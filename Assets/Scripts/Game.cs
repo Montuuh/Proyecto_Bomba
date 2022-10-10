@@ -6,16 +6,12 @@ using UnityEngine;
 public class Game : MonoBehaviour
 {
     #region Variables
-    // Begginer = 9x9, 10 mines, 0.12% chance of mine
-    // Intermediate = 16x16, 40 mines, 0.16% chance of mine
-    // Expert = 20x20, 85 mines, 0.21% chance of mine
-    // Legend = 25x25, 160 mines, 0.25% chance of mine
     public enum Difficulty
     {
-        Begginer,
-        Intermediate,
-        Extreme,
-        Legend
+        Begginer, // Begginer = 9x9, 10 mines, 0.12% chance of mine
+        Intermediate, // Intermediate = 16x16, 40 mines, 0.16% chance of mine
+        Extreme, // Expert = 20x20, 85 mines, 0.21% chance of mine
+        Legend // Legend = 25x25, 160 mines, 0.25% chance of mine
     }
     public Difficulty difficulty = Difficulty.Begginer;
     private int width;
@@ -24,7 +20,7 @@ public class Game : MonoBehaviour
 
     private bool isGodMode = false;
     private bool isRevealedExceptMines = false;
-    private bool letInput = true;
+    private bool letIngameInput = true;
 
     private Board board;
     private Cell[,] cells;
@@ -39,34 +35,38 @@ public class Game : MonoBehaviour
 
     private void Start()
     {
+        // ToDo: Add some kind of menu to select difficulty
+        // Loads the game at the start of the engine project.
         CreateGame();
     }
-    #endregion Unity Methods
 
-    #region Update
     private void Update()
     {
         DebugKeys();
-        
+
         // Besides this line, if the flag is false, won't run the code
-        if (!letInput) return;
+        if (!letIngameInput) return;
 
         IngameInput();
     }
+    #endregion Unity Methods
 
-    
+    #region Input Logic
     private void IngameInput()
     {
+        // Left click
         if (Input.GetMouseButtonDown(0))
         {
             Reveal();
         }
+        // Right click
         if (Input.GetMouseButtonDown(1))
         {
             Flag();
         }
     }
 
+    // Some debug keys
     private void DebugKeys()
     {
         if (Input.GetKeyDown(KeyCode.R))
@@ -91,6 +91,7 @@ public class Game : MonoBehaviour
         }
     }
 
+    // On right click flag the cell
     private void Flag()
     {
         var position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -122,6 +123,7 @@ public class Game : MonoBehaviour
         }
     }
 
+    // Counts the total of flags used. Returns false if there are no flags available
     private bool CheckFlagsAvailable()
     {
         var flagsUsed = 0;
@@ -139,6 +141,7 @@ public class Game : MonoBehaviour
         return flagsUsed < mines ? true : false;
     }
 
+    // On left click reveal the cell
     private void Reveal()
     {
         var position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -147,24 +150,21 @@ public class Game : MonoBehaviour
         if (x >= 0 && x < width && y >= 0 && y < height)
         {
             var cell = cells[x, y];
-            if (cell.isRevealed || cell.isFlagged)
+            if (cell.isFlagged) return;
+            
+            if (cell.isRevealed)
             {
-                // ToDo: 
-                // If all near mines are flagged, reveal surrounding cells
-                
-                return;
+                RevealAdjacentAvailableCells(cell);
             }
             
             if (cell.cellType == Cell.CellType.Empty)
             {
                 RevealEmptyCells(cell);
-                ReloadBoard();
             }
             else if (cell.cellType == Cell.CellType.Mine)
             {
                 cell.isExploded = true;
                 cells[x, y] = cell;
-                ReloadBoard();
                 GameOver();
             }
             else
@@ -175,11 +175,12 @@ public class Game : MonoBehaviour
                 {
                     Win();
                 }
-                ReloadBoard();
             }
+            ReloadBoard();
         }
     }
 
+    // Recursive function to reveal all empty cells that are close
     private void RevealEmptyCells(Cell cell)
     {
         if (cell.isRevealed) return;
@@ -198,6 +199,7 @@ public class Game : MonoBehaviour
         }
     }
 
+    // This functions count the mines around the cell and returns the number
     private List<Cell> GetNearCells(Cell cell)
     {
         var nearCells = new List<Cell>();
@@ -216,15 +218,62 @@ public class Game : MonoBehaviour
         }
         return nearCells;
     }
-    #endregion Update
+
+    // This function reveal all the surrounding cells if the cell has the same number of flags as mines around it
+    private void RevealAdjacentAvailableCells(Cell cell)
+    {
+        List<Cell> nearCells = GetNearCells(cell);
+
+        // Gets bomb and flags count of the surrounding cells
+        int bombCount = 0;
+        int bombsFlagged = 0;
+        for (int i = 0; i < nearCells.Count; i++)
+        {
+            Cell cellI = nearCells[i];
+            cellI.isRevealed = true;
+            if (cellI.cellType == Cell.CellType.Mine)
+            {
+                bombCount++;
+                if (cellI.isFlagged)
+                {
+                    bombsFlagged++;
+                }
+            }
+        }
+
+        // If the bomb count is equal to the number of flags around the cell, reveal the rest of the cells
+        if (bombCount == bombsFlagged)
+        {
+            for (int i = 0; i < nearCells.Count; i++)
+            {
+                Cell cellI = nearCells[i];
+                switch(cellI.cellType)
+                {
+                    case Cell.CellType.Empty:
+                        RevealEmptyCells(cellI);
+                        break;
+                    case Cell.CellType.Mine:
+                        //cellI.isExploded = true;
+                        //cells[cellI.position.x, cellI.position.y] = cellI;
+                        //GameOver();
+                        break;
+                    default:
+                        cellI.isRevealed = true;
+                        cells[cellI.position.x, cellI.position.y] = cellI;
+                        break;
+                }
+            }
+        }
+    }
+    #endregion Input Logic
 
     #region Game Generator
     private void CreateGame()
     {
         SetBoardSize();
         SetCamera();
-        
-        letInput = true;
+
+        letIngameInput = true;
         cells = new Cell[width, height];
 
         // ToDo:
@@ -290,6 +339,7 @@ public class Game : MonoBehaviour
         }
     }
 
+    // Mine generation
     private void CreateMines()
     {
         var minesLeft = mines;
@@ -399,13 +449,14 @@ public class Game : MonoBehaviour
 
     private void Win()
     {
-        // ToDo: Win
-        letInput = false;
+        Debug.Log("Win");
+        letIngameInput = false;
     }
 
     private void GameOver()
     {
-        letInput = false;
+        Debug.Log("GameOver");
+        letIngameInput = false;
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
