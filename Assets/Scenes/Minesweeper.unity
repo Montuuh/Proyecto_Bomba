@@ -417,7 +417,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 013dca1019ba0f54e9bce48a1ab1856b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  difficulty: 0
+  difficulty: 2
 --- !u!156049354 &946714908
 Grid:
   m_ObjectHideFlags: 0

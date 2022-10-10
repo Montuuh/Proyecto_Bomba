@@ -523,15 +523,6 @@ public class Game : MonoBehaviour
         board.Draw(cells, isGodMode, isRevealedExceptMines);
     }
 
-    private void MoveCamera()
-    {
-        var camera = Camera.main;
-        var position = camera.transform.position;
-        position.x = width / 2f;
-        position.y = height / 2f;
-        camera.transform.position = position;
-    }
-
     private void SetCamera()
     {
         var camera = Camera.main;
