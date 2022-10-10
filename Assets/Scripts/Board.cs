@@ -50,6 +50,9 @@ public class Board : MonoBehaviour
     #region GetTile
     private Tile GetTileNormal(Cell cell)
     {
+        if (cell.isExploded)
+            return tileExploded;
+        
         if (cell.isRevealed)
         {
             switch (cell.cellType)
@@ -79,6 +82,9 @@ public class Board : MonoBehaviour
     
     private Tile GetTileGodMode(Cell cell)
     {
+        if (cell.isExploded)
+            return tileExploded;
+        
         if (cell.isRevealed)
         {
             switch (cell.cellType)
@@ -118,6 +124,9 @@ public class Board : MonoBehaviour
 
     private Tile GetTileRevealAllExceptMines(Cell cell)
     {
+        if (cell.isExploded)
+            return tileExploded;
+        
         if (cell.isRevealed)
         {
             switch (cell.cellType)

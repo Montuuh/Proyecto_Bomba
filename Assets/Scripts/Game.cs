@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Game : MonoBehaviour
@@ -21,9 +22,11 @@ public class Game : MonoBehaviour
     private bool isGodMode = false;
     private bool isRevealedExceptMines = false;
     private bool letIngameInput = true;
+    private bool firstGameClick = false;
 
     private Board board;
     private Cell[,] cells;
+    private Cell lastRevealedCell;
     #endregion Variables
 
     #region Unity Methods
@@ -36,8 +39,7 @@ public class Game : MonoBehaviour
     private void Start()
     {
         // ToDo: Add some kind of menu to select difficulty
-        // Loads the game at the start of the engine project.
-        CreateGame();
+        NewMap();
     }
 
     private void Update()
@@ -62,7 +64,8 @@ public class Game : MonoBehaviour
         // Right click
         if (Input.GetMouseButtonDown(1))
         {
-            Flag();
+            if (firstGameClick)
+                Flag();
         }
     }
 
@@ -71,7 +74,9 @@ public class Game : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            CreateGame();
+            isGodMode = false;
+            isRevealedExceptMines = false;
+            NewMap();
         }
         if (Input.GetKeyDown(KeyCode.F1))
         {
@@ -151,7 +156,17 @@ public class Game : MonoBehaviour
         {
             var cell = cells[x, y];
             if (cell.isFlagged) return;
-            
+
+            // First click logic
+            if (!firstGameClick)
+            {
+                firstGameClick = true;
+                lastRevealedCell = cell;
+                cell.isRevealed = true;
+                cells[x, y] = cell;
+                CreateFullMap();
+            }
+
             if (cell.isRevealed)
             {
                 RevealAdjacentAvailableCells(cell);
@@ -169,6 +184,7 @@ public class Game : MonoBehaviour
             }
             else
             {
+                lastRevealedCell = cell;
                 cell.isRevealed = true;
                 cells[x, y] = cell;
                 if (CheckWin())
@@ -186,6 +202,7 @@ public class Game : MonoBehaviour
         if (cell.isRevealed) return;
         if (cell.cellType == Cell.CellType.Mine) return;
 
+        lastRevealedCell = cell;
         cell.isRevealed = true;
         cells[cell.position.x, cell.position.y] = cell;
 
@@ -224,25 +241,31 @@ public class Game : MonoBehaviour
     {
         List<Cell> nearCells = GetNearCells(cell);
 
-        // Gets bomb and flags count of the surrounding cells
+        // Gets bomb count of the surrounding cells
         int bombCount = 0;
-        int bombsFlagged = 0;
+        
         for (int i = 0; i < nearCells.Count; i++)
         {
             Cell cellI = nearCells[i];
-            cellI.isRevealed = true;
             if (cellI.cellType == Cell.CellType.Mine)
             {
                 bombCount++;
-                if (cellI.isFlagged)
-                {
-                    bombsFlagged++;
-                }
+            }
+        }
+        
+        // Gets flag count from the surrounding cells
+        int flagCount = 0;
+        for (int i = 0; i < nearCells.Count; i++)
+        {
+            Cell cellI = nearCells[i];
+            if (cellI.isFlagged)
+            {
+                flagCount++;
             }
         }
 
         // If the bomb count is equal to the number of flags around the cell, reveal the rest of the cells
-        if (bombCount == bombsFlagged)
+        if (bombCount == flagCount)
         {
             for (int i = 0; i < nearCells.Count; i++)
             {
@@ -250,14 +273,19 @@ public class Game : MonoBehaviour
                 switch(cellI.cellType)
                 {
                     case Cell.CellType.Empty:
+                        lastRevealedCell = cellI;
                         RevealEmptyCells(cellI);
                         break;
                     case Cell.CellType.Mine:
-                        //cellI.isExploded = true;
-                        //cells[cellI.position.x, cellI.position.y] = cellI;
-                        //GameOver();
+                        if (!cellI.isFlagged)
+                        {
+                            cellI.isExploded = true;
+                            cells[cellI.position.x, cellI.position.y] = cellI;
+                            GameOver();
+                        }
                         break;
                     default:
+                        lastRevealedCell = cellI;
                         cellI.isRevealed = true;
                         cells[cellI.position.x, cellI.position.y] = cellI;
                         break;
@@ -268,20 +296,26 @@ public class Game : MonoBehaviour
     #endregion Input Logic
 
     #region Game Generator
-    private void CreateGame()
+    private void NewMap()
     {
+        Debug.Log("Creating empty map");
+
         SetBoardSize();
         SetCamera();
 
         letIngameInput = true;
+        firstGameClick = false;
+
         cells = new Cell[width, height];
 
-        // ToDo:
-        // First empty map, and when the player clicks the first cell, do generate mines and numbers, but with a condition
-        // Mines and numbers are generated with an offset from the clicked cell. For example 1 cell away from the clicked cell and some random cells around it.
-        // This way the player will never click on a mine on the first click.
-
         SetupCells();
+
+        ReloadBoard();
+    }
+    private void CreateFullMap()
+    {
+        Debug.Log("Creating full map");      
+
         CreateMines();
         SetupNumbers();
 
@@ -347,6 +381,9 @@ public class Game : MonoBehaviour
         {
             var x = Random.Range(0, width);
             var y = Random.Range(0, height);
+
+            if (x >= lastRevealedCell.position.x  - 1 && x <= lastRevealedCell.position.x + 1 && y >= lastRevealedCell.position.y - 1 && y <= lastRevealedCell.position.y + 1) continue;
+
             var cell = cells[x, y];
             if (cell.cellType != Cell.CellType.Mine)
             {
@@ -464,6 +501,7 @@ public class Game : MonoBehaviour
                 var cell = cells[x, y];
                 if (cell.cellType == Cell.CellType.Mine)
                 {
+                    lastRevealedCell = cell;
                     cell.isRevealed = true;
                     cells[x, y] = cell;
                 }
