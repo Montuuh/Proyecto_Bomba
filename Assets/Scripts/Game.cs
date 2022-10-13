@@ -19,34 +19,36 @@ public class Game : MonoBehaviour
     private int height;
     private int mines;
 
-    private bool isGodMode = false;
-    private bool isRevealedExceptMines = false;
-    private bool letIngameInput = true;
-    private bool firstGameClick = false;
+    private bool letIngameInput = true; // This boolean locks the input of the player. If false player can not play
+    private bool firstGameClick = false; // Flag used for the first click of the player. If true, the first click will be ignored
+    private bool isGodMode = false; // Debug key boolean to reveal all tiles
+    private bool isRevealedExceptMines = false; // Debug key boolean to reveal all tiles except mines
 
-    private Board board;
-    private Cell[,] cells;
-    private Cell lastRevealedCell;
+    private Board board; // Board object
+    private Cell[,] cells; // 2D array of current cells
+    private Cell lastRevealedCell; // Last revealed cell
     #endregion Variables
 
     #region Unity Methods
     private void Awake()
     {
+        // Setting up the object variables
         cells = new Cell[width, height];
         board = GetComponentInChildren<Board>();
     }
 
     private void Start()
     {
-        // ToDo: Add some kind of menu to select difficulty
-        NewMap();
+        // For now, the game is generated when the game starts. A menu will be added later
+        StartGame();
     }
 
     private void Update()
     {
+        // Debug keys handler. F1 -> GodMode. F2 -> RevealedExceptMines. R -> Restart game. Esc -> Quit game
         DebugKeys();
 
-        // Besides this line, if the flag is false, won't run the code
+        // Besides this line, if the flag is false, won't run the code, so in game input is not allowed
         if (!letIngameInput) return;
 
         IngameInput();
@@ -64,6 +66,7 @@ public class Game : MonoBehaviour
         // Right click
         if (Input.GetMouseButtonDown(1))
         {
+            // Don't let flags to be placed at the start of the game
             if (firstGameClick)
                 Flag();
         }
@@ -76,7 +79,7 @@ public class Game : MonoBehaviour
         {
             isGodMode = false;
             isRevealedExceptMines = false;
-            NewMap();
+            StartGame();
         }
         if (Input.GetKeyDown(KeyCode.F1))
         {
@@ -99,31 +102,40 @@ public class Game : MonoBehaviour
     // On right click flag the cell
     private void Flag()
     {
-        var position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        var x = Mathf.FloorToInt(position.x);
-        var y = Mathf.FloorToInt(position.y);
+        // Get mouse position and convert it to world position (2D)
+        Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        int x = Mathf.FloorToInt(position.x);
+        int y = Mathf.FloorToInt(position.y);
+        // Bounds check
         if (x >= 0 && x < width && y >= 0 && y < height)
         {
-            var cell = cells[x, y];
+            Cell cell = cells[x, y];
+            // Only tiles that were not revealed can be flagged
             if (!cell.isRevealed)
             {
+                // If there are flags available
                 if (CheckFlagsAvailable())
                 {
                     cell.isFlagged = !cell.isFlagged;
                 }
                 else
                 {
+                    // If there are no flags available, unflagging the cell
                     if (cell.isFlagged)
                     {
                         cell.isFlagged = false;
                     }
                 }
                 cells[x, y] = cell;
+                // Check if all bombs are flagged
                 if (CheckWin())
                 {
                     Win();
                 }
+                // Update the board
                 ReloadBoard();
+
+                // Future: Event has flagged cell X
             }
         }
     }
@@ -131,12 +143,12 @@ public class Game : MonoBehaviour
     // Counts the total of flags used. Returns false if there are no flags available
     private bool CheckFlagsAvailable()
     {
-        var flagsUsed = 0;
+        int flagsUsed = 0;
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                var cell = cells[x, y];
+                Cell cell = cells[x, y];
                 if (cell.isFlagged)
                 {
                     flagsUsed++;
@@ -149,12 +161,12 @@ public class Game : MonoBehaviour
     // On left click reveal the cell
     private void Reveal()
     {
-        var position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        var x = Mathf.FloorToInt(position.x);
-        var y = Mathf.FloorToInt(position.y);
+        Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        int x = Mathf.FloorToInt(position.x);
+        int y = Mathf.FloorToInt(position.y);
         if (x >= 0 && x < width && y >= 0 && y < height)
         {
-            var cell = cells[x, y];
+            Cell cell = cells[x, y];
             if (cell.isFlagged) return;
 
             // First click logic
@@ -167,21 +179,29 @@ public class Game : MonoBehaviour
                 CreateFullMap();
             }
 
+            // Checks if the flags and mines are the same number, and reveals the near cells
             if (cell.isRevealed)
             {
                 RevealAdjacentAvailableCells(cell);
             }
-            
+
+            // If cell is an empty cell, reveal numbers and empty cells
             if (cell.cellType == Cell.CellType.Empty)
             {
                 RevealEmptyCells(cell);
+                if (CheckWin())
+                {
+                    Win();
+                }
             }
+            // If cell is a mine, reveal all mines and end the game
             else if (cell.cellType == Cell.CellType.Mine)
             {
                 cell.isExploded = true;
                 cells[x, y] = cell;
                 GameOver();
             }
+            // Number cell, reveal it
             else
             {
                 lastRevealedCell = cell;
@@ -193,10 +213,12 @@ public class Game : MonoBehaviour
                 }
             }
             ReloadBoard();
+
+            // Future: Event has revealed cell X
         }
     }
 
-    // Recursive function to reveal all empty cells that are close
+    // Recursive function to reveal all empty cells that are close to each other
     private void RevealEmptyCells(Cell cell)
     {
         if (cell.isRevealed) return;
@@ -205,28 +227,29 @@ public class Game : MonoBehaviour
         lastRevealedCell = cell;
         cell.isRevealed = true;
         cells[cell.position.x, cell.position.y] = cell;
+        // Future: Event has revealed cell X
 
         if (cell.cellType == Cell.CellType.Empty)
         {
-            var nearCells = GetNearCells(cell);
-            foreach (var nearCell in nearCells)
+            List<Cell> nearCells = GetNearCells(cell);
+            foreach (Cell nearCell in nearCells)
             {
                 RevealEmptyCells(nearCell);
             }
         }
     }
 
-    // This functions count the mines around the cell and returns the number
+    // This functions return all the cells that are near the cell passed as parameter
     private List<Cell> GetNearCells(Cell cell)
     {
-        var nearCells = new List<Cell>();
+        List<Cell> nearCells = new List<Cell>();
         for (int x = -1; x <= 1; x++)
         {
             for (int y = -1; y <= 1; y++)
             {
                 if (x == 0 && y == 0) continue;
-                var nearX = cell.position.x + x;
-                var nearY = cell.position.y + y;
+                int nearX = cell.position.x + x;
+                int nearY = cell.position.y + y;
                 if (nearX >= 0 && nearX < width && nearY >= 0 && nearY < height)
                 {
                     nearCells.Add(cells[nearX, nearY]);
@@ -296,7 +319,7 @@ public class Game : MonoBehaviour
     #endregion Input Logic
 
     #region Game Generator
-    private void NewMap()
+    private void StartGame()
     {
         Debug.Log("Creating empty map");
 
@@ -326,22 +349,22 @@ public class Game : MonoBehaviour
     {
         switch(difficulty)
         {
-            case Difficulty.Begginer:
+            case Difficulty.Begginer: // 9x9 10 mines
                 width = 9;
                 height = 9;
                 mines = 10;
                 break;
-            case Difficulty.Intermediate:
+            case Difficulty.Intermediate: // 16x16 40 mines
                 width = 16;
                 height = 16;
                 mines = 40;
                 break;
-            case Difficulty.Extreme:
+            case Difficulty.Extreme: // 20x20 85 mines
                 width = 20;
                 height = 20;
                 mines = 85;
                 break;
-            case Difficulty.Legend:
+            case Difficulty.Legend: // 25x25 160 mines
                 width = 25;
                 height = 25;
                 mines = 160;
@@ -376,15 +399,15 @@ public class Game : MonoBehaviour
     // Mine generation
     private void CreateMines()
     {
-        var minesLeft = mines;
+        int minesLeft = mines;
         while (minesLeft > 0)
         {
-            var x = Random.Range(0, width);
-            var y = Random.Range(0, height);
+            int x = Random.Range(0, width);
+            int y = Random.Range(0, height);
 
             if (x >= lastRevealedCell.position.x  - 1 && x <= lastRevealedCell.position.x + 1 && y >= lastRevealedCell.position.y - 1 && y <= lastRevealedCell.position.y + 1) continue;
 
-            var cell = cells[x, y];
+            Cell cell = cells[x, y];
             if (cell.cellType != Cell.CellType.Mine)
             {
                 cell.cellType = Cell.CellType.Mine;
@@ -400,10 +423,10 @@ public class Game : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                var cell = cells[x, y];
+                Cell cell = cells[x, y];
                 if (cell.cellType != Cell.CellType.Mine)
                 {
-                    var number = 0;
+                    int number = 0;
                     for (int i = -1; i <= 1; i++)
                     {
                         for (int j = -1; j <= 1; j++)
@@ -412,11 +435,11 @@ public class Game : MonoBehaviour
                             {
                                 continue;
                             }
-                            var x1 = x + i;
-                            var y1 = y + j;
+                            int x1 = x + i;
+                            int y1 = y + j;
                             if (x1 >= 0 && x1 < width && y1 >= 0 && y1 < height)
                             {
-                                var cell1 = cells[x1, y1];
+                                Cell cell1 = cells[x1, y1];
                                 if (cell1.cellType == Cell.CellType.Mine)
                                 {
                                     number++;
@@ -447,7 +470,7 @@ public class Game : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                var cell = cells[x, y];
+                Cell cell = cells[x, y];
                 if (cell.cellType != Cell.CellType.Mine && !cell.isRevealed)
                 {
                     ret = false;
@@ -458,12 +481,12 @@ public class Game : MonoBehaviour
 
         // All mines flagged
         ret = true;
-        var minesLeft = mines;
+        int minesLeft = mines;
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                var cell = cells[x, y];
+                Cell cell = cells[x, y];
                 if (cell.isFlagged)
                 {
                     if (cell.cellType == Cell.CellType.Mine)
@@ -488,6 +511,8 @@ public class Game : MonoBehaviour
     {
         Debug.Log("Win");
         letIngameInput = false;
+
+        // Future: Event has Won
     }
 
     private void GameOver()
@@ -498,7 +523,7 @@ public class Game : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                var cell = cells[x, y];
+                Cell cell = cells[x, y];
                 if (cell.cellType == Cell.CellType.Mine)
                 {
                     lastRevealedCell = cell;
@@ -508,6 +533,8 @@ public class Game : MonoBehaviour
             }
         }
         ReloadBoard();
+
+        // Future: Event has Lost
     }
     #endregion Win&Lose
 
@@ -518,6 +545,8 @@ public class Game : MonoBehaviour
         Application.Quit();
     }
     
+    // This function reloads the drawing of the board.
+    // Called whenever a cell changes the state
     private void ReloadBoard()
     {
         board.Draw(cells, isGodMode, isRevealedExceptMines);
@@ -525,16 +554,16 @@ public class Game : MonoBehaviour
 
     private void SetCamera()
     {
-        var camera = Camera.main;
-
-        // Position on the middle
-        var position = camera.transform.position;
+        Camera camera = Camera.main;
+        
+        // Position the camera on the middle of the board
+        Vector3 position = camera.transform.position;
         position.x = width / 2f;
         position.y = height / 2f;
         position.z = -10;
         camera.transform.position = position;
 
-        // Size
+        // Resize the camera depending on the board size
         switch (difficulty)
         {
             case Difficulty.Begginer:
