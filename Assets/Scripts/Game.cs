@@ -9,12 +9,12 @@ public class Game : MonoBehaviour
     #region Variables
     public enum Difficulty
     {
-        Begginer, // Begginer = 9x9, 10 mines, 0.12% chance of mine
+        Beginner, // Beginner = 9x9, 10 mines, 0.12% chance of mine
         Intermediate, // Intermediate = 16x16, 40 mines, 0.16% chance of mine
         Extreme, // Expert = 20x20, 85 mines, 0.21% chance of mine
         Legend // Legend = 25x25, 160 mines, 0.25% chance of mine
     }
-    public Difficulty difficulty = Difficulty.Begginer;
+    public Difficulty difficulty = Difficulty.Beginner;
     private int width;
     private int height;
     private int mines;
@@ -27,6 +27,7 @@ public class Game : MonoBehaviour
     private Board board; // Board object
     private Cell[,] cells; // 2D array of current cells
     private Cell lastRevealedCell; // Last revealed cell
+    private SinglePlayerGameUI singlePlayerGameUI; // SinglePlayerGameUI object
     #endregion Variables
 
     #region Unity Methods
@@ -35,12 +36,19 @@ public class Game : MonoBehaviour
         // Setting up the object variables
         cells = new Cell[width, height];
         board = GetComponentInChildren<Board>();
+
+        // Set active a game object from the same parent
+        singlePlayerGameUI = GetComponent<SinglePlayerGameUI>();
+        singlePlayerGameUI.mainMenuGo.SetActive(false);
+        //mainMenuGo.SetActive(false);
     }
 
     private void Start()
     {
         // For now, the game is generated when the game starts. A menu will be added later
-        StartGame();
+        // StartGame();
+        difficulty = SceneManager.difficulty;
+        StartGame(difficulty);
     }
 
     private void Update()
@@ -79,7 +87,7 @@ public class Game : MonoBehaviour
         {
             isGodMode = false;
             isRevealedExceptMines = false;
-            StartGame();
+            StartGame(difficulty);
         }
         if (Input.GetKeyDown(KeyCode.F1))
         {
@@ -319,11 +327,11 @@ public class Game : MonoBehaviour
     #endregion Input Logic
 
     #region Game Generator
-    private void StartGame()
+    public void StartGame(Difficulty difficulty)
     {
-        Debug.Log("Creating empty map");
+        Debug.Log("Creating " + difficulty.ToString() + " map");
 
-        SetBoardSize();
+        SetBoardSize(difficulty);
         SetCamera();
 
         letIngameInput = true;
@@ -337,7 +345,7 @@ public class Game : MonoBehaviour
     }
     private void CreateFullMap()
     {
-        Debug.Log("Creating full map");      
+        Debug.Log("Creating full " + difficulty.ToString() + " map");      
 
         CreateMines();
         SetupNumbers();
@@ -345,11 +353,12 @@ public class Game : MonoBehaviour
         ReloadBoard();
     }
 
-    private void SetBoardSize()
+    private void SetBoardSize(Difficulty difficulty)
     {
-        switch(difficulty)
+        this.difficulty = difficulty;
+        switch(this.difficulty)
         {
-            case Difficulty.Begginer: // 9x9 10 mines
+            case Difficulty.Beginner: // 9x9 10 mines
                 width = 9;
                 height = 9;
                 mines = 10;
@@ -512,6 +521,8 @@ public class Game : MonoBehaviour
         Debug.Log("Win");
         letIngameInput = false;
 
+        singlePlayerGameUI.mainMenuGo.SetActive(true);
+
         // Future: Event has Won
     }
 
@@ -533,6 +544,8 @@ public class Game : MonoBehaviour
             }
         }
         ReloadBoard();
+
+        singlePlayerGameUI.mainMenuGo.SetActive(true);
 
         // Future: Event has Lost
     }
@@ -566,7 +579,7 @@ public class Game : MonoBehaviour
         // Resize the camera depending on the board size
         switch (difficulty)
         {
-            case Difficulty.Begginer:
+            case Difficulty.Beginner:
                 camera.orthographicSize = 5;
                 break;
             case Difficulty.Intermediate:
