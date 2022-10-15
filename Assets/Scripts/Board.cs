@@ -11,6 +11,7 @@ public class Board : MonoBehaviour
     public Tile tileMine;
     public Tile tileExploded;
     public Tile tileFlagged;
+
     public Tile tileNumber1;
     public Tile tileNumber2;
     public Tile tileNumber3;

@@ -25,6 +25,7 @@ public class Game : MonoBehaviour
     private bool isRevealedExceptMines = false; // Debug key boolean to reveal all tiles except mines
 
     private Board board; // Board object
+    private Highlight highlight;
     private Cell[,] cells; // 2D array of current cells
     private Cell lastRevealedCell; // Last revealed cell
     private SinglePlayerGameUI singlePlayerGameUI; // SinglePlayerGameUI object
@@ -36,6 +37,7 @@ public class Game : MonoBehaviour
         // Setting up the object variables
         cells = new Cell[width, height];
         board = GetComponentInChildren<Board>();
+        highlight = GetComponentInChildren<Highlight>();
 
         // Set active a game object from the same parent
         singlePlayerGameUI = GetComponent<SinglePlayerGameUI>();
@@ -59,8 +61,25 @@ public class Game : MonoBehaviour
         // Besides this line, if the flag is false, won't run the code, so in game input is not allowed
         if (!letIngameInput) return;
 
+        ReloadHighlight();
         IngameInput();
     }
+
+    private void ReloadHighlight()
+    {
+        // Get mouse position and convert it to world position (2D)
+        Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        int x = Mathf.FloorToInt(position.x);
+        int y = Mathf.FloorToInt(position.y);
+
+        // Bounds check
+        if (x >= 0 && x < width && y >= 0 && y < height)
+        {
+            highlight.Draw(x, y);
+        }
+
+    }
+
     #endregion Unity Methods
 
     #region Input Logic
