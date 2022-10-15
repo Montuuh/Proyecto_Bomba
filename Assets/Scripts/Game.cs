@@ -295,6 +295,7 @@ public class Game : MonoBehaviour
     private void RevealAdjacentAvailableCells(Cell cell)
     {
         List<Cell> nearCells = GetNearCells(cell);
+        bool willDie = false;
 
         // Gets bomb count of the surrounding cells
         int bombCount = 0;
@@ -305,6 +306,10 @@ public class Game : MonoBehaviour
             if (cellI.cellType == Cell.CellType.Mine)
             {
                 bombCount++;
+                if (!cellI.isFlagged)
+                {
+                    willDie = true;
+                }
             }
         }
         
@@ -328,8 +333,11 @@ public class Game : MonoBehaviour
                 switch(cellI.cellType)
                 {
                     case Cell.CellType.Empty:
-                        lastRevealedCell = cellI;
-                        RevealEmptyCells(cellI);
+                        if (!willDie && !cellI.isRevealed)
+                        {
+                            lastRevealedCell = cellI;
+                            RevealEmptyCells(cellI);
+                        }
                         break;
                     case Cell.CellType.Mine:
                         if (!cellI.isFlagged)
@@ -340,8 +348,16 @@ public class Game : MonoBehaviour
                         }
                         break;
                     default:
-                        lastRevealedCell = cellI;
-                        cellI.isRevealed = true;
+                        if (willDie)
+                        {
+                            if (!cellI.isRevealed) 
+                                cellI.isRevealed = false;
+                        }
+                        else
+                        {
+                            lastRevealedCell = cellI;
+                            cellI.isRevealed = true;
+                        }
                         cells[cellI.position.x, cellI.position.y] = cellI;
                         break;
                 }
