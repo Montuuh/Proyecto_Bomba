@@ -25,7 +25,7 @@ public class Game : MonoBehaviour
     private bool isRevealedExceptMines = false; // Debug key boolean to reveal all tiles except mines
 
     private Board board; // Board object
-    private Highlight highlight;
+    private Highlight highlight; //Highlights on top of board
     private Cell[,] cells; // 2D array of current cells
     private Cell lastRevealedCell; // Last revealed cell
     private SinglePlayerGameUI singlePlayerGameUI; // SinglePlayerGameUI object
