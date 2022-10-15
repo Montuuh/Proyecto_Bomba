@@ -13,6 +13,7 @@ public struct Cell
     public CellType cellType;
     public bool isRevealed;
     public bool isFlagged;
+    public bool isBadFlagged;
     public bool isExploded;
     public int number;
 }

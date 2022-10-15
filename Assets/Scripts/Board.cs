@@ -11,6 +11,7 @@ public class Board : MonoBehaviour
     public Tile tileMine;
     public Tile tileExploded;
     public Tile tileFlagged;
+    public Tile tileBadFlagged;
 
     public Tile tileNumber1;
     public Tile tileNumber2;
@@ -72,7 +73,10 @@ public class Board : MonoBehaviour
         {
             if (cell.isFlagged)
             {
-                return tileFlagged;
+                if (cell.isBadFlagged)
+                    return tileBadFlagged;
+                else
+                    return tileFlagged;
             }
             else
             {
@@ -104,7 +108,10 @@ public class Board : MonoBehaviour
         {
             if (cell.isFlagged)
             {
-                return tileFlagged;
+                if (cell.isBadFlagged)
+                    return tileBadFlagged;
+                else
+                    return tileFlagged;
             }
             else
             {
@@ -146,7 +153,10 @@ public class Board : MonoBehaviour
         {
             if (cell.isFlagged)
             {
-                return tileFlagged;
+                if (cell.isBadFlagged)
+                    return tileBadFlagged;
+                else
+                    return tileFlagged;
             }
             else
             {

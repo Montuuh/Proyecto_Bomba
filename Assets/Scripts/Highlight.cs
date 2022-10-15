@@ -19,9 +19,15 @@ public class Highlight : MonoBehaviour
 
         if (position != lastPosition)
         {
+            lastPosition = position;
             tilemap.ClearAllTiles();
             tilemap.SetTile(position, highlight);
         }
+    }
+
+    public void Clear()
+    {
+        tilemap.ClearAllTiles();
     }
 
 }

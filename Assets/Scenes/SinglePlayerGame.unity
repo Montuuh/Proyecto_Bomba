@@ -661,6 +661,7 @@ MonoBehaviour:
   tileMine: {fileID: 11400000, guid: 996354a999e400443872637fe836bb6b, type: 2}
   tileExploded: {fileID: 11400000, guid: b5c7d864e7dd0cd4c80498f30cc85cf0, type: 2}
   tileFlagged: {fileID: 11400000, guid: 048b432f9c1ece445bb47310075d064b, type: 2}
+  tileBadFlagged: {fileID: 11400000, guid: fdc41751d2f723c40a92a713a37f8822, type: 2}
   tileNumber1: {fileID: 11400000, guid: 8460dedb7cc570445b119ac1e15dbd31, type: 2}
   tileNumber2: {fileID: 11400000, guid: b7613db1c16acf344bca2284d10071ea, type: 2}
   tileNumber3: {fileID: 11400000, guid: 5869aeb0e173858498a388d24507fbb5, type: 2}

@@ -77,6 +77,10 @@ public class Game : MonoBehaviour
         {
             highlight.Draw(x, y);
         }
+        else
+        {
+            highlight.Draw(-100, -100);
+        }
 
     }
 
@@ -206,12 +210,6 @@ public class Game : MonoBehaviour
                 CreateFullMap();
             }
 
-            // Checks if the flags and mines are the same number, and reveals the near cells
-            if (cell.isRevealed)
-            {
-                RevealAdjacentAvailableCells(cell);
-            }
-
             // If cell is an empty cell, reveal numbers and empty cells
             if (cell.cellType == Cell.CellType.Empty)
             {
@@ -239,6 +237,13 @@ public class Game : MonoBehaviour
                     Win();
                 }
             }
+
+            // Checks if the flags and mines are the same number, and reveals the near cells
+            if (cell.isRevealed && !cell.isExploded)
+            {
+                RevealAdjacentAvailableCells(cell);
+            }
+
             ReloadBoard();
 
             // Future: Event has revealed cell X
@@ -549,6 +554,8 @@ public class Game : MonoBehaviour
     {
         Debug.Log("GameOver");
         letIngameInput = false;
+        
+        // Reveal all mines
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -560,10 +567,21 @@ public class Game : MonoBehaviour
                     cell.isRevealed = true;
                     cells[x, y] = cell;
                 }
+                else
+                {
+                    if (cell.isFlagged)
+                    {
+                        cell.isBadFlagged = true;
+                        cell.isRevealed = false;
+                        cells[x, y] = cell;
+                    }
+                }
             }
         }
+        highlight.Clear();
         ReloadBoard();
 
+        // Make the main menu button appear
         singlePlayerGameUI.mainMenuGo.SetActive(true);
 
         // Future: Event has Lost
