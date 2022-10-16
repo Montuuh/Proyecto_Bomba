@@ -73,10 +73,7 @@ public class Board : MonoBehaviour
         {
             if (cell.isFlagged)
             {
-                if (cell.isBadFlagged)
-                    return tileBadFlagged;
-                else
-                    return tileFlagged;
+                return FlagChecking(cell);
             }
             else
             {
@@ -85,6 +82,7 @@ public class Board : MonoBehaviour
         }
     }
     
+    // Debug Key: God Mode
     private Tile GetTileGodMode(Cell cell)
     {
         if (cell.isExploded)
@@ -108,10 +106,7 @@ public class Board : MonoBehaviour
         {
             if (cell.isFlagged)
             {
-                if (cell.isBadFlagged)
-                    return tileBadFlagged;
-                else
-                    return tileFlagged;
+                return FlagChecking(cell);
             }
             else
             {
@@ -130,6 +125,7 @@ public class Board : MonoBehaviour
         }
     }
 
+    // Debug Key: RevealAllExceptMines
     private Tile GetTileRevealAllExceptMines(Cell cell)
     {
         if (cell.isExploded)
@@ -153,10 +149,7 @@ public class Board : MonoBehaviour
         {
             if (cell.isFlagged)
             {
-                if (cell.isBadFlagged)
-                    return tileBadFlagged;
-                else
-                    return tileFlagged;
+                return FlagChecking(cell);
             }
             else
             {
@@ -198,6 +191,14 @@ public class Board : MonoBehaviour
             default:
                 return tileEmpty;
         }
+    }
+
+    private Tile FlagChecking(Cell cell)
+    {
+        if (cell.isBadFlagged)
+            return tileBadFlagged;
+        else
+            return tileFlagged;
     }
     #endregion GetTile
 }

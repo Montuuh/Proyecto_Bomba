@@ -579,9 +579,12 @@ public class Game : MonoBehaviour
                 Cell cell = cells[x, y];
                 if (cell.cellType == Cell.CellType.Mine)
                 {
-                    lastRevealedCell = cell;
-                    cell.isRevealed = true;
-                    cells[x, y] = cell;
+                    if (!cell.isFlagged)
+                    {
+                        lastRevealedCell = cell;
+                        cell.isRevealed = true;
+                        cells[x, y] = cell;
+                    }
                 }
                 else
                 {
