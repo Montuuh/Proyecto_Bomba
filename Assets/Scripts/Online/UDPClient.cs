@@ -28,27 +28,37 @@ public class UDPClient : MonoBehaviour
         // Get IP and port
         serverIP = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverIP;
         serverPort = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverPort;
+    }
+    
+    private void OnDisable()
+    {
+        //Debug.Log("[CLIENT] Closing UDP socket & thread...");
+        if (udpSocket != null)
+            udpSocket.Close();
+        if (clientThread != null)
+            clientThread.Abort();
+    }
 
+    public void ConnectToServer(string ip = null, int port = 0)
+    {
+        if (ip != null)
+            serverIP = ip;
+        if (port != 0)
+            serverPort = port;
+        
         InitializeUDPSocket();
         InitializeThread();
     }
 
-    private void OnDisable()
-    {
-        Debug.Log("[CLIENT] Closing UDP socket & thread...");
-        udpSocket.Close();
-        clientThread.Abort();
-    }
-
     private void InitializeUDPSocket()
     {
-        Debug.Log("[CLIENT] Initializing UDP socket...");
+        //Debug.Log("[CLIENT] Initializing UDP socket...");
         udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
     }
 
     private void InitializeThread()
     {
-        Debug.Log("[CLIENT] Initializing UDP thread...");
+        //Debug.Log("[CLIENT] Initializing UDP thread...");
         clientThread = new Thread(ServerConnection);
         clientThread.IsBackground = true;
         clientThread.Start();
@@ -61,7 +71,12 @@ public class UDPClient : MonoBehaviour
         serverIPEP = new IPEndPoint(ipAddress, serverPort);
         serverEP = (EndPoint)serverIPEP;
 
-        SendData("Hello this is a message from the client to the server, maracatone");
+        // Send data to server
+        SendData("This is a message from the client");
+
+        // Receive data from server
+        recv = udpSocket.Receive(data);
+        Debug.Log("[CLIENT] Received: " + Encoding.Default.GetString(data, 0, recv));
     }
 
     // SendData to server
@@ -69,7 +84,7 @@ public class UDPClient : MonoBehaviour
     {
         try
         {
-            Debug.Log("[CLIENT] Sending: " + message + " to server: " + serverIPEP.ToString());
+            Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + message);
             data = Encoding.ASCII.GetBytes(message);
             recv = udpSocket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
