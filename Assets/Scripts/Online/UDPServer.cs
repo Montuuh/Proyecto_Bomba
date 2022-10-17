@@ -9,59 +9,90 @@ using UnityEngine;
 
 public class UDPServer : MonoBehaviour
 {
+    private string serverIP;
+    private int serverPort;
+    
     private int recv;
     private byte[] data = new byte[1024];
 
-    Thread serverThread;
-    Thread clientThread;
-
-    // Bounding mechanism
+    private Thread serverThread;
     private Socket udpSocket;
-
-    // IP and Adress
-    IPEndPoint clientIPEP;
-    EndPoint clientEP;
-
-    int serverPort = 9500;
+    
+    // Destination EndPoint and IP
+    private IPEndPoint clientIPEP;
+    private EndPoint clientEP;
 
     // Start is called before the first frame update
     void Start()
     {
-        // Initialize Thread
-        udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        serverThread = new Thread(ReceiveData);
-        serverThread.IsBackground = true;
-        serverThread.Start();
-    }
-    private void ReceiveData()
-    {
-        //Client IP EndPoint
-        clientIPEP = new IPEndPoint(IPAddress.Any, serverPort);
-        clientEP = (EndPoint)clientIPEP;
+        // Get IP and port
+        serverIP = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverIP;
+        serverPort = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverPort;
 
-        try
-        {
-            Debug.Log("Waiting for client...");
-
-            //Creating Socket and binding it to the address
-            udpSocket.Bind(clientIPEP);
-
-            //Recieve Data From Client and send Answer
-            recv = udpSocket.ReceiveFrom(data, ref clientEP);
-            Debug.Log("Data received from client: " + Encoding.ASCII.GetString(data, 0, recv));
-            udpSocket.SendTo(data, data.Length, SocketFlags.None, clientEP);
-
-        } catch (Exception e)
-        {
-            Debug.Log("Error binding socket: " + e.ToString());
-        }
+        InitializeUDPSocket();
+        InitializeThread();
     }
 
     private void OnDisable()
     {
-        Debug.Log("Disabling...");
-
+        Debug.Log("[SERVER] Closing UDP socket & thread...");
         udpSocket.Close();
         serverThread.Abort();
+    }
+
+    private void InitializeUDPSocket()
+    {
+        Debug.Log("[SERVER] Initializing UDP socket...");
+        udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+    }
+
+    private void InitializeThread()
+    {
+        Debug.Log("[SERVER] Initializing UDP thread...");
+        serverThread = new Thread(ReceiveData);
+        serverThread.IsBackground = true;
+        serverThread.Start();
+    }
+
+    private void ReceiveData()
+    {
+        // Client IP EndPoint
+        IPAddress ipAddress = IPAddress.Parse(serverIP);
+        clientIPEP = new IPEndPoint(IPAddress.Any, serverPort);
+        clientEP = (EndPoint)clientIPEP;
+
+        // Creating Socket and binding it to the address
+        try
+        {
+            udpSocket.Bind(clientIPEP);
+            Debug.Log("[SERVER] UDP socket bound to " + clientIPEP.ToString());
+        }
+        catch (Exception e)
+        {
+            Debug.Log("[ERROR SERVER] Failed to bind socket: " + e.ToString());
+        }
+
+        Debug.Log("[SERVER] Waiting for client...");
+
+        // Receive Data From Client
+        try
+        {
+            recv = udpSocket.ReceiveFrom(data, ref clientEP);
+            Debug.Log("[SERVER] Message received from " + clientEP.ToString() + ": " + Encoding.ASCII.GetString(data, 0, recv));
+        }
+        catch (Exception e)
+        {
+            Debug.Log("[ERROR SERVER] Failed to receive data: " + e.ToString());
+        }
+
+        // ToDo: Send data to clients
+        // SendString("HOLAAAAAAA CLIENTE ASQUEROSO");
+    }
+
+    private void SendString(string message)
+    {
+        // Send Data to Client
+        data = Encoding.ASCII.GetBytes(message);
+        udpSocket.SendTo(data, data.Length, SocketFlags.None, clientEP);
     }
 }
