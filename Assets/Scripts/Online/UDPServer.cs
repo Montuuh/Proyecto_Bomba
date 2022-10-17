@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
@@ -10,56 +11,57 @@ public class UDPServer : MonoBehaviour
 {
     private int recv;
     private byte[] data = new byte[1024];
-    Socket socket;
-    EndPoint remote;
-    Thread thread;
-    int port = 9500;
 
-    private void OnDisable()
-    {
-        socket.Close();
-        thread.Abort();
-        StopAllCoroutines();
-    }
+    Thread serverThread;
+    Thread clientThread;
+
+    // Bounding mechanism
+    private Socket udpSocket;
+
+    // IP and Adress
+    IPEndPoint clientIPEP;
+    EndPoint clientEP;
+
+    int serverPort = 9500;
 
     // Start is called before the first frame update
     void Start()
     {
-        IPEndPoint ipep = new IPEndPoint(IPAddress.Any, port);
-
-        socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        socket.Bind(ipep);
-        Debug.Log("Waiting for client...");
-        
-        IPEndPoint sender = new IPEndPoint(IPAddress.Any, port);
-        remote = (EndPoint)(sender);
-
-        // Thread
-        thread = new Thread(new ThreadStart(ReceiveData));
-
-        // Data received
-        //recv = socket.ReceiveFrom(data, ref remote);
-        //Debug.Log("Message received from " + remote.ToString());
-        //Debug.Log(Encoding.ASCII.GetString(data, 0, recv));
-
-        // Sends a message to the client
-        string welcome = "Welcome to my test server";
-        data = Encoding.ASCII.GetBytes(welcome);
-        socket.SendTo(data, data.Length, SocketFlags.None, remote);
+        // Initialize Thread
+        udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+        serverThread = new Thread(ReceiveData);
+        serverThread.IsBackground = true;
+        serverThread.Start();
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        //recv = socket.ReceiveFrom(data, ref remote);
-        //Debug.Log(Encoding.ASCII.GetString(data, 0, recv));
-        //socket.SendTo(data, data.Length, SocketFlags.None, remote);
-    }
-
     private void ReceiveData()
     {
-        recv = socket.ReceiveFrom(data, ref remote);
-        Debug.Log(Encoding.ASCII.GetString(data, 0, recv));
-        socket.SendTo(data, data.Length, SocketFlags.None, remote);
+        //Client IP EndPoint
+        clientIPEP = new IPEndPoint(IPAddress.Any, serverPort);
+        clientEP = (EndPoint)clientIPEP;
+
+        try
+        {
+            Debug.Log("Waiting for client...");
+
+            //Creating Socket and binding it to the address
+            udpSocket.Bind(clientIPEP);
+
+            //Recieve Data From Client and send Answer
+            recv = udpSocket.ReceiveFrom(data, ref clientEP);
+            Debug.Log("Data received from client: " + Encoding.ASCII.GetString(data, 0, recv));
+            udpSocket.SendTo(data, data.Length, SocketFlags.None, clientEP);
+
+        } catch (Exception e)
+        {
+            Debug.Log("Error binding socket: " + e.ToString());
+        }
+    }
+
+    private void OnDisable()
+    {
+        Debug.Log("Disabling...");
+
+        udpSocket.Close();
+        serverThread.Abort();
     }
 }
