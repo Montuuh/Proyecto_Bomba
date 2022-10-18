@@ -678,7 +678,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serverType: 1
-  protocol: 1
+  protocol: 0
 --- !u!114 &956514975
 MonoBehaviour:
   m_ObjectHideFlags: 0
