@@ -59,12 +59,12 @@ public class UDPClient : MonoBehaviour
     private void InitializeThread()
     {
         //Debug.Log("[CLIENT] Initializing UDP thread...");
-        clientThread = new Thread(ServerConnection);
+        clientThread = new Thread(ClientThread);
         clientThread.IsBackground = true;
         clientThread.Start();
     }
 
-    private void ServerConnection()
+    private void ClientThread()
     {
         // Client IP EndPoint
         IPAddress ipAddress = IPAddress.Parse(serverIP);
@@ -85,7 +85,7 @@ public class UDPClient : MonoBehaviour
         try
         {
             Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + message);
-            data = Encoding.ASCII.GetBytes(message);
+            data = Encoding.Default.GetBytes(message);
             recv = udpSocket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
         catch (Exception e)

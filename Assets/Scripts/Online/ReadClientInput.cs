@@ -29,7 +29,7 @@ public class ReadClientInput : MonoBehaviour
             switch (GameObject.Find("ClientManager").GetComponent<ServerManager>().protocol)
             {
                 case ServerManager.Protocol.TCP:
-                    //GameObject.Find("ClientManager").GetComponent<TCPClient>().ConnectToServer();
+                    GameObject.Find("ClientManager").GetComponent<TCPClient>().ConnectToServer();
                     break;
                 case ServerManager.Protocol.UDP:
                     GameObject.Find("ClientManager").GetComponent<UDPClient>().ConnectToServer(clientInput);

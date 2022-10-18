@@ -41,8 +41,13 @@ public class UDPServer : MonoBehaviour
             serverThread.Abort();
     }
 
-    private void StartServer()
+    private void StartServer(string ip = null, int port = 0)
     {
+        if (ip != null)
+            serverIP = ip;
+        if (port != 0)
+            serverPort = port;
+
         InitializeUDPSocket();
         InitializeThread();
     }
@@ -56,12 +61,12 @@ public class UDPServer : MonoBehaviour
     private void InitializeThread()
     {
         //Debug.Log("[SERVER] Initializing UDP thread...");
-        serverThread = new Thread(ReceiveData);
+        serverThread = new Thread(ServerThread);
         serverThread.IsBackground = true;
         serverThread.Start();
     }
 
-    private void ReceiveData()
+    private void ServerThread()
     {
         // Client IP EndPoint
         IPAddress ipAddress = IPAddress.Parse(serverIP);
@@ -76,7 +81,7 @@ public class UDPServer : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log("[ERROR SERVER] Failed to bind socket: " + e.ToString());
+            Debug.Log("[ERROR SERVER] Failed to bind socket: " + e.Message);
         }
 
         // Receive Data From Client
@@ -87,7 +92,7 @@ public class UDPServer : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log("[ERROR SERVER] Failed to receive data: " + e.ToString());
+            Debug.Log("[ERROR SERVER] Failed to receive data: " + e.Message);
         }
 
         // Send data to client
@@ -105,7 +110,7 @@ public class UDPServer : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log("[ERROR SERVER] Failed to send data. Error: " + e.ToString());
+            Debug.Log("[ERROR SERVER] Failed to send data. Error: " + e.Message);
         }
     }
 }

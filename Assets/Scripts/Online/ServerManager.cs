@@ -30,9 +30,7 @@ public class ServerManager : MonoBehaviour
                 switch (protocol)
                 {
                     case Protocol.TCP:
-                        // not yet implemented
-                        
-                        //gameObject.AddComponent<TCPServer>();
+                        gameObject.AddComponent<TCPServer>();
                         break;
                     case Protocol.UDP:
                         gameObject.AddComponent<UDPServer>();
@@ -43,9 +41,7 @@ public class ServerManager : MonoBehaviour
                 switch (protocol)
                 {
                     case Protocol.TCP:
-                        // not yet implemented
-                        
-                        //gameObject.AddComponent<TCPClient>();
+                        gameObject.AddComponent<TCPClient>();
                         break;
                     case Protocol.UDP:
                         gameObject.AddComponent<UDPClient>();
