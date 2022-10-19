@@ -898,7 +898,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c4509b811de1354b8656bde3994582b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  difficulty: 3
+  difficulty: 1
   numberOfStartingHoles: 3
 --- !u!1 &1190395575
 GameObject:

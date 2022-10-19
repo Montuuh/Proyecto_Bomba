@@ -78,8 +78,11 @@ public class MultiPlayerGame : MonoBehaviour
             // Set up initial holes
             for(int i = 0; i < numberOfStartingHoles; i++)
             {
-                int x = Random.Range(0, width/numberOfStartingHoles) + width / numberOfStartingHoles * i;
-                int y = Random.Range(0, height/numberOfStartingHoles) + width / numberOfStartingHoles * i;
+                //int x = Random.Range(0, width/numberOfStartingHoles) + width / numberOfStartingHoles * i;
+                //int y = Random.Range(0, height/numberOfStartingHoles) + width / numberOfStartingHoles * i;
+
+                int x = Random.Range(0, width);
+                int y = Random.Range(0, height);
 
                 Cell cell = cells[x, y];
                 cell.cellType = Cell.CellType.Empty;
