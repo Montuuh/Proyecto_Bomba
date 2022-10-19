@@ -75,8 +75,15 @@ public class UDPClient : MonoBehaviour
         SendData("This is a message from the client");
 
         // Receive data from server
-        recv = udpSocket.Receive(data);
-        Debug.Log("[CLIENT] Received: " + Encoding.Default.GetString(data, 0, recv));
+        try
+        {
+            recv = udpSocket.Receive(data);
+            Debug.Log("[CLIENT] Received: " + Encoding.Default.GetString(data, 0, recv));
+        }
+        catch (Exception e)
+        {
+            Debug.Log("[CLIENT] Failed to send message. Error: " + e.ToString());
+        }
     }
 
     // SendData to server
