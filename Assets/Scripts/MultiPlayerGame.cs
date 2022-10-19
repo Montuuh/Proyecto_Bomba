@@ -75,16 +75,18 @@ public class MultiPlayerGame : MonoBehaviour
         } else
         {
 
+            // Set up initial holes
             for(int i = 0; i < numberOfStartingHoles; i++)
             {
-                int x = Random.Range(0, width);
-                int y = Random.Range(0, height);
+                int x = Random.Range(0, width/numberOfStartingHoles) + width / numberOfStartingHoles * i;
+                int y = Random.Range(0, height/numberOfStartingHoles) + width / numberOfStartingHoles * i;
 
                 Cell cell = cells[x, y];
                 cell.cellType = Cell.CellType.Empty;
                 startingHoles.Add(cell);
             }
 
+            // Create the full map and reveal the starting holes
             CreateFullMap();
             for (int i = 0; i < startingHoles.Count; i++)
             {
