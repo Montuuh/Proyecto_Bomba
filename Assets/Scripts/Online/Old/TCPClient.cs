@@ -1,16 +1,16 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Sockets;
-using System.Text;
+using System.Net;
 using System.Threading;
 using UnityEngine;
+using System.Text;
+using System;
 
-public class UDPClient : MonoBehaviour
+public class TCPClient : MonoBehaviour
 {
     public string userName;
-    private bool hasSetUsername = false;
+    public bool hasSetUsername = false;
     private string serverIP;
     private int serverPort;
 
@@ -18,27 +18,26 @@ public class UDPClient : MonoBehaviour
     private byte[] data = new byte[1024];
 
     private Thread clientThread;
-    private Socket udpSocket;
+    private Socket tcpSocket;
 
     // Destination EndPoint and IP
     private IPEndPoint serverIPEP;
-    private EndPoint serverEP;
-
+    
     // Start is called before the first frame update
     void Start()
     {
         // Get IP and port
-        serverIP = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverIP;
-        serverPort = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverPort;
-
+        serverIP = GameObject.Find("ServerManager").GetComponent<Server>().serverIP;
+        serverPort = GameObject.Find("ServerManager").GetComponent<Server>().serverPort;
+        
         SetRandomGuest();
     }
-    
+
     private void OnDisable()
     {
-        //Debug.Log("[CLIENT] Closing UDP socket & thread...");
-        if (udpSocket != null)
-            udpSocket.Close();
+        //Debug.Log("[CLIENT] Closing TCP socket & thread...");
+        if (tcpSocket != null)
+            tcpSocket.Close();
         if (clientThread != null)
             clientThread.Abort();
     }
@@ -49,60 +48,56 @@ public class UDPClient : MonoBehaviour
             serverIP = ip;
         if (port != 0)
             serverPort = port;
-        
-        InitializeUDPSocket();
+
+        InitializeTCPSocket();
         InitializeThread();
     }
 
-    private void InitializeUDPSocket()
+    private void InitializeTCPSocket()
     {
-        //Debug.Log("[CLIENT] Initializing UDP socket...");
-        udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+        //Debug.Log("[CLIENT] Initializing TCP socket...");
+        tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
     }
 
     private void InitializeThread()
     {
-        //Debug.Log("[CLIENT] Initializing UDP thread...");
-        clientThread = new Thread(ClientThread);
+        //Debug.Log("[CLIENT] Initializing TCP thread...");
+        clientThread = new Thread(new ThreadStart(ClientThread));
         clientThread.IsBackground = true;
         clientThread.Start();
     }
 
     private void ClientThread()
     {
-        // Client IP EndPoint
-        Debug.Log("[CLIENT] Trying to connect to UDP server --> " + serverIP + ":" + serverPort);
+        Debug.Log("[CLIENT] Trying to connect to TCP server --> " + serverIP + ":" + serverPort);
         IPAddress ipAddress = IPAddress.Parse(serverIP);
         serverIPEP = new IPEndPoint(ipAddress, serverPort);
-        serverEP = (EndPoint)serverIPEP;
+        
+        tcpSocket.Connect(serverIPEP);
 
-        // Send data to server
-        SendData("This is a message from the client: " + userName);
+        // Debug.Log("[CLIENT] Connected to server!");
+        SendString("Hello from client: " + userName);
 
-        // Receive data from server
-        try
-        {
-            recv = udpSocket.Receive(data);
-            Debug.Log("[CLIENT] Received: " + Encoding.Default.GetString(data, 0, recv));
-        }
-        catch (Exception e)
-        {
-            Debug.Log("[CLIENT] Failed to send message. Error: " + e.ToString());
-        }
+        // Debug.Log("[CLIENT] Receiving data from server...");
+        data = new byte[1024];
+        recv = tcpSocket.Receive(data);
+        Debug.Log("[CLIENT] Data received from server: " + Encoding.Default.GetString(data, 0, recv));
+
+        // Debug.Log("[CLIENT] Closing TCP socket...");
+        tcpSocket.Close();
     }
 
-    // SendData to server
-    private void SendData(string message)
+    private void SendString(string message)
     {
         try
         {
             Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + message);
             data = Encoding.Default.GetBytes(message);
-            recv = udpSocket.SendTo(data, data.Length, SocketFlags.None, serverEP);
+            tcpSocket.Send(data, data.Length, SocketFlags.None);
         }
         catch (Exception e)
         {
-            Debug.Log("[CLIENT] Failed to send message. Error: " + e.ToString());
+            Debug.Log("[CLIENT] Error sending string: " + e.ToString());
         }
     }
 

@@ -46,11 +46,11 @@ public class Server : MonoBehaviour
         switch (protocol)
         {
             case Protocol.TCP:
-                //Debug.Log("[SERVER] Initializing TCP socket...");
+                Debug.Log("[SERVER] Initializing TCP socket...");
                 socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 break;
             case Protocol.UDP:
-                //Debug.Log("[SERVER] Initializing UDP socket...");
+                Debug.Log("[SERVER] Initializing UDP socket...");
                 socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 break;
             default:
@@ -60,7 +60,7 @@ public class Server : MonoBehaviour
 
     private void InitializeThread()
     {
-        //Debug.Log("[SERVER] Initializing thread...");
+        Debug.Log("[SERVER] Initializing thread...");
         serverThread = new Thread(new ThreadStart(ServerThread));
         serverThread.IsBackground = true;
         serverThread.Start();
@@ -72,6 +72,17 @@ public class Server : MonoBehaviour
         IPAddress ipAddress = IPAddress.Parse(serverIP);
         clientIPEP = new IPEndPoint(ipAddress, serverPort);
         clientEP = (EndPoint)clientIPEP;
+
+        // Creating Socket and binding it to the address
+        try
+        {
+            socket.Bind(clientIPEP);
+            Debug.Log("[SERVER] Socket bound to " + clientIPEP.ToString());
+        }
+        catch (Exception e)
+        {
+            Debug.Log("[ERROR SERVER] Failed to bind socket: " + e.Message);
+        }
 
         switch (protocol)
         {
@@ -88,17 +99,6 @@ public class Server : MonoBehaviour
 
     void UDPThread()
     {
-        // Creating Socket and binding it to the address
-        try
-        {
-            socket.Bind(clientIPEP);
-            Debug.Log("[SERVER] UDP socket bound to " + clientIPEP.ToString());
-        }
-        catch (Exception e)
-        {
-            Debug.Log("[ERROR SERVER] Failed to bind socket: " + e.Message);
-        }
-
         // Receive Data From Client
         try
         {

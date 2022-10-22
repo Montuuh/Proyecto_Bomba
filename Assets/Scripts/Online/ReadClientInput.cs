@@ -15,20 +15,20 @@ public class ReadClientInput : MonoBehaviour
     private string inputUsername;
     public TMP_InputField inputFieldUsername;
 
-    private ServerManager serverManager;
+    private Client serverManager;
     private TCPClient tcpClient;
     private UDPClient udpClient;
 
     // Start is called before the first frame update
     void Start()
     {
-        serverManager = GameObject.Find("ClientManager").GetComponent<ServerManager>();
+        serverManager = GameObject.Find("ClientManager").GetComponent<Client>();
         switch (serverManager.protocol)
         {
-            case ServerManager.Protocol.TCP:
+            case Client.Protocol.TCP:
                 tcpClient = GameObject.Find("ClientManager").GetComponent<TCPClient>();
                 break;
-            case ServerManager.Protocol.UDP:
+            case Client.Protocol.UDP:
                 udpClient = GameObject.Find("ClientManager").GetComponent<UDPClient>();
                 break;
         }
@@ -57,9 +57,9 @@ public class ReadClientInput : MonoBehaviour
         if ((inputIP == null || inputIP == "") && (inputPort != null || inputPort != ""))
             return false;
 
-        if (serverManager.protocol == ServerManager.Protocol.TCP) 
+        if (serverManager.protocol == Client.Protocol.TCP) 
             tcpClient.ConnectToServer(inputIP, int.Parse(inputPort));
-        else if (serverManager.protocol == ServerManager.Protocol.UDP)
+        else if (serverManager.protocol == Client.Protocol.UDP)
             udpClient.ConnectToServer(inputIP, int.Parse(inputPort));
 
         GameObject.Find("ClientLobby").GetComponent<ClientLobby>().OnValidServer();
@@ -82,10 +82,10 @@ public class ReadClientInput : MonoBehaviour
 
         switch (serverManager.protocol)
         {
-            case ServerManager.Protocol.TCP:
+            case Client.Protocol.TCP:
                 tcpClient.SetUsername(inputUsername);
                 break;
-            case ServerManager.Protocol.UDP:
+            case Client.Protocol.UDP:
                 udpClient.SetUsername(inputUsername);
                 break;
         }
