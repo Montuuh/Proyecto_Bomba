@@ -27,8 +27,8 @@ public class TCPClient : MonoBehaviour
     void Start()
     {
         // Get IP and port
-        serverIP = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverIP;
-        serverPort = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverPort;
+        serverIP = GameObject.Find("ServerManager").GetComponent<Server>().serverIP;
+        serverPort = GameObject.Find("ServerManager").GetComponent<Server>().serverPort;
         
         SetRandomGuest();
     }

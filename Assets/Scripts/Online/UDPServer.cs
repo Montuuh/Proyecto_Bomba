@@ -28,7 +28,6 @@ public class UDPServer : MonoBehaviour
         // Get IP and port
         serverIP = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverIP;
         serverPort = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverPort;
-
         StartServer();
     }
 
