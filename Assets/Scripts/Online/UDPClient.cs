@@ -9,6 +9,8 @@ using UnityEngine;
 
 public class UDPClient : MonoBehaviour
 {
+    public string userName;
+    private bool hasSetUsername = false;
     private string serverIP;
     private int serverPort;
 
@@ -28,6 +30,8 @@ public class UDPClient : MonoBehaviour
         // Get IP and port
         serverIP = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverIP;
         serverPort = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverPort;
+
+        SetRandomGuest();
     }
     
     private void OnDisable()
@@ -67,12 +71,13 @@ public class UDPClient : MonoBehaviour
     private void ClientThread()
     {
         // Client IP EndPoint
+        Debug.Log("[CLIENT] Trying to connect to UDP server --> " + serverIP + ":" + serverPort);
         IPAddress ipAddress = IPAddress.Parse(serverIP);
         serverIPEP = new IPEndPoint(ipAddress, serverPort);
         serverEP = (EndPoint)serverIPEP;
 
         // Send data to server
-        SendData("This is a message from the client");
+        SendData("This is a message from the client: " + userName);
 
         // Receive data from server
         try
@@ -99,5 +104,22 @@ public class UDPClient : MonoBehaviour
         {
             Debug.Log("[CLIENT] Failed to send message. Error: " + e.ToString());
         }
+    }
+
+    private void SetRandomGuest()
+    {
+        int random = UnityEngine.Random.Range(0, 10000);
+        userName = "Guest" + random.ToString();
+    }
+
+    public string GetUsername()
+    {
+        return userName;
+    }
+
+    public void SetUsername(string name)
+    {
+        userName = name;
+        hasSetUsername = true;
     }
 }

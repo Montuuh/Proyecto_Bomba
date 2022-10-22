@@ -22,7 +22,7 @@ public class ServerManager : MonoBehaviour
     public string serverIP { get; set; } = "127.0.0.1";
     public int serverPort { get; set; } = 9500;
 
-    void Start()
+    void Awake()
     {
         switch (serverType)
         {

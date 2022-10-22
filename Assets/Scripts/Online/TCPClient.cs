@@ -9,6 +9,8 @@ using System;
 
 public class TCPClient : MonoBehaviour
 {
+    public string userName;
+    public bool hasSetUsername = false;
     private string serverIP;
     private int serverPort;
 
@@ -27,6 +29,8 @@ public class TCPClient : MonoBehaviour
         // Get IP and port
         serverIP = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverIP;
         serverPort = GameObject.Find("ServerManager").GetComponent<ServerManager>().serverPort;
+        
+        SetRandomGuest();
     }
 
     private void OnDisable()
@@ -65,13 +69,13 @@ public class TCPClient : MonoBehaviour
 
     private void ClientThread()
     {
-        // Debug.Log("[CLIENT] Connecting to server...");
+        Debug.Log("[CLIENT] Trying to connect to TCP server --> " + serverIP + ":" + serverPort);
         IPAddress ipAddress = IPAddress.Parse(serverIP);
         serverIPEP = new IPEndPoint(ipAddress, serverPort);
         tcpSocket.Connect(serverIPEP);
 
         // Debug.Log("[CLIENT] Connected to server!");
-        SendString("Hello from client!");
+        SendString("Hello from client: " + userName);
 
         // Debug.Log("[CLIENT] Receiving data from server...");
         data = new byte[1024];
@@ -94,5 +98,22 @@ public class TCPClient : MonoBehaviour
         {
             Debug.Log("[CLIENT] Error sending string: " + e.ToString());
         }
+    }
+
+    private void SetRandomGuest()
+    {
+        int random = UnityEngine.Random.Range(0, 10000);
+        userName = "Guest" + random.ToString();
+    }
+
+    public string GetUsername()
+    {
+        return userName;
+    }
+
+    public void SetUsername(string name)
+    {
+        userName = name;
+        hasSetUsername = true;
     }
 }
