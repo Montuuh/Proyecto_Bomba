@@ -8,10 +8,14 @@ public class ClientLobby : MonoBehaviour
     private GameObject inputUsername;
     
     private GameObject usernameWelcome;
+
+    private Client client;
     
     // Start is called before the first frame update
     void Start()
     {
+        client = GameObject.Find("ClientManager").GetComponent<Client>();
+        
         inputServer = GameObject.Find("InputServer");
         inputUsername = GameObject.Find("InputUsername");
         usernameWelcome = GameObject.Find("UsernameWelcome");
@@ -39,14 +43,6 @@ public class ClientLobby : MonoBehaviour
     private void ShowUsernameWelcome()
     {
         usernameWelcome.SetActive(true);
-        switch (GameObject.Find("ClientManager").GetComponent<ServerManager>().protocol)
-        {
-            case ServerManager.Protocol.TCP:
-                usernameWelcome.GetComponent<TMPro.TextMeshProUGUI>().text = "Welcome " + GameObject.Find("ClientManager").GetComponent<TCPClient>().userName;
-                break;
-            case ServerManager.Protocol.UDP:
-                usernameWelcome.GetComponent<TMPro.TextMeshProUGUI>().text = "Welcome " + GameObject.Find("ClientManager").GetComponent<UDPClient>().userName;
-                break;
-        }
+        usernameWelcome.GetComponent<TMPro.TextMeshProUGUI>().text = "Welcome " + client.clientData.GetUserName();
     }
 }

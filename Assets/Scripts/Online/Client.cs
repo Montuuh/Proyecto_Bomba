@@ -7,16 +7,47 @@ using UnityEngine;
 using System.Text;
 using System;
 
+public class ClientData
+{
+    private string userName;
+    private bool hasSetUsername = false;
+
+    public ClientData()
+    {
+        
+        SetRandomGuest();
+    }
+
+    public string GetUserName()
+    {
+        return userName;
+    }
+    
+    public void SetUsername(string _userName)
+    {
+        if (!hasSetUsername)
+        {
+            hasSetUsername = true;
+            userName = _userName;
+        }
+    }
+
+    private void SetRandomGuest()
+    {
+        int random = UnityEngine.Random.Range(0, 10000);
+        userName = "Guest" + random.ToString();
+    }
+}
+
 public class Client : MonoBehaviour
 {
     public enum Protocol { TCP, UDP }
     public Protocol protocol;
 
+    public ClientData clientData;
+
     private int serverPort;
     private string serverIP;
-
-    private string userName;
-    private bool hasSetUsername = false;
 
     private int recv;
     private byte[] data = new byte[1024];
@@ -35,8 +66,8 @@ public class Client : MonoBehaviour
         serverIP = GameObject.Find("ServerManager").GetComponent<Server>().serverIP;
         serverPort = GameObject.Find("ServerManager").GetComponent<Server>().serverPort;
 
-        SetRandomGuest();
-        ConnectToServer();
+        // Creating the client data
+        clientData = new ClientData();
     }
 
     private void OnDisable()
@@ -121,7 +152,7 @@ public class Client : MonoBehaviour
         serverEP = (EndPoint)serverIPEP;
 
         // Send data to server
-        SendData("This is a message from the client: " + userName);
+        SendData("This is a message from the client: " + clientData.GetUserName());
 
         // Receive data from server
         try
@@ -140,7 +171,7 @@ public class Client : MonoBehaviour
         socket.Connect(serverIPEP);
 
         // Debug.Log("[CLIENT] Connected to server!");
-        SendData("Hello from client: " + userName);
+        SendData("Hello from client: " + clientData.GetUserName());
 
         // Debug.Log("[CLIENT] Receiving data from server...");
         data = new byte[1024];
@@ -175,20 +206,5 @@ public class Client : MonoBehaviour
         {
             Debug.Log("[CLIENT] Failed to send message. Error: " + e.ToString());
         }
-    }
-    private void SetRandomGuest()
-    {
-        int random = UnityEngine.Random.Range(0, 10000);
-        userName = "Guest" + random.ToString();
-    }
-    public string GetUsername()
-    {
-        return userName;
-    }
-
-    public void SetUsername(string name)
-    {
-        userName = name;
-        hasSetUsername = true;
     }
 }

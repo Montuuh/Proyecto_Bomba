@@ -15,23 +15,12 @@ public class ReadClientInput : MonoBehaviour
     private string inputUsername;
     public TMP_InputField inputFieldUsername;
 
-    private Client serverManager;
-    private TCPClient tcpClient;
-    private UDPClient udpClient;
+    private Client client;
 
     // Start is called before the first frame update
     void Start()
     {
-        serverManager = GameObject.Find("ClientManager").GetComponent<Client>();
-        switch (serverManager.protocol)
-        {
-            case Client.Protocol.TCP:
-                tcpClient = GameObject.Find("ClientManager").GetComponent<TCPClient>();
-                break;
-            case Client.Protocol.UDP:
-                udpClient = GameObject.Find("ClientManager").GetComponent<UDPClient>();
-                break;
-        }
+        client = GameObject.Find("ClientManager").GetComponent<Client>();
     }
 
     public void OnSubmitInputIP()
@@ -57,10 +46,7 @@ public class ReadClientInput : MonoBehaviour
         if ((inputIP == null || inputIP == "") && (inputPort != null || inputPort != ""))
             return false;
 
-        if (serverManager.protocol == Client.Protocol.TCP) 
-            tcpClient.ConnectToServer(inputIP, int.Parse(inputPort));
-        else if (serverManager.protocol == Client.Protocol.UDP)
-            udpClient.ConnectToServer(inputIP, int.Parse(inputPort));
+        client.ConnectToServer(inputIP, int.Parse(inputPort));
 
         GameObject.Find("ClientLobby").GetComponent<ClientLobby>().OnValidServer();
 
@@ -80,15 +66,7 @@ public class ReadClientInput : MonoBehaviour
         if (inputUsername == null || inputUsername == "")
             return;
 
-        switch (serverManager.protocol)
-        {
-            case Client.Protocol.TCP:
-                tcpClient.SetUsername(inputUsername);
-                break;
-            case Client.Protocol.UDP:
-                udpClient.SetUsername(inputUsername);
-                break;
-        }
+        client.clientData.SetUsername(inputUsername);
 
         GameObject.Find("ClientLobby").GetComponent<ClientLobby>().OnValidUsername();
     }

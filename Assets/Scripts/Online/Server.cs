@@ -30,6 +30,15 @@ public class Server : MonoBehaviour
         StartServer();
     }
 
+    private void OnDisable()
+    {
+        //Debug.Log("[SERVER] Closing TCP socket & thread...");
+        if (socket != null)
+            socket.Close();
+        if (serverThread != null)
+            serverThread.Abort();
+    }
+
     private void StartServer(string ip = null, int port = 0)
     {
         if (ip != null)
@@ -61,9 +70,21 @@ public class Server : MonoBehaviour
     private void InitializeThread()
     {
         Debug.Log("[SERVER] Initializing thread...");
-        serverThread = new Thread(new ThreadStart(ServerThread));
-        serverThread.IsBackground = true;
-        serverThread.Start();
+        switch (protocol)
+        {
+            case Protocol.TCP:
+                serverThread = new Thread(new ThreadStart(ServerThread));
+                serverThread.IsBackground = true;
+                serverThread.Start();
+                break;
+            case Protocol.UDP:
+                serverThread = new Thread(ServerThread);
+                serverThread.IsBackground = true;
+                serverThread.Start();
+                break;
+            default:
+                break;
+        }
     }
 
     private void ServerThread()
@@ -111,7 +132,7 @@ public class Server : MonoBehaviour
         }
 
         // Send data to client
-        SendData("Welcome to the server!");
+        SendData("Heyyy client, I have received your message");
     }
 
     void TCPThread()
@@ -138,23 +159,20 @@ public class Server : MonoBehaviour
         }
     }
 
-    private void SendData(string message, Socket socket_ = null)
+    private void SendData(string message, Socket clientSocket = null)
     {
-        if (socket_ == null)
-            socket_ = socket;
-
         // Send Data to Client
         try
         {
             Debug.Log("[SERVER] Sending message to " + clientEP.ToString() + ": " + message);
-            data = Encoding.ASCII.GetBytes(message);
+            data = Encoding.Default.GetBytes(message);
             switch (protocol)
             {
                 case Protocol.TCP:
-                    socket.Send(data);
+                    clientSocket.Send(data);
                     break;
                 case Protocol.UDP:
-                    socket_.SendTo(data, data.Length, SocketFlags.None, clientEP);
+                    socket.SendTo(data, data.Length, SocketFlags.None, clientEP);
                     break;
                 default:
                     break;
