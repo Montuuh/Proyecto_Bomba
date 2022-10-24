@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using UnityEngine;
+using System.Collections.Concurrent;
 
 public class Server : MonoBehaviour
 {
@@ -103,9 +104,9 @@ public class Server : MonoBehaviour
                 serverThread.IsBackground = true;
                 serverThread.Start();
 
-                serverAcceptThread = new Thread(ServerThreadAccept);
-                serverAcceptThread.IsBackground = true;
-                serverAcceptThread.Start();
+                //serverAcceptThread = new Thread(ServerThreadAccept);
+                //serverAcceptThread.IsBackground = true;
+                //serverAcceptThread.Start();
                 break;
             case Protocol.UDP:
                 serverThread = new Thread(ServerThread);
@@ -137,7 +138,15 @@ public class Server : MonoBehaviour
         socket.Listen(10);
         while (clientSocketList.Count <= 10)
         {
+            
             Socket clientSocket = socket.Accept();
+
+            if (clientSocketList.Count == 1)
+            {
+
+                int A = 0;
+            }
+
 
             data = new byte[1024];
             recv = clientSocket.Receive(data);
@@ -173,25 +182,23 @@ public class Server : MonoBehaviour
 
     void TCPThread()
     {
+        socket.Listen(10);
+        Socket clientSocket = socket.Accept();
         while (true)
         {
-            if (clientSocketList.Count == 0)
-                continue;
+           
+            data = new byte[1024];
+            recv = clientSocket.Receive(data);
 
-            foreach(Socket sock in clientSocketList)
+            if (recv > 0)
             {
-                data = new byte[1024];
-                recv = sock.Receive(data);
+                string message = Encoding.ASCII.GetString(data, 0, recv);
 
-                if (recv > 0)
-                {
-                    string message = Encoding.ASCII.GetString(data, 0, recv);
-
-                    Debug.Log("[SERVER] Message received from " + sock.RemoteEndPoint + " = " + message);
-                    // sock.Send(data);
-                    SendData(message, sock);
-                }
+                Debug.Log("[SERVER] Message received from " + clientSocket.RemoteEndPoint + " = " + message);
+                 
+                    SendData(message, clientSocket);
             }
+           
         }
     }
 

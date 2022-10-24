@@ -179,7 +179,7 @@ public class Client : MonoBehaviour
     {
         socket.Connect(serverIPEP);
 
-        //SendData(" Hello! I have joined the server");
+        SendData(" Hello! I have joined the server");
 
         ReceiveData();
     }
@@ -226,7 +226,15 @@ public class Client : MonoBehaviour
 
                 
                 Message messa = new Message();
-                messa.text = Encoding.Default.GetString(data, 0, recv);
+                switch(protocol)
+                {
+                    case Protocol.TCP:
+                        messa.text = Encoding.ASCII.GetString(data, 0, recv);
+                        break;
+                    case Protocol.UDP:
+                        messa.text = Encoding.Default.GetString(data, 0, recv);
+                        break;
+                }
                 pendingMessages.Add(messa);
                 
 

@@ -77,6 +77,7 @@ public class ReadClientInput : MonoBehaviour
     public void OnSubmitInputChat()
     {
         inputChat = inputFieldChat.text;
+        
         client.SendData(inputChat);
         inputFieldChat.text = "";
     }
