@@ -15,6 +15,9 @@ public class ReadClientInput : MonoBehaviour
     private string inputUsername;
     public TMP_InputField inputFieldUsername;
 
+    private string inputChat;
+    public TMP_InputField inputFieldChat;
+
     private Client client;
 
     // Start is called before the first frame update
@@ -69,5 +72,12 @@ public class ReadClientInput : MonoBehaviour
         client.clientData.SetUsername(inputUsername);
 
         GameObject.Find("ClientLobby").GetComponent<ClientLobby>().OnValidUsername();
+    }
+
+    public void OnSubmitInputChat()
+    {
+        inputChat = inputFieldChat.text;
+        client.SendData(inputChat);
+        inputFieldChat.text = "";
     }
 }

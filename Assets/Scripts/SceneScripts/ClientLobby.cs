@@ -9,20 +9,22 @@ public class ClientLobby : MonoBehaviour
     
     private GameObject usernameWelcome;
 
+    private GameObject chat;
+
     private Client client;
     
     // Start is called before the first frame update
     void Start()
     {
         client = GameObject.Find("ClientManager").GetComponent<Client>();
-        
+
         inputServer = GameObject.Find("InputServer");
         inputUsername = GameObject.Find("InputUsername");
-        usernameWelcome = GameObject.Find("UsernameWelcome");
+        chat = GameObject.Find("Chat");
 
         inputServer.SetActive(false);
         inputUsername.SetActive(true);
-        usernameWelcome.SetActive(false);
+        chat.SetActive(false);
     }
 
     public void OnValidUsername()
@@ -36,13 +38,19 @@ public class ClientLobby : MonoBehaviour
         inputServer.SetActive(false);
         inputUsername.SetActive(false);
 
-        ShowUsernameWelcome();
+        //ShowUsernameWelcome();
+        ShowChat();
         // Load lobby
     }
 
     private void ShowUsernameWelcome()
     {
-        usernameWelcome.SetActive(true);
+        //usernameWelcome.SetActive(true);
         usernameWelcome.GetComponent<TMPro.TextMeshProUGUI>().text = "Welcome " + client.clientData.GetUserName();
+    }
+
+    private void ShowChat()
+    {
+        chat.SetActive(true);
     }
 }

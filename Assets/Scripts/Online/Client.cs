@@ -4,6 +4,8 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 using System.Text;
 using System;
 using System.IO;
@@ -72,7 +74,9 @@ public class Client : MonoBehaviour
     private IPEndPoint serverIPEP;
     private EndPoint serverEP;
 
- 
+    public GameObject chat;
+    List<Message> pendingMessages = new List<Message>();
+
     void Start()
     {
         // Creating the client data
@@ -81,9 +85,10 @@ public class Client : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (pendingMessages.Count > 0)
         {
-            SendData("ZUPAE");
+            chat.GetComponent<Chat>().pendingMessages.Add(pendingMessages[0]);
+            pendingMessages.Remove(pendingMessages[0]);
         }
     }
 
@@ -180,7 +185,7 @@ public class Client : MonoBehaviour
     }
 
     // SendData to server
-    private void SendData(string message)
+    public void SendData(string message)
     {
         serverEP = (EndPoint)serverIPEP;
 
@@ -217,6 +222,12 @@ public class Client : MonoBehaviour
             {
                 data = new byte[1024];
                 recv = socket.Receive(data);
+
+                
+                Message messa = new Message();
+                messa.text = Encoding.Default.GetString(data, 0, recv);
+                pendingMessages.Add(messa);
+                
 
                 Debug.Log("[CLIENT] Received: " + Encoding.Default.GetString(data, 0, recv));
             }
