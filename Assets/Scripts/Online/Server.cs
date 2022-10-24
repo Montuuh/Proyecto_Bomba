@@ -126,17 +126,6 @@ public class Server : MonoBehaviour
                 break;
         }
     }
-    private void Update()
-    {
-        //if (Input.GetKeyDown(KeyCode.Space))
-        //{
-        //    foreach (EndPoint endPoint in clientEPList)
-        //    {
-        //        //Debug.Log("[SERVER] Received message from " + endPoint.ToString() + ", named: " + message[0] + ": " + message[1]);
-        //        SendData(" ZUPAE ", endPoint, socket);
-        //    }
-        //}
-    }
     void UDPThread()
     {
         while(true)
