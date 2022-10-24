@@ -169,4 +169,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   protocol: 1
   serverPort: 9500
-  serverIP: 127.0.0.1
+  serverIP: 0.0.0.0

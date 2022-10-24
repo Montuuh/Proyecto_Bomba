@@ -12,8 +12,8 @@ public class Server : MonoBehaviour
     public enum Protocol { TCP, UDP }
     public Protocol protocol;
 
-    public int serverPort = 9500;
-    public string serverIP = "127.0.0.1";
+    public int serverPort;
+    public string serverIP;
     
     private int recv;
     private byte[] data = new byte[1024];
@@ -24,6 +24,8 @@ public class Server : MonoBehaviour
     // Destination EndPoint and IP
     private IPEndPoint clientIPEP;
     private EndPoint clientEP;
+
+    private IPEndPoint serverIPEP;
 
     void Start()
     {
@@ -89,16 +91,18 @@ public class Server : MonoBehaviour
 
     private void ServerThread()
     {
+        // ServerIP EndPoint
+        serverIPEP = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+        
         // Client IP EndPoint
-        IPAddress ipAddress = IPAddress.Parse(serverIP);
-        clientIPEP = new IPEndPoint(ipAddress, serverPort);
+        clientIPEP = new IPEndPoint(IPAddress.Any, 0);
         clientEP = (EndPoint)clientIPEP;
 
         // Creating Socket and binding it to the address
         try
         {
-            socket.Bind(clientIPEP);
-            Debug.Log("[SERVER] Socket bound to " + clientIPEP.ToString());
+            socket.Bind(serverIPEP);
+            Debug.Log("[SERVER] Socket bound to " + serverIPEP.ToString());
         }
         catch (Exception e)
         {

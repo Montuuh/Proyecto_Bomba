@@ -75,10 +75,6 @@ public class Client : MonoBehaviour
  
     void Start()
     {
-        // Get IP and port
-        serverIP = GameObject.Find("ServerManager").GetComponent<Server>().serverIP;
-        serverPort = GameObject.Find("ServerManager").GetComponent<Server>().serverPort;
-
         // Creating the client data
         clientData = new ClientData();
     }
