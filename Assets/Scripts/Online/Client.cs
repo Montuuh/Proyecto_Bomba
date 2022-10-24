@@ -83,7 +83,7 @@ public class Client : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            SendData("Mandando mensaje al server");
+            SendData("ZUPAE");
         }
     }
 
@@ -165,8 +165,6 @@ public class Client : MonoBehaviour
 
     private void UDPThread()
     {
-        serverEP = (EndPoint)serverIPEP;
-
         SendData("This is a message from the client");
 
         ReceiveData();
@@ -184,7 +182,9 @@ public class Client : MonoBehaviour
     // SendData to server
     private void SendData(string message)
     {
-        string separator = "|";
+        serverEP = (EndPoint)serverIPEP;
+
+        string separator = ": ";
         try
         {
             message = clientData.GetUserName() + separator + message;
@@ -211,15 +211,19 @@ public class Client : MonoBehaviour
 
     private void ReceiveData()
     {
-        try
+        while(true)
         {
-            data = new byte[1024];
-            recv = socket.Receive(data);
-            Debug.Log("[CLIENT] Received: " + Encoding.Default.GetString(data, 0, recv));
-        }
-        catch (Exception e)
-        {
-            Debug.Log("[CLIENT] Failed to receive message. Error: " + e.ToString());
+            try
+            {
+                data = new byte[1024];
+                recv = socket.Receive(data);
+
+                Debug.Log("[CLIENT] Received: " + Encoding.Default.GetString(data, 0, recv));
+            }
+            catch (Exception e)
+            {
+                Debug.Log("[CLIENT] Failed to receive message. Error: " + e.ToString());
+            }
         }
     }
 }

@@ -20,10 +20,12 @@ public class Server : MonoBehaviour
 
     private Thread serverThread;
     private Socket socket;
+    private List<Socket> clientSocketList;
 
     // Destination EndPoint and IP
     private IPEndPoint clientIPEP;
     private EndPoint clientEP;
+    private List<EndPoint> clientEPList;
 
     private IPEndPoint serverIPEP;
 
@@ -43,6 +45,9 @@ public class Server : MonoBehaviour
 
     private void StartServer(string ip = null, int port = 0)
     {
+        clientSocketList = new List<Socket>();
+        clientEPList = new List<EndPoint>();
+
         if (ip != null)
             serverIP = ip;
         if (port != 0)
@@ -121,19 +126,64 @@ public class Server : MonoBehaviour
                 break;
         }
     }
-
+    private void Update()
+    {
+        //if (Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    foreach (EndPoint endPoint in clientEPList)
+        //    {
+        //        //Debug.Log("[SERVER] Received message from " + endPoint.ToString() + ", named: " + message[0] + ": " + message[1]);
+        //        SendData(" ZUPAE ", endPoint, socket);
+        //    }
+        //}
+    }
     void UDPThread()
     {
         while(true)
         {
+            data = new byte[1024];
             recv = socket.ReceiveFrom(data, ref clientEP);
             
             if (recv > 0)
             {
-                string[] message = DecodeString(Encoding.Default.GetString(data, 0, recv));
-                Debug.Log("[SERVER] Received message from " + clientEP.ToString() + ", named: " + message[0] + ": " + message[1]);
-                SendData("Heyyy client: " + message[0] + ", I have received your message. Welcome to my server", socket);
+                if(!clientEPList.Contains(clientEP))
+                    clientEPList.Add(clientEP);
+
+                string message = Encoding.Default.GetString(data, 0, recv);
+
+                foreach (EndPoint endPoint in clientEPList)
+                {
+
+                    //Debug.Log("[SERVER] Received message from " + endPoint.ToString() + ", named: " + message[0] + ": " + message[1]);
+                    SendData(message, endPoint, socket);
+                }
+
+
             }
+        }
+    }
+
+    private void SendData(string message, EndPoint endPoint, Socket clientSocket = null)
+    {
+        try
+        {
+            Debug.Log("[SERVER] Sending message to " + endPoint.ToString() + ": " + message);
+            data = Encoding.Default.GetBytes(message);
+            switch (protocol)
+            {
+                case Protocol.TCP:
+                    clientSocket.Send(data);
+                    break;
+                case Protocol.UDP:
+                    socket.SendTo(data, data.Length, SocketFlags.None, endPoint);
+                    break;
+                default:
+                    break;
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("[ERROR SERVER] Failed to send data. Error: " + e.Message);
         }
     }
 
@@ -143,6 +193,7 @@ public class Server : MonoBehaviour
         Socket clientSocket = socket.Accept();
         while (true)
         {
+
             recv = clientSocket.Receive(data);
 
             if (recv > 0)
