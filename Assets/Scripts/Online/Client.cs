@@ -170,7 +170,7 @@ public class Client : MonoBehaviour
 
     private void UDPThread()
     {
-        SendData("This is a message from the client");
+        SendData(" Hello! I have joined the server");
 
         ReceiveData();
     }
