@@ -179,7 +179,7 @@ public class Client : MonoBehaviour
     {
         socket.Connect(serverIPEP);
 
-        SendData("This is a message from the client");
+        //SendData(" Hello! I have joined the server");
 
         ReceiveData();
     }
@@ -187,7 +187,6 @@ public class Client : MonoBehaviour
     // SendData to server
     public void SendData(string message)
     {
-        serverEP = (EndPoint)serverIPEP;
 
         string separator = ": ";
         try
@@ -199,9 +198,11 @@ public class Client : MonoBehaviour
             switch (protocol)
             {
                 case Protocol.TCP:
+                    data = Encoding.ASCII.GetBytes(message);
                     recv = socket.Send(data, data.Length, SocketFlags.None);
                     break;
                 case Protocol.UDP:
+                    serverEP = (EndPoint)serverIPEP;
                     recv = socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
                     break;
                 default:

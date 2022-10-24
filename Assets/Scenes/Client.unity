@@ -2104,7 +2104,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07eb9993c4857704493db500d994dfe6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  protocol: 1
+  protocol: 0
   chat: {fileID: 1150454413}
 --- !u!1 &1078809516
 GameObject:
