@@ -120,48 +120,39 @@ public class Server : MonoBehaviour
 
     void UDPThread()
     {
-        // Receive Data From Client
-        try
+        while(true)
         {
             recv = socket.ReceiveFrom(data, ref clientEP);
-            Debug.Log("[SERVER] Message received from " + clientEP.ToString() + ": " + Encoding.Default.GetString(data, 0, recv));
+            
+            if (recv > 0)
+            {
+                string[] message = DecodeString(Encoding.Default.GetString(data, 0, recv));
+                Debug.Log("[SERVER] Received message from " + clientEP.ToString() + ", named: " + message[0] + ": " + message[1]);
+                SendData("Heyyy client: " + message[0] + ", I have received your message. Welcome to my server", socket);
+            }
         }
-        catch (Exception e)
-        {
-            Debug.Log("[ERROR SERVER] Failed to receive data: " + e.Message);
-        }
-
-        // Send data to client
-        SendData("Heyyy client, I have received your message");
     }
 
     void TCPThread()
     {
         socket.Listen(10);
+        Socket clientSocket = socket.Accept();
         while (true)
         {
-            Socket clientSocket = socket.Accept();
-            try
-            {
-                recv = clientSocket.Receive(data);
-                Debug.Log("[SERVER] Message received: " + Encoding.Default.GetString(data, 0, recv));
-            }
-            catch (Exception e)
-            {
-                Debug.Log("[ERROR SERVER] Failed to receive data: " + e.Message);
-            }
+            recv = clientSocket.Receive(data);
 
-            // Send data to the client
-            SendData("Heyyy client, I have received your message", clientSocket);
+            if (recv > 0)
+            {
+                string[] message = DecodeString(Encoding.Default.GetString(data, 0, recv));
+                Debug.Log("[SERVER] Message received from " + clientSocket.RemoteEndPoint.ToString() + ", named: " + message[0] + ": " + message[1]);
 
-            // Close the connection socket
-            clientSocket.Close();
+                SendData("Heyyy client: " + message[0] + ", I have received your message. Welcome to my server", clientSocket);
+            }
         }
     }
 
     private void SendData(string message, Socket clientSocket = null)
     {
-        // Send Data to Client
         try
         {
             Debug.Log("[SERVER] Sending message to " + clientEP.ToString() + ": " + message);
@@ -184,4 +175,11 @@ public class Server : MonoBehaviour
         }
     }
 
+    private string[] DecodeString(string message)
+    {
+        string[] messageParts = message.Split('|');
+        string username = messageParts[0];
+        string rest = messageParts[1];
+        return new string[] { username, rest };
+    }
 }

@@ -6,9 +6,12 @@ using System.Threading;
 using UnityEngine;
 using System.Text;
 using System;
+using System.IO;
+using Newtonsoft.Json.Bson;
 
 public class ClientData
 {
+    private BinaryWriter writer;
     private string userName;
     private bool hasSetUsername = false;
 
@@ -36,6 +39,16 @@ public class ClientData
     {
         int random = UnityEngine.Random.Range(0, 10000);
         userName = "Guest" + random.ToString();
+    }
+    
+    public void Serialize()
+    {
+        Debug.Log("[CLIENT] Serializing...");
+    }
+
+    public void Deserialize()
+    {
+        Debug.Log("[CLIENT] Deserializing...");
     }
 }
 
@@ -70,9 +83,16 @@ public class Client : MonoBehaviour
         clientData = new ClientData();
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            SendData("Mandando mensaje al server");
+        }
+    }
+
     private void OnDisable()
     {
-        //Debug.Log("[CLIENT] Closing socket & thread...");
         if (socket != null)
             socket.Close();
         if (clientThread != null)
@@ -151,49 +171,34 @@ public class Client : MonoBehaviour
     {
         serverEP = (EndPoint)serverIPEP;
 
-        // Send data to server
-        SendData("This is a message from the client: " + clientData.GetUserName());
+        SendData("This is a message from the client");
 
-        // Receive data from server
-        try
-        {
-            recv = socket.Receive(data);
-            Debug.Log("[CLIENT] Received: " + Encoding.Default.GetString(data, 0, recv));
-        }
-        catch (Exception e)
-        {
-            Debug.Log("[CLIENT] Failed to receive message. Error: " + e.ToString());
-        }
+        ReceiveData();
     }
 
     private void TCPThread()
     {
         socket.Connect(serverIPEP);
 
-        // Debug.Log("[CLIENT] Connected to server!");
-        SendData("Hello from client: " + clientData.GetUserName());
+        SendData("This is a message from the client");
 
-        // Debug.Log("[CLIENT] Receiving data from server...");
-        data = new byte[1024];
-        recv = socket.Receive(data);
-        Debug.Log("[CLIENT] Data received from server: " + Encoding.Default.GetString(data, 0, recv));
-
-        // Debug.Log("[CLIENT] Closing TCP socket...");
-        socket.Close();
+        ReceiveData();
     }
 
     // SendData to server
     private void SendData(string message)
     {
+        string separator = "|";
         try
         {
+            message = clientData.GetUserName() + separator + message;
             Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + message);
             data = Encoding.Default.GetBytes(message);
 
             switch (protocol)
             {
                 case Protocol.TCP:
-                    socket.Send(data, data.Length, SocketFlags.None);
+                    recv = socket.Send(data, data.Length, SocketFlags.None);
                     break;
                 case Protocol.UDP:
                     recv = socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
@@ -205,6 +210,20 @@ public class Client : MonoBehaviour
         catch (Exception e)
         {
             Debug.Log("[CLIENT] Failed to send message. Error: " + e.ToString());
+        }
+    }
+
+    private void ReceiveData()
+    {
+        try
+        {
+            data = new byte[1024];
+            recv = socket.Receive(data);
+            Debug.Log("[CLIENT] Received: " + Encoding.Default.GetString(data, 0, recv));
+        }
+        catch (Exception e)
+        {
+            Debug.Log("[CLIENT] Failed to receive message. Error: " + e.ToString());
         }
     }
 }

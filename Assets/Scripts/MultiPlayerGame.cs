@@ -647,7 +647,9 @@ public class MultiPlayerGame : MonoBehaviour
     #region Helpers
     private void QuitGame()
     {
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
+#endif
         Application.Quit();
     }
     
