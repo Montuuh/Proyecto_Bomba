@@ -141,13 +141,6 @@ public class Server : MonoBehaviour
             
             Socket clientSocket = socket.Accept();
 
-            if (clientSocketList.Count == 1)
-            {
-
-                int A = 0;
-            }
-
-
             data = new byte[1024];
             recv = clientSocket.Receive(data);
 
