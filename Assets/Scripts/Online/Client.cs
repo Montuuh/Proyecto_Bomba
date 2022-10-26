@@ -15,11 +15,11 @@ public class ClientData
 {
     private BinaryWriter writer;
     private string userName;
+    private uint userID;
     private bool hasSetUsername = false;
 
     public ClientData()
     {
-        
         SetRandomGuest();
     }
 
@@ -37,20 +37,33 @@ public class ClientData
         }
     }
 
+    public uint GetUID()
+    {
+        return userID;
+    }
+
+    public void SetUID(uint _userID)
+    {
+        userID = _userID;
+    }
+
     private void SetRandomGuest()
     {
-        int random = UnityEngine.Random.Range(0, 10000);
+        int random = UnityEngine.Random.Range(0, 100000);
         userName = "Guest" + random.ToString();
+        userID = (uint)random;
     }
-    
+
     public void Serialize()
     {
         Debug.Log("[CLIENT] Serializing...");
+        
     }
 
     public void Deserialize()
     {
         Debug.Log("[CLIENT] Deserializing...");
+        
     }
 }
 
@@ -63,33 +76,27 @@ public class Client : MonoBehaviour
 
     private int serverPort;
     private string serverIP;
-
-    private int recv;
-    private byte[] data = new byte[1024];
-
+    
     private Thread clientThread;
     private Socket socket;
-
-    // Destination EndPoint and IP
     private IPEndPoint serverIPEP;
     private EndPoint serverEP;
 
-    public GameObject chat;
-    List<Message> pendingMessages = new List<Message>();
+    // public GameObject chat;
+    // List<Message> pendingMessages = new List<Message>();
 
     void Start()
     {
-        // Creating the client data
         clientData = new ClientData();
     }
 
     private void Update()
     {
-        if (pendingMessages.Count > 0)
-        {
-            chat.GetComponent<Chat>().pendingMessages.Add(pendingMessages[0]);
-            pendingMessages.Remove(pendingMessages[0]);
-        }
+        //if (pendingMessages.Count > 0)
+        //{
+        //    chat.GetComponent<Chat>().pendingMessages.Add(pendingMessages[0]);
+        //    pendingMessages.Remove(pendingMessages[0]);
+        //}
     }
 
     private void OnDisable()
@@ -99,6 +106,7 @@ public class Client : MonoBehaviour
         if (clientThread != null)
             clientThread.Abort();
     }
+    
     public void ConnectToServer(string ip = null, int port = 0)
     {
         if (ip != null)
@@ -106,46 +114,16 @@ public class Client : MonoBehaviour
         if (port != 0)
             serverPort = port;
 
-        InitializeSocket();
-        InitializeThread();
-    }
+        // Socket initialization
+        if (protocol == Protocol.TCP)
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        else
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
-
-    private void InitializeSocket()
-    {
-        switch (protocol)
-        {
-            case Protocol.TCP:
-                Debug.Log("[CLIENT] Initializing TCP socket...");
-                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                break;
-            case Protocol.UDP:
-                Debug.Log("[CLIENT] Initializing UDP socket...");
-                socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                break;
-            default:
-                break;
-        }
-    }
-    private void InitializeThread()
-    {
-        switch (protocol)
-        {
-            case Protocol.TCP:
-                Debug.Log("[CLIENT] Initializing TCP thread...");
-                clientThread = new Thread(new ThreadStart(ClientThread));
-                clientThread.IsBackground = true;
-                clientThread.Start();
-                break;
-            case Protocol.UDP:
-                Debug.Log("[CLIENT] Initializing UDP thread...");
-                clientThread = new Thread(ClientThread);
-                clientThread.IsBackground = true;
-                clientThread.Start();
-                break;
-            default:
-                break;
-        }
+        // Thread initialization
+        clientThread = new Thread(ClientThread);
+        clientThread.IsBackground = true;
+        clientThread.Start();
     }
 
     private void ClientThread()
@@ -154,96 +132,63 @@ public class Client : MonoBehaviour
         Debug.Log("[CLIENT] Trying to connect to server --> " + serverIP + ":" + serverPort);
         IPAddress ipAddress = IPAddress.Parse(serverIP);
         serverIPEP = new IPEndPoint(ipAddress, serverPort);
+        serverEP = (EndPoint)serverIPEP;
 
-        switch (protocol)
+        if (protocol == Protocol.TCP)
         {
-            case Protocol.TCP:
-                TCPThread();
-                break;
-            case Protocol.UDP:
-                UDPThread();
-                break;
-            default:
-                break;
-        }
-    }
+            socket.Connect(serverIPEP);
 
-    private void UDPThread()
-    {
-        SendData(" Hello! I have joined the server");
-
-        ReceiveData();
-    }
-
-    private void TCPThread()
-    {
-        socket.Connect(serverIPEP);
-
-        SendData(" Hello! I have joined the server");
-
-        ReceiveData();
-    }
-
-    // SendData to server
-    public void SendData(string message)
-    {
-
-        string separator = ": ";
-        try
-        {
-            message = clientData.GetUserName() + separator + message;
-            Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + message);
-            data = Encoding.Default.GetBytes(message);
-
-            switch (protocol)
+            if (socket.Connected)
             {
-                case Protocol.TCP:
-                    data = Encoding.ASCII.GetBytes(message);
-                    recv = socket.Send(data, data.Length, SocketFlags.None);
-                    break;
-                case Protocol.UDP:
-                    serverEP = (EndPoint)serverIPEP;
-                    recv = socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
-                    break;
-                default:
-                    break;
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.Log("[CLIENT] Failed to send message. Error: " + e.ToString());
-        }
-    }
+                Debug.Log("[CLIENT] Connected to server --> " + serverIP + ":" + serverPort);
+                // Send welcome message
+                SendString("Username: " + clientData.GetUserName() + " | UID: " + clientData.GetUID() + " | Connected to server");
 
-    private void ReceiveData()
-    {
-        while(true)
-        {
-            try
-            {
-                data = new byte[1024];
-                recv = socket.Receive(data);
-
-                
-                Message messa = new Message();
-                switch(protocol)
+                while (true)
                 {
-                    case Protocol.TCP:
-                        messa.text = Encoding.ASCII.GetString(data, 0, recv);
+                    // Receive data from server
+                    byte[] data = new byte[1024];
+                    int receivedDataLength = 0;
+                    receivedDataLength = socket.Receive(data);
+                    if (receivedDataLength == 0)
                         break;
-                    case Protocol.UDP:
-                        messa.text = Encoding.Default.GetString(data, 0, recv);
-                        break;
+                    Debug.Log("[CLIENT] Received: " + Encoding.ASCII.GetString(data, 0, receivedDataLength));
                 }
-                pendingMessages.Add(messa);
-                
+            }
+        }
+        else
+        {
+            // Send username to server
+            SendString("Username: " + clientData.GetUserName() + " | UID: " + clientData.GetUID() + " | Connected to server");
 
-                Debug.Log("[CLIENT] Received: " + Encoding.Default.GetString(data, 0, recv));
-            }
-            catch (Exception e)
+            while (true)
             {
-                Debug.Log("[CLIENT] Failed to receive message. Error: " + e.ToString());
+                // Receive data from server
+                byte[] data = new byte[1024];
+                int receivedDataLength = 0;
+                receivedDataLength = socket.ReceiveFrom(data, ref serverEP);
+                if (receivedDataLength == 0)
+                    break;
+                Debug.Log("[CLIENT] Received: " + Encoding.ASCII.GetString(data, 0, receivedDataLength));
             }
+        }
+    }
+
+    public void SendString(string message)
+    {
+        byte[] data = new byte[1024];
+        data = Encoding.ASCII.GetBytes(message);
+
+        if (protocol == Protocol.TCP)
+        {
+            Debug.Log("[CLIENT] Sending to server: " + socket.RemoteEndPoint.ToString() + " Message: " + message);
+            data = Encoding.ASCII.GetBytes(message);
+            socket.Send(data, data.Length, SocketFlags.None);
+        }
+        else
+        {
+            Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + message);
+            socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
     }
 }

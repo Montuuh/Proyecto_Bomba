@@ -1,12 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using UnityEngine;
-using System.Collections.Concurrent;
 
 public class Server : MonoBehaviour
 {
@@ -15,9 +13,6 @@ public class Server : MonoBehaviour
 
     public int serverPort;
     public string serverIP;
-    
-    private int recv;
-    private byte[] data = new byte[1024];
 
     private Thread serverThread;
     private Thread serverAcceptThread;
@@ -55,68 +50,35 @@ public class Server : MonoBehaviour
         if (port != 0)
             serverPort = port;
 
-        InitializeSocket();
-        InitializeThread();
-    }
-
-    private void InitializeSocket()
-    {
-        switch (protocol)
+        // Initialize socket
+        if (protocol == Protocol.TCP)
         {
-            case Protocol.TCP:
-                Debug.Log("[SERVER] Initializing TCP socket...");
-                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                break;
-            case Protocol.UDP:
-                Debug.Log("[SERVER] Initializing UDP socket...");
-                socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                break;
-            default:
-                break;
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
-
-        // ServerIP EndPoint
+        else
+        {
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+        }
+        
         serverIPEP = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
-
-        // Client IP EndPoint
         clientIPEP = new IPEndPoint(IPAddress.Any, 0);
         clientEP = (EndPoint)clientIPEP;
+        socket.Bind(serverIPEP);
 
-        // Creating Socket and binding it to the address
-        try
-        {
-            socket.Bind(serverIPEP);
-            Debug.Log("[SERVER] Socket bound to " + serverIPEP.ToString());
-        }
-        catch (Exception e)
-        {
-            Debug.Log("[ERROR SERVER] Failed to bind socket: " + e.Message);
-        }
-    }
+        serverThread = new Thread(ServerThread);
+        serverThread.IsBackground = true;
+        serverThread.Start();
 
-    private void InitializeThread()
-    {
-        Debug.Log("[SERVER] Initializing thread...");
-        switch (protocol)
+        if (protocol == Protocol.TCP)
         {
-            case Protocol.TCP:
-                serverThread = new Thread(ServerThread);
-                serverThread.IsBackground = true;
-                serverThread.Start();
-
-                //serverAcceptThread = new Thread(ServerThreadAccept);
-                //serverAcceptThread.IsBackground = true;
-                //serverAcceptThread.Start();
-                break;
-            case Protocol.UDP:
-                serverThread = new Thread(ServerThread);
-                serverThread.IsBackground = true;
-                serverThread.Start();
-                break;
-            default:
-                break;
+            //serverAcceptThread = new Thread(ServerAcceptThread);
+            //serverAcceptThread.IsBackground = true;
+            //serverAcceptThread.Start();
         }
     }
+
+    // NOT REFORMATED FROM HERE
+    // ------------------------------------------------------------------------------------------
 
     private void ServerThread()
     {
@@ -138,11 +100,10 @@ public class Server : MonoBehaviour
         socket.Listen(10);
         while (clientSocketList.Count <= 10)
         {
-            
             Socket clientSocket = socket.Accept();
 
-            data = new byte[1024];
-            recv = clientSocket.Receive(data);
+            byte[] data = new byte[1024];
+            int receivedDataLength = clientSocket.Receive(data);
 
             clientSocketList.Add(clientSocket);
         }
@@ -152,7 +113,7 @@ public class Server : MonoBehaviour
     {
         while(true)
         {
-            data = new byte[1024];
+            byte[] data = new byte[1024];
             recv = socket.ReceiveFrom(data, ref clientEP);
             
             if (recv > 0)
