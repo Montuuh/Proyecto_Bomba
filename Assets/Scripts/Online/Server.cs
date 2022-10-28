@@ -13,18 +13,22 @@ public class Server : MonoBehaviour
 
     public int serverPort;
     public string serverIP;
+    private IPEndPoint serverIPEP;
 
-    private Thread serverThread;
+    private Socket serverSocket;
+
+    // Thread
     private Thread serverAcceptThread;
-    private Socket socket;
-    private List<Socket> clientSocketList;
+    private Thread serverThread;
+    private Thread clientThread;
 
     // Destination EndPoint and IP
     private IPEndPoint clientIPEP;
     private EndPoint clientEP;
+    
     private List<EndPoint> clientEPList;
+    private List<Socket> clientSocketList;
 
-    private IPEndPoint serverIPEP;
 
     void Start()
     {
@@ -33,163 +37,115 @@ public class Server : MonoBehaviour
 
     private void OnDisable()
     {
-        //Debug.Log("[SERVER] Closing TCP socket & thread...");
-        if (socket != null)
-            socket.Close();
+        if (serverSocket != null)
+            serverSocket.Close();
+        if (serverAcceptThread != null)
+            serverAcceptThread.Abort();
         if (serverThread != null)
             serverThread.Abort();
+        if (clientThread != null)
+            clientThread.Abort();
     }
 
     private void StartServer(string ip = null, int port = 0)
     {
-        clientSocketList = new List<Socket>();
-        clientEPList = new List<EndPoint>();
-
         if (ip != null)
             serverIP = ip;
         if (port != 0)
             serverPort = port;
+        
+        clientSocketList = new List<Socket>();
+        clientEPList = new List<EndPoint>();
 
-        // Initialize socket
+        // Initialize serverSocket
         if (protocol == Protocol.TCP)
         {
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
         else
         {
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         }
-        
-        serverIPEP = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+
+        // Accept any client IP
         clientIPEP = new IPEndPoint(IPAddress.Any, 0);
         clientEP = (EndPoint)clientIPEP;
-        socket.Bind(serverIPEP);
-
-        serverThread = new Thread(ServerThread);
-        serverThread.IsBackground = true;
-        serverThread.Start();
+        
+        // Server start
+        serverIPEP = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+        serverSocket.Bind(serverIPEP);
+        Debug.Log("[SERVER] Server started on " + serverIP + ":" + serverPort);
 
         if (protocol == Protocol.TCP)
         {
-            //serverAcceptThread = new Thread(ServerAcceptThread);
-            //serverAcceptThread.IsBackground = true;
-            //serverAcceptThread.Start();
+            serverSocket.Listen(10);
+            serverAcceptThread = new Thread(new ThreadStart(ServerAcceptThread));
+            serverAcceptThread.IsBackground = true;
+            serverAcceptThread.Start();
         }
-    }
-
-    // NOT REFORMATED FROM HERE
-    // ------------------------------------------------------------------------------------------
-
-    private void ServerThread()
-    {
-        switch (protocol)
+        else
         {
-            case Protocol.TCP:
-                TCPThread();
-                break;
-            case Protocol.UDP:
-                UDPThread();
-                break;
-            default:
-                break;
+            serverThread = new Thread(new ThreadStart(UDPThread));
+            serverThread.IsBackground = true;
+            serverThread.Start();
         }
     }
 
-    private void ServerThreadAccept()
+    private void ServerAcceptThread()
     {
-        socket.Listen(10);
-        while (clientSocketList.Count <= 10)
-        {
-            Socket clientSocket = socket.Accept();
-
-            byte[] data = new byte[1024];
-            int receivedDataLength = clientSocket.Receive(data);
-
-            clientSocketList.Add(clientSocket);
-        }
-    }
-
-    void UDPThread()
-    {
-        while(true)
-        {
-            byte[] data = new byte[1024];
-            recv = socket.ReceiveFrom(data, ref clientEP);
-            
-            if (recv > 0)
-            {
-                if(!clientEPList.Contains(clientEP))
-                    clientEPList.Add(clientEP);
-
-                string message = Encoding.Default.GetString(data, 0, recv);
-
-                foreach (EndPoint endPoint in clientEPList)
-                {
-
-                    //Debug.Log("[SERVER] Received message from " + endPoint.ToString() + ", named: " + message[0] + ": " + message[1]);
-                    SendData(message, socket, endPoint);
-                }
-            }
-        }
-    }
-
-
-    void TCPThread()
-    {
-        socket.Listen(10);
-        Socket clientSocket = socket.Accept();
         while (true)
         {
-           
-            data = new byte[1024];
-            recv = clientSocket.Receive(data);
+            // Accept new connections
+            Socket clientSocket = serverSocket.Accept();
+            clientSocketList.Add(clientSocket);
+            //clientEPList.Add(clientSocket.RemoteEndPoint);
+            Debug.Log("[SERVER] Client connected: " + clientSocket.RemoteEndPoint.ToString());
 
-            if (recv > 0)
-            {
-                string message = Encoding.ASCII.GetString(data, 0, recv);
-
-                Debug.Log("[SERVER] Message received from " + clientSocket.RemoteEndPoint + " = " + message);
-                 
-                    SendData(message, clientSocket);
-            }
-           
+            clientThread = new Thread(ClientThread);
+            clientThread.IsBackground = true;
+            clientThread.Start(clientSocket);
         }
     }
 
-    private void SendData(string message, Socket clientSocket = null, EndPoint endPoint = null)
+    private void ClientThread(object clientSocket)
     {
-        try
+        Socket client = (Socket)clientSocket;
+        while (true)
         {
-            data = Encoding.Default.GetBytes(message);
-            switch (protocol)
-            {
-                case Protocol.TCP:
-                    Debug.Log("[SERVER] Sending message to " + clientSocket.RemoteEndPoint + " = " + message);
-                    data = Encoding.ASCII.GetBytes(message);
-                    clientSocket.Send(data);
-                    break;
-                case Protocol.UDP:
-                    Debug.Log("[SERVER] Sending message to " + clientEP.ToString() + ": " + message);
-                    if (endPoint == null)
-                        socket.SendTo(data, data.Length, SocketFlags.None, clientEP);
-                    else
-                        socket.SendTo(data, data.Length, SocketFlags.None, endPoint);
-                    break;
-                default:
-                    break;
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.Log("[ERROR SERVER] Failed to send data. Error: " + e.Message);
+            // Receive data from client
+            byte[] data = new byte[1024];
+            int recv = client.Receive(data);
+            string stringData = Encoding.ASCII.GetString(data, 0, recv);
+            Debug.Log("[SERVER] Received: " + stringData + " from " + client.RemoteEndPoint.ToString());
+
+            // Send reply
+            string reply = "OK: " + stringData;
+            byte[] replyData = Encoding.ASCII.GetBytes(reply);
+            client.Send(replyData);
         }
     }
 
-    private string[] DecodeString(string message)
+    private void UDPThread()
     {
-        string[] messageParts = message.Split('|');
-        string username = messageParts[0];
-        string rest = messageParts[1];
-        return new string[] { username, rest };
+        while (true)
+        {
+            // Receive data from client
+            byte[] data = new byte[1024];
+            int recv = serverSocket.ReceiveFrom(data, ref clientEP);
+            string stringData = Encoding.ASCII.GetString(data, 0, recv);
+            Debug.Log("[SERVER] Received: " + stringData + " from " + clientEP.ToString());
+
+            // Send reply
+            string reply = "OK: " + stringData;
+            byte[] replyData = Encoding.ASCII.GetBytes(reply);
+            serverSocket.SendTo(replyData, clientEP);
+
+            // Check if endpoint is not in the list
+            if (!clientEPList.Contains(clientEP))
+            {
+                clientEPList.Add(clientEP);
+                Debug.Log("[SERVER] Client connected: " + clientEP.ToString());
+            }
+        }
     }
 }
