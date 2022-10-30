@@ -13,14 +13,18 @@ using Newtonsoft.Json.Bson;
 
 public class ClientData
 {
-    private BinaryWriter writer;
+    private MemoryStream stream;
+    
     private string userName;
     private uint userID;
-    private bool hasSetUsername = false;
+    private List<float> test;
 
     public ClientData()
     {
         SetRandomGuest();
+        test.Add(1.0f);
+        test.Add(2.0f);
+        test.Add(3.0f);
     }
 
     public string GetUserName()
@@ -30,11 +34,7 @@ public class ClientData
     
     public void SetUsername(string _userName)
     {
-        if (!hasSetUsername)
-        {
-            hasSetUsername = true;
-            userName = _userName;
-        }
+        userName = _userName;
     }
 
     public uint GetUID()
@@ -57,13 +57,41 @@ public class ClientData
     public void Serialize()
     {
         Debug.Log("[CLIENT] Serializing...");
+
+        uint uid = GetUID();
+        string username = GetUserName();
+        List<float> test = this.test;
+
+        stream = new MemoryStream();
+        BinaryWriter writer = new BinaryWriter(stream);
+        writer.Write(uid);
+        writer.Write(username);
+        foreach (float f in test)
+        {
+            writer.Write(f);
+        }
         
     }
 
-    public void Deserialize()
+    public ClientData Deserialize()
     {
         Debug.Log("[CLIENT] Deserializing...");
+
+        byte[] bytes = stream.ToArray();
+        stream = new MemoryStream();
+        stream.Write(bytes, 0, bytes.Length);
         
+        BinaryReader reader = new BinaryReader(stream);
+        stream.Seek(0, SeekOrigin.Begin);
+        ClientData clientData = new ClientData();
+        clientData.SetUID(reader.ReadUInt32());
+        clientData.SetUsername(reader.ReadString());
+        foreach (float f in test)
+        {
+            clientData.test.Add(reader.ReadSingle());
+        }
+        
+        return clientData;
     }
 }
 
