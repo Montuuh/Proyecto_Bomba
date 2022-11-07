@@ -10,41 +10,53 @@ using System.Text;
 using System;
 using System.IO;
 using Newtonsoft.Json.Bson;
+using Newtonsoft.Json;
+using System.Runtime.InteropServices.ComTypes;
+
+
+// Serialize static class
+public static class Serialize
+{
+    public static byte[] SerializeClientData(ClientData clientData)
+    {
+        Debug.Log("[CLIENT] Serializing...");
+
+        uint uid = clientData.userID;
+        string username = clientData.userName;
+
+        MemoryStream stream = new MemoryStream();
+        BinaryWriter writer = new BinaryWriter(stream);
+        writer.Write(uid);
+        writer.Write(username);
+
+        return stream.ToArray();
+    }
+
+    public static ClientData DeserializeClientData(byte[] data)
+    {
+        Debug.Log("[CLIENT] Deserializing...");
+
+        MemoryStream stream = new MemoryStream(data);
+        stream.Write(data, 0, data.Length);
+
+        BinaryReader reader = new BinaryReader(stream);
+        stream.Seek(0, SeekOrigin.Begin);
+        ClientData clientData = new ClientData();
+        clientData.userID = reader.ReadUInt32();
+        clientData.userName = reader.ReadString();
+
+        return clientData;
+    }
+}
 
 public class ClientData
 {
-    private MemoryStream stream;
+    public string userName;
+    public uint userID;
     
-    private string userName;
-    private uint userID;
-    private List<float> test;
-
     public ClientData()
     {
         SetRandomGuest();
-        test.Add(1.0f);
-        test.Add(2.0f);
-        test.Add(3.0f);
-    }
-
-    public string GetUserName()
-    {
-        return userName;
-    }
-    
-    public void SetUsername(string _userName)
-    {
-        userName = _userName;
-    }
-
-    public uint GetUID()
-    {
-        return userID;
-    }
-
-    public void SetUID(uint _userID)
-    {
-        userID = _userID;
     }
 
     private void SetRandomGuest()
@@ -52,46 +64,6 @@ public class ClientData
         int random = UnityEngine.Random.Range(0, 100000);
         userName = "Guest" + random.ToString();
         userID = (uint)random;
-    }
-
-    public void Serialize()
-    {
-        Debug.Log("[CLIENT] Serializing...");
-
-        uint uid = GetUID();
-        string username = GetUserName();
-        List<float> test = this.test;
-
-        stream = new MemoryStream();
-        BinaryWriter writer = new BinaryWriter(stream);
-        writer.Write(uid);
-        writer.Write(username);
-        foreach (float f in test)
-        {
-            writer.Write(f);
-        }
-        
-    }
-
-    public ClientData Deserialize()
-    {
-        Debug.Log("[CLIENT] Deserializing...");
-
-        byte[] bytes = stream.ToArray();
-        stream = new MemoryStream();
-        stream.Write(bytes, 0, bytes.Length);
-        
-        BinaryReader reader = new BinaryReader(stream);
-        stream.Seek(0, SeekOrigin.Begin);
-        ClientData clientData = new ClientData();
-        clientData.SetUID(reader.ReadUInt32());
-        clientData.SetUsername(reader.ReadString());
-        foreach (float f in test)
-        {
-            clientData.test.Add(reader.ReadSingle());
-        }
-        
-        return clientData;
     }
 }
 
@@ -110,8 +82,6 @@ public class Client : MonoBehaviour
     private IPEndPoint serverIPEP;
     private EndPoint serverEP;
 
-    // public GameObject chat;
-    // List<Message> pendingMessages = new List<Message>();
 
     void Start()
     {
@@ -120,11 +90,7 @@ public class Client : MonoBehaviour
 
     private void Update()
     {
-        //if (pendingMessages.Count > 0)
-        //{
-        //    chat.GetComponent<Chat>().pendingMessages.Add(pendingMessages[0]);
-        //    pendingMessages.Remove(pendingMessages[0]);
-        //}
+        
     }
 
     private void OnDisable()
@@ -170,7 +136,7 @@ public class Client : MonoBehaviour
             {
                 Debug.Log("[CLIENT] Connected to server --> " + serverIP + ":" + serverPort);
                 // Send welcome message
-                SendString("Username: " + clientData.GetUserName() + " | UID: " + clientData.GetUID() + " | Connected to server");
+                SendString("Username: " + clientData.userName + " | UID: " + clientData.userID + " | Connected to server");
 
                 while (true)
                 {
@@ -187,14 +153,19 @@ public class Client : MonoBehaviour
         else
         {
             // Send username to server
-            SendString("Username: " + clientData.GetUserName() + " | UID: " + clientData.GetUID() + " | Connected to server");
+            // SendString("Username: " + clientData.userName + " | UID: " + clientData.userID + " | Connected to server");
+
+            // Send ClientData to server
+            SendClientData(clientData);
 
             while (true)
             {
                 // Receive data from server
                 byte[] data = new byte[1024];
                 int receivedDataLength = 0;
-                receivedDataLength = socket.ReceiveFrom(data, ref serverEP);
+                // Receive clientData from server
+                receivedDataLength = ReceiveClientData(data);
+                //receivedDataLength = socket.ReceiveFrom(data, ref serverEP);
                 if (receivedDataLength == 0)
                     break;
                 Debug.Log("[CLIENT] Received: " + Encoding.ASCII.GetString(data, 0, receivedDataLength));
@@ -210,7 +181,6 @@ public class Client : MonoBehaviour
         if (protocol == Protocol.TCP)
         {
             Debug.Log("[CLIENT] Sending to server: " + socket.RemoteEndPoint.ToString() + " Message: " + message);
-            data = Encoding.ASCII.GetBytes(message);
             socket.Send(data, data.Length, SocketFlags.None);
         }
         else
@@ -218,5 +188,36 @@ public class Client : MonoBehaviour
             Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + message);
             socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
+    }
+
+    public void SendClientData(ClientData _clientData)
+    {
+        byte[] data = Serialize.SerializeClientData(_clientData);
+        if (protocol == Protocol.TCP)
+        {
+            Debug.Log("[CLIENT] Sending to server: " + socket.RemoteEndPoint.ToString() + " Message: " + data.Length);
+            socket.Send(data, data.Length, SocketFlags.None);
+        }
+        else
+        {
+            Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + data.Length);
+            socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
+        }
+    }
+
+    public int ReceiveClientData(byte[] data)
+    {
+        //byte[] data = new byte[1024];
+        int receivedDataLength = 0;
+        if (protocol == Protocol.TCP)
+            receivedDataLength = socket.Receive(data);
+        else
+            receivedDataLength = socket.ReceiveFrom(data, ref serverEP);
+        if (receivedDataLength == 0)
+            return 0;
+        clientData = Serialize.DeserializeClientData(data);
+        Debug.Log("[CLIENT] Received: " + clientData.userName + " | " + clientData.userID);
+
+        return receivedDataLength;
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -132,12 +133,16 @@ public class Server : MonoBehaviour
             // Receive data from client
             byte[] data = new byte[1024];
             int recv = serverSocket.ReceiveFrom(data, ref clientEP);
-            string stringData = Encoding.ASCII.GetString(data, 0, recv);
-            Debug.Log("[SERVER] Received: " + stringData + " from " + clientEP.ToString());
+            // deserialize data
+            ClientData clientData = Serialize.DeserializeClientData(data);
+
+            //string stringData = Encoding.ASCII.GetString(data, 0, recv);
+            //Debug.Log("[SERVER] Received: " + stringData + " from " + clientEP.ToString());
 
             // Send reply
-            string reply = "OK: " + stringData;
-            byte[] replyData = Encoding.ASCII.GetBytes(reply);
+            //string reply = "OK: " + stringData;
+            //byte[] replyData = Encoding.ASCII.GetBytes(reply);
+            byte[] replyData = Serialize.SerializeClientData(clientData);
             serverSocket.SendTo(replyData, clientEP);
 
             // Check if endpoint is not in the list
@@ -147,5 +152,22 @@ public class Server : MonoBehaviour
                 Debug.Log("[SERVER] Client connected: " + clientEP.ToString());
             }
         }
+    }
+
+    // Deserialize clientData
+    private int DeserializeClientData(byte[] data)
+    {
+        int recv = 0;
+        int pos = 0;
+
+        // Deserialize data, string username, uint uid
+        string username = Encoding.ASCII.GetString(data, pos, 16);
+        pos += 16;
+        recv += 16;
+        uint uid = BitConverter.ToUInt32(data, pos);
+        pos += 4;
+        recv += 4;
+
+        return recv;
     }
 }
