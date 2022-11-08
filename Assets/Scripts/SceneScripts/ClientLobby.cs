@@ -43,12 +43,6 @@ public class ClientLobby : MonoBehaviour
         // Load lobby
     }
 
-    private void ShowUsernameWelcome()
-    {
-        //usernameWelcome.SetActive(true);
-        usernameWelcome.GetComponent<TMPro.TextMeshProUGUI>().text = "Welcome " + client.clientData.GetUserName();
-    }
-
     private void ShowChat()
     {
         chat.SetActive(true);

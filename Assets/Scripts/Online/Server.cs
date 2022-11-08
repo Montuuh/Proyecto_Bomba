@@ -92,6 +92,7 @@ public class Server : MonoBehaviour
         }
     }
 
+    // Not yet adapted to serialization
     private void ServerAcceptThread()
     {
         while (true)
@@ -99,7 +100,6 @@ public class Server : MonoBehaviour
             // Accept new connections
             Socket clientSocket = serverSocket.Accept();
             clientSocketList.Add(clientSocket);
-            //clientEPList.Add(clientSocket.RemoteEndPoint);
             Debug.Log("[SERVER] Client connected: " + clientSocket.RemoteEndPoint.ToString());
 
             clientThread = new Thread(ClientThread);
@@ -108,6 +108,7 @@ public class Server : MonoBehaviour
         }
     }
 
+    // Not yet adapted to serialization
     private void ClientThread(object clientSocket)
     {
         Socket client = (Socket)clientSocket;
@@ -130,44 +131,87 @@ public class Server : MonoBehaviour
     {
         while (true)
         {
-            // Receive data from client
             byte[] data = new byte[1024];
             int recv = serverSocket.ReceiveFrom(data, ref clientEP);
-            // deserialize data
-            ClientData clientData = Serialize.DeserializeClientData(data);
+            
+            Sender sender = Serialize.DeserializeSender(data);
 
-            //string stringData = Encoding.ASCII.GetString(data, 0, recv);
-            //Debug.Log("[SERVER] Received: " + stringData + " from " + clientEP.ToString());
-
-            // Send reply
-            //string reply = "OK: " + stringData;
-            //byte[] replyData = Encoding.ASCII.GetBytes(reply);
-            byte[] replyData = Serialize.SerializeClientData(clientData);
-            serverSocket.SendTo(replyData, clientEP);
-
-            // Check if endpoint is not in the list
             if (!clientEPList.Contains(clientEP))
             {
                 clientEPList.Add(clientEP);
-                Debug.Log("[SERVER] Client connected: " + clientEP.ToString());
+                Debug.Log("[SERVER] Client connected: " + clientEP.ToString() + " with username: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString());
+
+                // Send welcome message to all clients
+                string welcome = sender.clientData.userName + " has joined the server";
+                SendStringToAll(welcome, clientEP);
+            }
+            else
+            {
+                // ToDo: Redirect received client data type sender to all players
+                if (sender.senderType == SenderType.CLIENTDATA)
+                {
+                    Debug.Log("[SERVER] Received client data sender type from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
+                    SendClientDataToAll(sender.clientData, clientEP);
+                }
             }
         }
     }
 
-    // Deserialize clientData
-    private int DeserializeClientData(byte[] data)
+    // Send ClientData struct to all clients except the sender
+    public void SendClientDataToAll(ClientData clientData, EndPoint senderEP)
     {
-        int recv = 0;
-        int pos = 0;
+        Debug.Log("[SERVER] Sending sender type client data: " + clientData.userName + " | " + clientData.userID.ToString() + " to all clients except: " + senderEP.ToString());
+        Sender sender = new Sender(clientData);
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderEP);
+    }
+    public void SendClientDataToAll(ClientData clientData, Socket senderSocket)
+    {
+        Debug.Log("[SERVER] Sending sender type client data: " + clientData.userName + " | " + clientData.userID.ToString() + " to all clients except:" + senderSocket.RemoteEndPoint.ToString());
+        Sender sender = new Sender(clientData);
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderSocket.RemoteEndPoint);
+    }
 
-        // Deserialize data, string username, uint uid
-        string username = Encoding.ASCII.GetString(data, pos, 16);
-        pos += 16;
-        recv += 16;
-        uint uid = BitConverter.ToUInt32(data, pos);
-        pos += 4;
-        recv += 4;
+    // Send string to all clients except the sender
+    public void SendStringToAll(string message, EndPoint senderEP)
+    {
+        Debug.Log("[SERVER] Sending sender type string: " + message + " to all clients except: " + senderEP.ToString());
+        Sender sender = new Sender(message);
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderEP);
+    }
+    public void SendStringToAll(string message, Socket senderSocket)
+    {
+        Debug.Log("[SERVER] Sending sender type string: " + message + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+        Sender sender = new Sender(message);
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderSocket.RemoteEndPoint);
+    }
 
-        return recv;
+    // Send data stream to all clients
+    private void SendToAll(byte[] data, EndPoint except = null)
+    {
+        if (protocol == Protocol.TCP)
+        {
+            // ToDo: Not yet adapted to serializing
+            foreach (Socket clientSocket in clientSocketList)
+            {
+                if (except != null && clientSocket.RemoteEndPoint == except)
+                    continue;
+
+                clientSocket.Send(data);
+            }
+        }
+        else
+        {
+            foreach (EndPoint clientEP in clientEPList)
+            {
+                if (except != null && clientEP == except)
+                    continue;
+
+                serverSocket.SendTo(data, clientEP);
+            }
+        }
     }
 }

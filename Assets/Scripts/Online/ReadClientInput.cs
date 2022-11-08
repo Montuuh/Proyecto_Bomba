@@ -69,7 +69,7 @@ public class ReadClientInput : MonoBehaviour
         if (inputUsername == null || inputUsername == "")
             return;
 
-        client.clientData.SetUsername(inputUsername);
+        client.clientData.userName = inputUsername;
 
         GameObject.Find("ClientLobby").GetComponent<ClientLobby>().OnValidUsername();
     }

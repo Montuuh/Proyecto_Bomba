@@ -1,59 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading;
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using System.Text;
-using System;
 using System.IO;
-using Newtonsoft.Json.Bson;
-using Newtonsoft.Json;
-using System.Runtime.InteropServices.ComTypes;
-
-
-// Serialize static class
-public static class Serialize
-{
-    public static byte[] SerializeClientData(ClientData clientData)
-    {
-        Debug.Log("[CLIENT] Serializing...");
-
-        uint uid = clientData.userID;
-        string username = clientData.userName;
-
-        MemoryStream stream = new MemoryStream();
-        BinaryWriter writer = new BinaryWriter(stream);
-        writer.Write(uid);
-        writer.Write(username);
-
-        return stream.ToArray();
-    }
-
-    public static ClientData DeserializeClientData(byte[] data)
-    {
-        Debug.Log("[CLIENT] Deserializing...");
-
-        MemoryStream stream = new MemoryStream(data);
-        stream.Write(data, 0, data.Length);
-
-        BinaryReader reader = new BinaryReader(stream);
-        stream.Seek(0, SeekOrigin.Begin);
-        ClientData clientData = new ClientData();
-        clientData.userID = reader.ReadUInt32();
-        clientData.userName = reader.ReadString();
-
-        return clientData;
-    }
-}
+using UnityEngine;
+using System.Collections.Generic;
 
 public class ClientData
 {
     public string userName;
     public uint userID;
-    
+    public List<Cell> lastRevealedCells;        
+
     public ClientData()
     {
         SetRandomGuest();
@@ -61,7 +19,7 @@ public class ClientData
 
     private void SetRandomGuest()
     {
-        int random = UnityEngine.Random.Range(0, 100000);
+        int random = Random.Range(0, 100000);
         userName = "Guest" + random.ToString();
         userID = (uint)random;
     }
@@ -130,6 +88,7 @@ public class Client : MonoBehaviour
 
         if (protocol == Protocol.TCP)
         {
+            // ToDo: Not yet adapted to serializing
             socket.Connect(serverIPEP);
 
             if (socket.Connected)
@@ -152,27 +111,29 @@ public class Client : MonoBehaviour
         }
         else
         {
-            // Send username to server
-            // SendString("Username: " + clientData.userName + " | UID: " + clientData.userID + " | Connected to server");
-
-            // Send ClientData to server
+            // First connexion sender
             SendClientData(clientData);
 
             while (true)
             {
-                // Receive data from server
+                // RECEIVE DATA
                 byte[] data = new byte[1024];
-                int receivedDataLength = 0;
-                // Receive clientData from server
-                receivedDataLength = ReceiveClientData(data);
-                //receivedDataLength = socket.ReceiveFrom(data, ref serverEP);
-                if (receivedDataLength == 0)
-                    break;
-                Debug.Log("[CLIENT] Received: " + Encoding.ASCII.GetString(data, 0, receivedDataLength));
+                int recv = socket.ReceiveFrom(data, ref serverEP);
+                Sender sender = Serialize.DeserializeSender(data);
+                if (sender.senderType == SenderType.CLIENTDATA)
+                {
+                    Debug.Log("[CLIENT] Received client data sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
+                }
+                else if (sender.senderType == SenderType.STRING)
+                {
+                    Debug.Log("[CLIENT] Received string sender type from server: " + sender.message);
+                }
+                // !RECEIVE DATA
             }
         }
     }
 
+    // ToDo: Not yet adapted to serializing
     public void SendString(string message)
     {
         byte[] data = new byte[1024];
@@ -192,32 +153,20 @@ public class Client : MonoBehaviour
 
     public void SendClientData(ClientData _clientData)
     {
-        byte[] data = Serialize.SerializeClientData(_clientData);
+        Sender sender = new Sender(_clientData);
+        
+        byte[] data = Serialize.SerializeSender(sender);
+        
         if (protocol == Protocol.TCP)
         {
+            // ToDo: Not yet adapted to serializing
             Debug.Log("[CLIENT] Sending to server: " + socket.RemoteEndPoint.ToString() + " Message: " + data.Length);
             socket.Send(data, data.Length, SocketFlags.None);
         }
         else
         {
-            Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + data.Length);
+            Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType + " || Sender username and UID: " + sender.clientData.userName + " | " + sender.clientData.userID);
             socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
-    }
-
-    public int ReceiveClientData(byte[] data)
-    {
-        //byte[] data = new byte[1024];
-        int receivedDataLength = 0;
-        if (protocol == Protocol.TCP)
-            receivedDataLength = socket.Receive(data);
-        else
-            receivedDataLength = socket.ReceiveFrom(data, ref serverEP);
-        if (receivedDataLength == 0)
-            return 0;
-        clientData = Serialize.DeserializeClientData(data);
-        Debug.Log("[CLIENT] Received: " + clientData.userName + " | " + clientData.userID);
-
-        return receivedDataLength;
     }
 }
