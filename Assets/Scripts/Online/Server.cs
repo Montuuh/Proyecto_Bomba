@@ -26,7 +26,7 @@ public class Server : MonoBehaviour
     // Destination EndPoint and IP
     private IPEndPoint clientIPEP;
     private EndPoint clientEP;
-    
+
     private List<EndPoint> clientEPList;
     private List<Socket> clientSocketList;
 
@@ -54,7 +54,7 @@ public class Server : MonoBehaviour
             serverIP = ip;
         if (port != 0)
             serverPort = port;
-        
+
         clientSocketList = new List<Socket>();
         clientEPList = new List<EndPoint>();
 
@@ -71,7 +71,7 @@ public class Server : MonoBehaviour
         // Accept any client IP
         clientIPEP = new IPEndPoint(IPAddress.Any, 0);
         clientEP = (EndPoint)clientIPEP;
-        
+
         // Server start
         serverIPEP = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
         serverSocket.Bind(serverIPEP);
@@ -92,7 +92,7 @@ public class Server : MonoBehaviour
         }
     }
 
-    // Not yet adapted to serialization
+    // ToDo: Not yet adapted to serialization
     private void ServerAcceptThread()
     {
         while (true)
@@ -108,7 +108,7 @@ public class Server : MonoBehaviour
         }
     }
 
-    // Not yet adapted to serialization
+    // ToDo: Not yet adapted to serialization
     private void ClientThread(object clientSocket)
     {
         Socket client = (Socket)clientSocket;
@@ -133,7 +133,10 @@ public class Server : MonoBehaviour
         {
             byte[] data = new byte[1024];
             int recv = serverSocket.ReceiveFrom(data, ref clientEP);
-            
+
+            if (recv == 0)
+                continue;
+
             Sender sender = Serialize.DeserializeSender(data);
 
             if (!clientEPList.Contains(clientEP))
@@ -143,24 +146,22 @@ public class Server : MonoBehaviour
 
                 // Send welcome message to all clients
                 string welcome = sender.clientData.userName + " has joined the server";
-                SendStringToAll(welcome, clientEP);
+                SendStringToAll(welcome);
             }
             else
             {
-                // ToDo: Redirect received client data type sender to all players
-                if (sender.senderType == SenderType.CLIENTDATA)
-                {
-                    Debug.Log("[SERVER] Received client data sender type from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
-                    SendClientDataToAll(sender.clientData, clientEP);
-                }
+                DecodeSender(sender);              
             }
         }
     }
 
     // Send ClientData struct to all clients except the sender
-    public void SendClientDataToAll(ClientData clientData, EndPoint senderEP)
+    public void SendClientDataToAll(ClientData clientData, EndPoint senderEP = null)
     {
-        Debug.Log("[SERVER] Sending sender type client data: " + clientData.userName + " | " + clientData.userID.ToString() + " to all clients except: " + senderEP.ToString());
+        if (senderEP != null)
+            Debug.Log("[SERVER] Sending sender type client data: " + clientData.userName + " | " + clientData.userID.ToString() + " to all clients except: " + senderEP.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type client data: " + clientData.userName + " | " + clientData.userID.ToString() + " to all clients");
         Sender sender = new Sender(clientData);
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
@@ -174,9 +175,12 @@ public class Server : MonoBehaviour
     }
 
     // Send string to all clients except the sender
-    public void SendStringToAll(string message, EndPoint senderEP)
+    public void SendStringToAll(string message, EndPoint senderEP = null)
     {
-        Debug.Log("[SERVER] Sending sender type string: " + message + " to all clients except: " + senderEP.ToString());
+        if (senderEP != null)
+            Debug.Log("[SERVER] Sending sender type string: " + message + " to all clients except: " + senderEP.ToString());
+        else
+            Debug.Log("[SERVER] Sending string: " + message + " to all clients");
         Sender sender = new Sender(message);
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
@@ -185,6 +189,20 @@ public class Server : MonoBehaviour
     {
         Debug.Log("[SERVER] Sending sender type string: " + message + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         Sender sender = new Sender(message);
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderSocket.RemoteEndPoint);
+    }
+
+    // Send client data string to all clients except the sender
+    public void SendClientStringToAll(Sender sender, EndPoint senderEP)
+    {
+        Debug.Log("[SERVER] Sending sender type client string: " + sender.clientString + " to all clients except: " + senderEP.ToString());
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderEP);
+    }
+    public void SendClientStringToAll(Sender sender, Socket senderSocket)
+    {
+        Debug.Log("[SERVER] Sending sender type client string: " + sender.clientString + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -212,6 +230,21 @@ public class Server : MonoBehaviour
 
                 serverSocket.SendTo(data, clientEP);
             }
+        }
+    }
+
+    // Decode sender data
+    private void DecodeSender(Sender sender)
+    {
+        if (sender.senderType == SenderType.CLIENTDATA)
+        {
+            Debug.Log("[SERVER] Received client data sender type from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
+            SendClientDataToAll(sender.clientData, clientEP);
+        }
+        else if (sender.senderType == SenderType.CLIENTSTRING)
+        {
+            Debug.Log("[SERVER] Received string: " + sender.clientString + " || from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
+            SendClientStringToAll(sender, clientEP);
         }
     }
 }

@@ -29,7 +29,7 @@ public class ReadClientInput : MonoBehaviour
     public void OnSubmitInputIP()
     {
         inputIP = inputFieldIP.text;
-        Debug.Log("Input IP: " + inputIP);
+        // Debug.Log("Input IP: " + inputIP);
 
         IsValidDirection();
     }
@@ -37,7 +37,7 @@ public class ReadClientInput : MonoBehaviour
     public void OnSubmitInputPort()
     {
         inputPort = inputFieldPort.text;
-        Debug.Log("Input Port: " + inputPort);
+        // Debug.Log("Input Port: " + inputPort);
 
         IsValidDirection();
     }
@@ -59,7 +59,7 @@ public class ReadClientInput : MonoBehaviour
     public void OnSubmitInputUsername()
     {
         inputUsername = inputFieldUsername.text;
-        Debug.Log("Input Username: " + inputUsername);
+        // Debug.Log("Input Username: " + inputUsername);
 
         IsValidUsername();
     }

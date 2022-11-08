@@ -16,6 +16,11 @@ public class ClientData
     {
         SetRandomGuest();
     }
+    public ClientData(uint userID, string userName)
+    {
+        this.userName = userName;
+        this.userID = userID;
+    }
 
     private void SetRandomGuest()
     {
@@ -120,14 +125,7 @@ public class Client : MonoBehaviour
                 byte[] data = new byte[1024];
                 int recv = socket.ReceiveFrom(data, ref serverEP);
                 Sender sender = Serialize.DeserializeSender(data);
-                if (sender.senderType == SenderType.CLIENTDATA)
-                {
-                    Debug.Log("[CLIENT] Received client data sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
-                }
-                else if (sender.senderType == SenderType.STRING)
-                {
-                    Debug.Log("[CLIENT] Received string sender type from server: " + sender.message);
-                }
+                DecodeSender(sender);
                 // !RECEIVE DATA
             }
         }
@@ -167,6 +165,22 @@ public class Client : MonoBehaviour
         {
             Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType + " || Sender username and UID: " + sender.clientData.userName + " | " + sender.clientData.userID);
             socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
+        }
+    }
+
+    private void DecodeSender(Sender sender)
+    {
+        if (sender.senderType == SenderType.STRING)
+        {
+            Debug.Log("[CLIENT] Received string sender type from server: " + sender.message);
+        }
+        else if (sender.senderType == SenderType.CLIENTDATA)
+        {
+            Debug.Log("[CLIENT] Received client data sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
+        }
+        else if (sender.senderType == SenderType.CLIENTSTRING)
+        {
+            Debug.Log("[CLIENT] Received client string sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " | " + sender.clientString);
         }
     }
 }
