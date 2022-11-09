@@ -11,7 +11,6 @@ public class ClientData
     public string userName;
     public uint userID;
     public List<Cell> lastRevealedCells;        
-
     public ClientData()
     {
         SetRandomGuest();
@@ -44,20 +43,22 @@ public class Client : MonoBehaviour
     private Socket socket;
     private IPEndPoint serverIPEP;
     private EndPoint serverEP;
+    private Chat chat;
 
 
     void Start()
     {
         clientData = new ClientData();
+        chat = GameObject.Find("Chat").GetComponent<Chat>();
     }
 
     private void Update()
     {
         // if pressed space, send a clientcell sender to server
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            SendClientCell(clientData, 10, 10);
-        }
+        //if (Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    SendClientCell(clientData, 10, 10);
+        //}
     }
 
     private void OnDisable()
@@ -206,6 +207,7 @@ public class Client : MonoBehaviour
         else if (sender.senderType == SenderType.CLIENTSTRING)
         {
             Debug.Log("[CLIENT] Received CLIENTSTRING sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.clientString);
+            if (chat != null) chat.SetPendingMessage(sender.clientData, sender.clientString);
         }
         else if (sender.senderType == SenderType.CLIENTCELL)
         {

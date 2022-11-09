@@ -15,24 +15,37 @@ public class Chat : MonoBehaviour
 {
     List<Message> messages = new List<Message>();
     public List<Message> pendingMessages = new List<Message>();
+    public List<ClientData> pendingClients = new List<ClientData>();
     public int maxMessages = 25;
     public GameObject chatPanel, textObject;
- 
+    Transform chatPosition;
+
     private void Update()
     {
-        //if (!gameObject.activeSelf)
-        //{
-        //    pendingMessages.Clear();
-        //}
+        if (!gameObject.activeSelf)
+        {
+            pendingMessages.Clear();
+        }
 
-        //if (pendingMessages.Count > 0)
-        //{
-        //    SendMessageToChat(clientDatapendingMessages[0].text);
-        //    pendingMessages.Remove(pendingMessages[0]);
-        //}
+        if (pendingMessages.Count > 0)
+        {
+            SendMessageToChat(pendingClients[0], pendingMessages[0].text);
+            pendingMessages.Remove(pendingMessages[0]);
+            pendingClients.Remove(pendingClients[0]);
+        }
     }
 
-    public void SendMessageToChat(Client client, string text)
+    public void SetPendingMessage(ClientData clientData, string text)
+    {
+        Message newMessage = new Message();
+
+        newMessage.text = text;
+
+        pendingMessages.Add(newMessage);
+        pendingClients.Add(clientData);
+    }
+
+    public void SendMessageToChat(ClientData clientData, string text)
     {
         if (messages.Count >= maxMessages)
         {
@@ -42,7 +55,7 @@ public class Chat : MonoBehaviour
 
         Message newMessage = new Message();
 
-        text = client.clientData.userName + ": " + text;
+        text = clientData.userName + ": " + text;
 
         newMessage.text = text;
         GameObject newText = Instantiate(textObject, chatPanel.transform);
@@ -51,8 +64,5 @@ public class Chat : MonoBehaviour
         newMessage.textObject.text = newMessage.text;
 
         messages.Add(newMessage);
-
-        client.SendClientString(client.clientData, text);
-
     }
 }
