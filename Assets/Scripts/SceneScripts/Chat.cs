@@ -17,22 +17,22 @@ public class Chat : MonoBehaviour
     public List<Message> pendingMessages = new List<Message>();
     public int maxMessages = 25;
     public GameObject chatPanel, textObject;
-    
+ 
     private void Update()
     {
-        if (!gameObject.activeSelf)
-        {
-            pendingMessages.Clear();
-        }
+        //if (!gameObject.activeSelf)
+        //{
+        //    pendingMessages.Clear();
+        //}
 
-        if (pendingMessages.Count > 0)
-        {
-            SendMessageToChat(pendingMessages[0].text);
-            pendingMessages.Remove(pendingMessages[0]);
-        }
+        //if (pendingMessages.Count > 0)
+        //{
+        //    SendMessageToChat(clientDatapendingMessages[0].text);
+        //    pendingMessages.Remove(pendingMessages[0]);
+        //}
     }
 
-    public void SendMessageToChat(string text)
+    public void SendMessageToChat(Client client, string text)
     {
         if (messages.Count >= maxMessages)
         {
@@ -42,6 +42,8 @@ public class Chat : MonoBehaviour
 
         Message newMessage = new Message();
 
+        text = client.clientData.userName + ": " + text;
+
         newMessage.text = text;
         GameObject newText = Instantiate(textObject, chatPanel.transform);
 
@@ -49,5 +51,8 @@ public class Chat : MonoBehaviour
         newMessage.textObject.text = newMessage.text;
 
         messages.Add(newMessage);
+
+        client.SendClientString(client.clientData, text);
+
     }
 }

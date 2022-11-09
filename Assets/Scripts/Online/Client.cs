@@ -104,7 +104,7 @@ public class Client : MonoBehaviour
             {
                 Debug.Log("[CLIENT] Connected to server --> " + serverIP + ":" + serverPort);
                 // Send welcome message
-                SendString("Username: " + clientData.userName + " | UID: " + clientData.userID + " | Connected to server");
+                SendClientString(clientData, "Username: " + clientData.userName + " | UID: " + clientData.userID + " | Connected to server");
 
                 while (true)
                 {
@@ -136,19 +136,21 @@ public class Client : MonoBehaviour
     }
 
     // ToDo: Not yet adapted to serializing
-    public void SendString(string message)
+    public void SendClientString(ClientData _clientData, string message)
     {
-        byte[] data = new byte[1024];
-        data = Encoding.ASCII.GetBytes(message);
+        Sender sender = new Sender(_clientData, message);
+
+        byte[] data = Serialize.SerializeSender(sender);
 
         if (protocol == Protocol.TCP)
         {
+            // ToDo: Not yet adapted to serializing
             Debug.Log("[CLIENT] Sending to server: " + socket.RemoteEndPoint.ToString() + " Message: " + message);
             socket.Send(data, data.Length, SocketFlags.None);
         }
         else
         {
-            Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + message);
+            Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + sender.clientString);
             socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
     }

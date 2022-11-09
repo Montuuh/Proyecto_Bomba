@@ -20,10 +20,13 @@ public class ReadClientInput : MonoBehaviour
 
     private Client client;
 
+    private Chat chat;
+
     // Start is called before the first frame update
     void Start()
     {
         client = GameObject.Find("ClientManager").GetComponent<Client>();
+        chat = GameObject.Find("Chat").GetComponent<Chat>();
     }
 
     public void OnSubmitInputIP()
@@ -77,8 +80,9 @@ public class ReadClientInput : MonoBehaviour
     public void OnSubmitInputChat()
     {
         inputChat = inputFieldChat.text;
-        
-        //client.SendData(inputChat);
+
+        chat.SendMessageToChat(client, inputChat);
+
         inputFieldChat.text = "";
     }
 }
