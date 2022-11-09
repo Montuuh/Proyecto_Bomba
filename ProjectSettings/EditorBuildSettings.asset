@@ -20,4 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SinglePlayerLobby.unity
     guid: d8ab99ba354426747b59405b4a20b685
+  - enabled: 1
+    path: Assets/Scenes/Jovani.unity
+    guid: 6b93e4b126ad0784f9540f04165d39ec
   m_configObjects: {}
