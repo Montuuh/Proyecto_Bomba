@@ -194,15 +194,35 @@ public class Server : MonoBehaviour
     }
 
     // Send client data string to all clients except the sender
-    public void SendClientStringToAll(Sender sender, EndPoint senderEP)
+    public void SendClientStringToAll(Sender sender, EndPoint senderEP = null)
     {
-        Debug.Log("[SERVER] Sending sender type client string: " + sender.clientString + " to all clients except: " + senderEP.ToString());
+        if (senderEP != null)
+            Debug.Log("[SERVER] Sending sender type client string: " + sender.clientString + " to all clients except: " + senderEP.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type client string: " + sender.clientString + " to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
     }
     public void SendClientStringToAll(Sender sender, Socket senderSocket)
     {
         Debug.Log("[SERVER] Sending sender type client string: " + sender.clientString + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderSocket.RemoteEndPoint);
+    }
+
+    // Send client data and cell position to all clients except the sender
+    public void SendClientCellToAll(Sender sender, EndPoint senderEP = null)
+    {
+        if (senderEP != null)
+            Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients except: " + senderEP.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients");
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderEP);
+    }
+    public void SendClientCellToAll(Sender sender, Socket senderSocket)
+    {
+        Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -245,6 +265,11 @@ public class Server : MonoBehaviour
         {
             Debug.Log("[SERVER] Received string: " + sender.clientString + " || from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
             SendClientStringToAll(sender, clientEP);
+        }
+        else if (sender.senderType == SenderType.CLIENTCELL)
+        {
+            Debug.Log("[SERVER] Received cell position: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " || from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
+            SendClientCellToAll(sender, clientEP);
         }
     }
 }

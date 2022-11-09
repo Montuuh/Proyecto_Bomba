@@ -6,7 +6,8 @@ public enum SenderType
     NONE,
     STRING, // This will serve as a message from server
     CLIENTDATA, // For the moment clientdata, but in the future it will be like CELL, EMOJI... that will also include client data
-    CLIENTSTRING
+    CLIENTSTRING,
+    CLIENTCELL
 }
 
 public class Sender
@@ -15,12 +16,17 @@ public class Sender
     public string message;
     public SenderType senderType;
     public string clientString;
+    public int cellPosX;
+    public int cellPosY;
 
     public Sender()
     {
         clientData = new ClientData();
         message = "";
         senderType = SenderType.NONE;
+        clientString = "";
+        cellPosX = 0;
+        cellPosY = 0;
     }
     public Sender(ClientData clientData)
     {
@@ -37,6 +43,13 @@ public class Sender
         this.clientData = clientData;
         this.clientString = clientString;
         senderType = SenderType.CLIENTSTRING;
+    }
+    public Sender(ClientData clientData, int cellPosX, int cellPosY)
+    {
+        this.clientData = clientData;
+        this.cellPosX = cellPosX;
+        this.cellPosY = cellPosY;
+        senderType = SenderType.CLIENTCELL;
     }
 }
 
@@ -66,6 +79,14 @@ public static class Serialize
             writer.Write(sender.clientData.userID); // 2 -> uint
             writer.Write(sender.clientData.userName); // 3 -> string
             writer.Write(sender.clientString); // 4 -> string
+        }
+        else if (sender.senderType == SenderType.CLIENTCELL)
+        {
+            writer.Write((int)sender.senderType); // 1 -> int
+            writer.Write(sender.clientData.userID); // 2 -> uint
+            writer.Write(sender.clientData.userName); // 3 -> string
+            writer.Write(sender.cellPosX); // 4 -> int
+            writer.Write(sender.cellPosY); // 5 -> int
         }
         else
         {
@@ -104,6 +125,15 @@ public static class Serialize
             string username = reader.ReadString(); // 3 -> string
             string clientString = reader.ReadString(); // 4 -> string
             Sender sender = new Sender(new ClientData(uid, username), clientString);
+            return sender;
+        }
+        else if (type == SenderType.CLIENTCELL)
+        {
+            uint uid = reader.ReadUInt32(); // 2 -> uint
+            string username = reader.ReadString(); // 3 -> string
+            int x = reader.ReadInt32(); // 4 -> int
+            int y = reader.ReadInt32(); // 5 -> int
+            Sender sender = new Sender(new ClientData(uid, username), x, y);
             return sender;
         }
         else
