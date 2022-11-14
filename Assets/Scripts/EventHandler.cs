@@ -6,11 +6,6 @@ public class EventHandler : MonoBehaviour
 {
     public Client client;
 
-    void Start()
-    {
-        client = GameObject.Find("ClientManager").GetComponent<Client>();
-    }
-
     public void SendRevealCell(int x, int y)
     {
         Debug.Log("[EVENT] SendRevealCell event received, SendRevealCell: " + x + ", " + y + " from " + client.clientData.userName);

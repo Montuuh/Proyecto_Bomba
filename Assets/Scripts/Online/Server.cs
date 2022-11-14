@@ -33,7 +33,7 @@ public class Server : MonoBehaviour
 
     void Start()
     {
-        StartServer();
+        
     }
 
     private void OnDisable()
@@ -48,12 +48,16 @@ public class Server : MonoBehaviour
             clientThread.Abort();
     }
 
-    private void StartServer(string ip = null, int port = 0)
+    public void StartServer(string ip = null, int port = 0, bool isTcp = false)
     {
         if (ip != null)
             serverIP = ip;
         if (port != 0)
             serverPort = port;
+        if (isTcp)
+            protocol = Protocol.TCP;
+        else
+            protocol = Protocol.UDP;
 
         clientSocketList = new List<Socket>();
         clientEPList = new List<EndPoint>();
@@ -155,7 +159,6 @@ public class Server : MonoBehaviour
         }
     }
 
-    // Send ClientData struct to all clients except the sender
     public void SendClientDataToAll(ClientData clientData, EndPoint senderEP = null)
     {
         if (senderEP != null)
@@ -168,7 +171,10 @@ public class Server : MonoBehaviour
     }
     public void SendClientDataToAll(ClientData clientData, Socket senderSocket)
     {
-        Debug.Log("[SERVER] Sending sender type client data: " + clientData.userName + " | " + clientData.userID.ToString() + " to all clients except:" + senderSocket.RemoteEndPoint.ToString());
+        if (senderSocket != null)
+            Debug.Log("[SERVER] Sending sender type client data: " + clientData.userName + " | " + clientData.userID.ToString() + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type client data: " + clientData.userName + " | " + clientData.userID.ToString() + " to all clients");
         Sender sender = new Sender(clientData);
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
@@ -187,7 +193,10 @@ public class Server : MonoBehaviour
     }
     public void SendStringToAll(string message, Socket senderSocket)
     {
-        Debug.Log("[SERVER] Sending sender type string: " + message + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+        if (senderSocket != null)
+            Debug.Log("[SERVER] Sending sender type string: " + message + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+        else
+            Debug.Log("[SERVER] Sending string: " + message + " to all clients");
         Sender sender = new Sender(message);
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
@@ -205,7 +214,10 @@ public class Server : MonoBehaviour
     }
     public void SendClientStringToAll(Sender sender, Socket senderSocket)
     {
-        Debug.Log("[SERVER] Sending sender type client string: " + sender.clientString + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+        if (senderSocket != null)
+            Debug.Log("[SERVER] Sending sender type client string: " + sender.clientString + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type client string: " + sender.clientString + " to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -222,7 +234,10 @@ public class Server : MonoBehaviour
     }
     public void SendClientCellToAll(Sender sender, Socket senderSocket)
     {
-        Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+        if (senderSocket != null)
+            Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -235,7 +250,7 @@ public class Server : MonoBehaviour
             // ToDo: Not yet adapted to serializing
             foreach (Socket clientSocket in clientSocketList)
             {
-                if (except != null && clientSocket.RemoteEndPoint == except)
+                if (except != null && clientSocket.RemoteEndPoint.ToString() == except.ToString())
                     continue;
 
                 clientSocket.Send(data);
@@ -245,7 +260,7 @@ public class Server : MonoBehaviour
         {
             foreach (EndPoint clientEP in clientEPList)
             {
-                if (except != null && clientEP == except)
+                if (except != null && clientEP.ToString() == except.ToString())
                     continue;
 
                 serverSocket.SendTo(data, clientEP);
@@ -259,17 +274,17 @@ public class Server : MonoBehaviour
         if (sender.senderType == SenderType.CLIENTDATA)
         {
             Debug.Log("[SERVER] Received client data sender type from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
-            SendClientDataToAll(sender.clientData, clientEP);
+            SendClientDataToAll(sender.clientData);
         }
         else if (sender.senderType == SenderType.CLIENTSTRING)
         {
             Debug.Log("[SERVER] Received string: " + sender.clientString + " || from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
-            SendClientStringToAll(sender, clientEP);
+            SendClientStringToAll(sender);
         }
         else if (sender.senderType == SenderType.CLIENTCELL)
         {
             Debug.Log("[SERVER] Received cell position: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " || from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
-            SendClientCellToAll(sender, clientEP);
+            SendClientCellToAll(sender);
         }
     }
 }

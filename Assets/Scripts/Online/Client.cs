@@ -43,22 +43,22 @@ public class Client : MonoBehaviour
     private Socket socket;
     private IPEndPoint serverIPEP;
     private EndPoint serverEP;
-    private Chat chat;
+    
+    public Chat chat;
 
 
     void Start()
     {
         clientData = new ClientData();
-        chat = GameObject.Find("Chat").GetComponent<Chat>();
     }
 
     private void Update()
     {
         // if pressed space, send a clientcell sender to server
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            SendClientCell(clientData, 10, 10);
-        }
+        //if (Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    SendClientCell(clientData, 10, 10);
+        //}
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             SceneManager.LoadScene("MultiplayerGame");
@@ -140,7 +140,6 @@ public class Client : MonoBehaviour
         }
     }
 
-    // ToDo: Not yet adapted to serializing
     public void SendClientString(ClientData _clientData, string message)
     {
         Sender sender = new Sender(_clientData, message);
