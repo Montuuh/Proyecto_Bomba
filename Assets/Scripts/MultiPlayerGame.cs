@@ -33,6 +33,8 @@ public class MultiPlayerGame : MonoBehaviour
     private Cell[,] cells; // 2D array of current cells
     private Cell lastRevealedCell; // Last revealed cell
     private SinglePlayerGameUI singlePlayerGameUI; // SinglePlayerGameUI object
+
+    private EventHandler eventHandler;
     #endregion Variables
 
     #region Unity Methods
@@ -57,6 +59,8 @@ public class MultiPlayerGame : MonoBehaviour
         // StartGame();
         difficulty = SceneManager.multiDifficulty;
         StartGame(difficulty);
+
+        eventHandler = GameObject.Find("ClientManager").GetComponent<EventHandler>();
     }
 
     private void Update()
@@ -135,7 +139,7 @@ public class MultiPlayerGame : MonoBehaviour
         if (Input.GetMouseButtonDown(1))
         {
             // Don't let flags to be placed at the start of the game
-                Flag();
+            Flag();
         }
     }
 
@@ -236,6 +240,8 @@ public class MultiPlayerGame : MonoBehaviour
             Cell cell = cells[x, y];
             if (cell.isFlagged) return;
 
+            eventHandler.SendRevealCell(x, y);
+
             // If cell is an empty cell, reveal numbers and empty cells
             if (cell.cellType == Cell.CellType.Empty)
             {
@@ -271,8 +277,6 @@ public class MultiPlayerGame : MonoBehaviour
             }
 
             ReloadBoard();
-
-            // Future: Event has revealed cell X
         }
     }
 
@@ -285,7 +289,8 @@ public class MultiPlayerGame : MonoBehaviour
         lastRevealedCell = cell;
         cell.isRevealed = true;
         cells[cell.position.x, cell.position.y] = cell;
-        // Future: Event has revealed cell X
+        
+        eventHandler.SendRevealCell(cell.position.x, cell.position.y);
 
         if (cell.cellType == Cell.CellType.Empty)
         {
@@ -356,7 +361,10 @@ public class MultiPlayerGame : MonoBehaviour
             for (int i = 0; i < nearCells.Count; i++)
             {
                 Cell cellI = nearCells[i];
-                switch(cellI.cellType)
+                
+                eventHandler.SendRevealCell(cellI.position.x, cellI.position.y);
+                
+                switch (cellI.cellType)
                 {
                     case Cell.CellType.Empty:
                         if (!willDie && !cellI.isRevealed)

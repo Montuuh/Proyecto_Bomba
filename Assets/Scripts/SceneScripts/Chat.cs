@@ -55,9 +55,14 @@ public class Chat : MonoBehaviour
 
         Message newMessage = new Message();
 
-        text = clientData.userName + ": " + text;
-
-        newMessage.text = text;
+        if (clientData == null)
+        {
+            newMessage.text = "[SERVER]:" + text;
+        }
+        else
+        {
+            newMessage.text = clientData.userName + ": " + text;
+        }
         GameObject newText = Instantiate(textObject, chatPanel.transform);
 
         newMessage.textObject = newText.GetComponent<TMP_Text>();

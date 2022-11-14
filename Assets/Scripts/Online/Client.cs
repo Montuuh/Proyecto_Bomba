@@ -55,10 +55,14 @@ public class Client : MonoBehaviour
     private void Update()
     {
         // if pressed space, send a clientcell sender to server
-        //if (Input.GetKeyDown(KeyCode.Space))
-        //{
-        //    SendClientCell(clientData, 10, 10);
-        //}
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            SendClientCell(clientData, 10, 10);
+        }
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            SceneManager.LoadScene("MultiplayerGame");
+        }
     }
 
     private void OnDisable()
@@ -199,6 +203,7 @@ public class Client : MonoBehaviour
         if (sender.senderType == SenderType.STRING)
         {
             Debug.Log("[CLIENT] Received STRING sender type from server: " + sender.message);
+            if (chat != null) chat.SetPendingMessage(sender.clientData, sender.message);
         }
         else if (sender.senderType == SenderType.CLIENTDATA)
         {

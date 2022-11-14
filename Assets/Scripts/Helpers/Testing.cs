@@ -24,9 +24,9 @@ public class Testing : MonoBehaviour
             SceneManager.LoadScene("Client");
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            server.SendStringToAll("Test");
-        }
+        //if (Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    server.SendStringToAll("Test");
+        //}
     }
 }
