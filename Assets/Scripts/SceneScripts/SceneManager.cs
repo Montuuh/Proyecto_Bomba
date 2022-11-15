@@ -15,7 +15,8 @@ public static class SceneManager
         MainMenu,
         OnlineLobby,
         SinglePlayerLobby,
-        SinglePlayerGame
+        SinglePlayerGame,
+        MultiplayerGame
     }
 
     // Load scene by name and by enum

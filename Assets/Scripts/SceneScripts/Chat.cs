@@ -16,8 +16,10 @@ public class Chat : MonoBehaviour
     List<Message> messages = new List<Message>();
     public List<Message> pendingMessages = new List<Message>();
     public List<ClientData> pendingClients = new List<ClientData>();
+    public List<Message> pendingPlayers = new List<Message>();
     public int maxMessages = 25;
     public GameObject chatPanel, textObject;
+    public GameObject playerPanel;
     Transform chatPosition;
 
     private void Update()
@@ -32,6 +34,12 @@ public class Chat : MonoBehaviour
             SendMessageToChat(pendingClients[0], pendingMessages[0].text);
             pendingMessages.Remove(pendingMessages[0]);
             pendingClients.Remove(pendingClients[0]);
+        }
+
+        if (pendingPlayers.Count > 0)
+        {
+            AddPlayerToHUD(pendingPlayers[0].text);
+            pendingPlayers.Remove(pendingPlayers[0]);
         }
     }
 
@@ -54,20 +62,32 @@ public class Chat : MonoBehaviour
         }
 
         Message newMessage = new Message();
-
-        if (clientData == null)
-        {
-            newMessage.text = "[SERVER]:" + text;
-        }
-        else
-        {
+        newMessage.text = text;
+        
+        if (clientData != null)
             newMessage.text = clientData.userName + ": " + text;
-        }
+
         GameObject newText = Instantiate(textObject, chatPanel.transform);
 
         newMessage.textObject = newText.GetComponent<TMP_Text>();
         newMessage.textObject.text = newMessage.text;
 
         messages.Add(newMessage);
+    }
+
+    public void AddPlayer(ClientData clientData)
+    {
+        Message newMessage = new Message();
+        newMessage.text = clientData.userName;
+        pendingPlayers.Add(newMessage);
+    }
+
+    public void AddPlayerToHUD(string text)
+    {
+        GameObject newText = Instantiate(textObject, playerPanel.transform);
+        Message newMessage = new Message();
+        newMessage.text = text;
+        newMessage.textObject = newText.GetComponent<TMP_Text>();
+        newMessage.textObject.text = newMessage.text;
     }
 }

@@ -46,6 +46,8 @@ public class Client : MonoBehaviour
     
     public Chat chat;
 
+    private List<SceneManager.Scene> scenesToLoad = new List<SceneManager.Scene>();
+
 
     void Start()
     {
@@ -54,14 +56,10 @@ public class Client : MonoBehaviour
 
     private void Update()
     {
-        // if pressed space, send a clientcell sender to server
-        //if (Input.GetKeyDown(KeyCode.Space))
-        //{
-        //    SendClientCell(clientData, 10, 10);
-        //}
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+        if (scenesToLoad.Count > 0)
         {
-            SceneManager.LoadScene("MultiplayerGame");
+            SceneManager.LoadScene(scenesToLoad[0]);
+            scenesToLoad.Remove(scenesToLoad[0]);
         }
     }
 
@@ -140,6 +138,7 @@ public class Client : MonoBehaviour
         }
     }
 
+    #region SENDERS
     public void SendClientString(ClientData _clientData, string message)
     {
         Sender sender = new Sender(_clientData, message);
@@ -154,7 +153,7 @@ public class Client : MonoBehaviour
         }
         else
         {
-            Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + sender.clientString);
+            Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + sender.clientChat);
             socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
     }
@@ -167,7 +166,6 @@ public class Client : MonoBehaviour
         
         if (protocol == Protocol.TCP)
         {
-            // ToDo: Not yet adapted to serializing
             Debug.Log("[CLIENT] Sending CLIENTDATA to server: " + socket.RemoteEndPoint.ToString() + " Message: " + data.Length);
             socket.Send(data, data.Length, SocketFlags.None);
         }
@@ -186,7 +184,6 @@ public class Client : MonoBehaviour
 
         if (protocol == Protocol.TCP)
         {
-            // ToDo: Not yet adapted to serializing
             Debug.Log("[CLIENT] Sending CLIENTCELL to server: " + socket.RemoteEndPoint.ToString() + " || Sender type: " + sender.senderType + " || Sender username and UID: " + sender.clientData.userName + " | " + sender.clientData.userID + " || Cell revealed: " + sender.cellPosX + " | " + sender.cellPosY);
             socket.Send(data, data.Length, SocketFlags.None);
         }
@@ -197,25 +194,66 @@ public class Client : MonoBehaviour
         }
     }
 
-    private void DecodeSender(Sender sender)
+    public void SendStartGame()
     {
-        if (sender.senderType == SenderType.STRING)
+        Sender sender = new Sender();
+        sender.senderType = SenderType.STARTGAME;
+
+        byte[] data = Serialize.SerializeSender(sender);
+
+        if (protocol == Protocol.TCP)
         {
-            Debug.Log("[CLIENT] Received STRING sender type from server: " + sender.message);
-            if (chat != null) chat.SetPendingMessage(sender.clientData, sender.message);
+            Debug.Log("[CLIENT] Sending STARTGAME to server: " + socket.RemoteEndPoint.ToString() + " || Sender type: " + sender.senderType);
+            socket.Send(data, data.Length, SocketFlags.None);
         }
-        else if (sender.senderType == SenderType.CLIENTDATA)
+        else
         {
-            Debug.Log("[CLIENT] Received CLIENTDATA sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
-        }
-        else if (sender.senderType == SenderType.CLIENTSTRING)
-        {
-            Debug.Log("[CLIENT] Received CLIENTSTRING sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.clientString);
-            if (chat != null) chat.SetPendingMessage(sender.clientData, sender.clientString);
-        }
-        else if (sender.senderType == SenderType.CLIENTCELL)
-        {
-            Debug.Log("[CLIENT] Received CLIENTCELL sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.cellPosX + " | " + sender.cellPosY);
+            Debug.Log("[CLIENT] Sending STARTGAME to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType);
+            socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
     }
+    #endregion SENDERS
+
+    #region DECODERS
+    private void DecodeSender(Sender sender)
+    {
+        switch (sender.senderType)
+        {
+            case SenderType.STRING:
+                Debug.Log("[CLIENT] Received STRING sender type from server: " + sender.message);
+                break;
+            case SenderType.CLIENTDATA:
+                Debug.Log("[CLIENT] Received CLIENTDATA sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
+                break;
+            case SenderType.CLIENTSTRING:
+                Debug.Log("[CLIENT] Received CLIENTSTRING sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.clientChat);
+                if (chat != null) chat.SetPendingMessage(sender.clientData, sender.clientChat);
+                break;
+            case SenderType.CLIENTCELL:
+                Debug.Log("[CLIENT] Received CLIENTCELL sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.cellPosX + " | " + sender.cellPosY);
+                // ToDo: Set pending cell to game
+                
+                break;
+            case SenderType.STARTGAME:
+                Debug.Log("[CLIENT] Received STARTGAME sender type from server");
+                scenesToLoad.Add(SceneManager.Scene.MultiplayerGame);
+                break;
+            case SenderType.CLIENTDISCONNECT:
+                Debug.Log("[CLIENT] Received CLIENTDISCONNECT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
+                if (chat != null) chat.SetPendingMessage(null, sender.clientData.userName + " has left the server :(");
+                // ToDo: Check if you have been disconnected
+
+                break;
+            case SenderType.CLIENTCONNECT:
+                Debug.Log("[CLIENT] Received CLIENTCONNECT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
+                if (chat != null) chat.SetPendingMessage(null, sender.clientData.userName + " has joined the server :)");
+
+                if (chat != null) chat.AddPlayer(sender.clientData);
+                break;
+            default:
+                Debug.Log("[CLIENT] Trying to decode UNKNOWN sender type...");
+                break;
+        }
+    }
+    #endregion DECODERS
 }

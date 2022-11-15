@@ -7,7 +7,10 @@ public enum SenderType
     STRING, // This will serve as a message from server
     CLIENTDATA, // For the moment clientdata, but in the future it will be like CELL, EMOJI... that will also include client data
     CLIENTSTRING,
-    CLIENTCELL
+    CLIENTCELL,
+    STARTGAME,
+    CLIENTDISCONNECT,
+    CLIENTCONNECT
 }
 
 public class Sender
@@ -15,7 +18,7 @@ public class Sender
     public ClientData clientData;
     public string message;
     public SenderType senderType;
-    public string clientString;
+    public string clientChat;
     public int cellPosX;
     public int cellPosY;
 
@@ -24,7 +27,7 @@ public class Sender
         clientData = new ClientData();
         message = "";
         senderType = SenderType.NONE;
-        clientString = "";
+        clientChat = "";
         cellPosX = 0;
         cellPosY = 0;
     }
@@ -41,7 +44,7 @@ public class Sender
     public Sender(ClientData clientData, string clientString)
     {
         this.clientData = clientData;
-        this.clientString = clientString;
+        this.clientChat = clientString;
         senderType = SenderType.CLIENTSTRING;
     }
     public Sender(ClientData clientData, int cellPosX, int cellPosY)
@@ -57,69 +60,78 @@ public static class Serialize
 {
     public static byte[] SerializeSender(Sender sender)
     {
-        // Debug.Log("[SERIALIZER] Serializing...");
-
         MemoryStream stream = new MemoryStream();
         BinaryWriter writer = new BinaryWriter(stream);
         
-        if (sender.senderType == SenderType.STRING)
+        switch (sender.senderType)
         {
-            writer.Write((int)sender.senderType); // 1 -> int
-            writer.Write(sender.message); // 2 -> string
+            case SenderType.STRING:
+                writer.Write((int)sender.senderType); // 1 -> int
+                writer.Write(sender.message); // 2 -> string
+                break;
+            case SenderType.CLIENTDATA:
+                writer.Write((int)sender.senderType); // 1 -> int
+                writer.Write(sender.clientData.userID); // 2 -> uint
+                writer.Write(sender.clientData.userName); // 3 -> string
+                break;
+            case SenderType.CLIENTSTRING:
+                writer.Write((int)sender.senderType); // 1 -> int
+                writer.Write(sender.clientData.userID); // 2 -> uint
+                writer.Write(sender.clientData.userName); // 3 -> string
+                writer.Write(sender.clientChat); // 4 -> string
+                break;
+            case SenderType.CLIENTCELL:
+                writer.Write((int)sender.senderType); // 1 -> int
+                writer.Write(sender.clientData.userID); // 2 -> uint
+                writer.Write(sender.clientData.userName); // 3 -> string
+                writer.Write(sender.cellPosX); // 4 -> int
+                writer.Write(sender.cellPosY); // 5 -> int
+                break;
+            case SenderType.STARTGAME:
+                writer.Write((int)sender.senderType); // 1 -> int
+                break;
+            case SenderType.CLIENTDISCONNECT:
+                writer.Write((int)sender.senderType); // 1 -> int
+                writer.Write(sender.clientData.userID); // 2 -> uint
+                writer.Write(sender.clientData.userName); // 3 -> string
+                break;
+            case SenderType.CLIENTCONNECT:
+                writer.Write((int)sender.senderType); // 1 -> int
+                writer.Write(sender.clientData.userID); // 2 -> uint
+                writer.Write(sender.clientData.userName); // 3 -> string
+                break;
+            default:
+                Debug.Log("[SERIALIZER] Trying to serialize NONE type...");
+                break;
         }
-        else if (sender.senderType == SenderType.CLIENTDATA)
-        {
-            writer.Write((int)sender.senderType); // 1 -> int
-            writer.Write(sender.clientData.userID); // 2 -> uint
-            writer.Write(sender.clientData.userName); // 3 -> string
-        }
-        else if (sender.senderType == SenderType.CLIENTSTRING)
-        {
-            writer.Write((int)sender.senderType); // 1 -> int
-            writer.Write(sender.clientData.userID); // 2 -> uint
-            writer.Write(sender.clientData.userName); // 3 -> string
-            writer.Write(sender.clientString); // 4 -> string
-        }
-        else if (sender.senderType == SenderType.CLIENTCELL)
-        {
-            writer.Write((int)sender.senderType); // 1 -> int
-            writer.Write(sender.clientData.userID); // 2 -> uint
-            writer.Write(sender.clientData.userName); // 3 -> string
-            writer.Write(sender.cellPosX); // 4 -> int
-            writer.Write(sender.cellPosY); // 5 -> int
-        }
-        else
-        {
-            Debug.Log("[SERIALIZER] Error: Sender type not recognized");
-        }
+
         return stream.ToArray();
     }
 
     public static Sender DeserializeSender(byte[] data)
     {
-        // Debug.Log("[SERIALIZER] Deserializing...");
-
         MemoryStream stream = new MemoryStream(data);
         stream.Write(data, 0, data.Length);
 
         BinaryReader reader = new BinaryReader(stream);
         stream.Seek(0, SeekOrigin.Begin);
 
-        SenderType type = (SenderType)reader.ReadInt32(); // 1 -> int
-        if (type == SenderType.STRING)
+        SenderType senderType = (SenderType)reader.ReadInt32(); // 1 -> int
+
+        if (senderType == SenderType.STRING)
         {
             string message = reader.ReadString(); // 2 -> string
             Sender sender = new Sender(message);
             return sender;
         }
-        else if (type == SenderType.CLIENTDATA)
+        else if (senderType == SenderType.CLIENTDATA)
         {
             uint uid = reader.ReadUInt32(); // 2 -> uint
             string username = reader.ReadString(); // 3 -> string
             Sender sender = new Sender(new ClientData(uid, username));
             return sender;
         }
-        else if (type == SenderType.CLIENTSTRING)
+        else if (senderType == SenderType.CLIENTSTRING)
         {
             uint uid = reader.ReadUInt32(); // 2 -> uint
             string username = reader.ReadString(); // 3 -> string
@@ -127,7 +139,7 @@ public static class Serialize
             Sender sender = new Sender(new ClientData(uid, username), clientString);
             return sender;
         }
-        else if (type == SenderType.CLIENTCELL)
+        else if (senderType == SenderType.CLIENTCELL)
         {
             uint uid = reader.ReadUInt32(); // 2 -> uint
             string username = reader.ReadString(); // 3 -> string
@@ -136,9 +148,31 @@ public static class Serialize
             Sender sender = new Sender(new ClientData(uid, username), x, y);
             return sender;
         }
+        else if (senderType == SenderType.STARTGAME)
+        {
+            Sender sender = new Sender(new ClientData(0, ""), "");
+            sender.senderType = SenderType.STARTGAME;
+            return sender;
+        }
+        else if (senderType == SenderType.CLIENTDISCONNECT)
+        {
+            uint uid = reader.ReadUInt32(); // 2 -> uint
+            string username = reader.ReadString(); // 3 -> string
+            Sender sender = new Sender(new ClientData(uid, username));
+            sender.senderType = SenderType.CLIENTDISCONNECT;
+            return sender;
+        }
+        else if (senderType == SenderType.CLIENTCONNECT)
+        {
+            uint uid = reader.ReadUInt32(); // 2 -> uint
+            string username = reader.ReadString(); // 3 -> string
+            Sender sender = new Sender(new ClientData(uid, username));
+            sender.senderType = SenderType.CLIENTCONNECT;
+            return sender;
+        }
         else
         {
-            Debug.LogError("[SERIALIZER] Error deserializing Sender");
+            Debug.LogError("[SERIALIZER] Trying to deserialize NONE type...");
             return null;
         }
     }

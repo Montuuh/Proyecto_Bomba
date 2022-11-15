@@ -139,6 +139,11 @@ public class ClientLobby : MonoBehaviour
         buttonJoinServer.gameObject.SetActive(true);
         buttonHostServer.gameObject.SetActive(true);
     }
+    
+    public void OnClickStartGame()
+    {
+        client.SendStartGame();
+    }
     #endregion INPUT EVENTS
 
     #region HELPERS
