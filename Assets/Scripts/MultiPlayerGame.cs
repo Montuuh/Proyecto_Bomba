@@ -27,7 +27,7 @@ public class MultiPlayerGame : MonoBehaviour
     private bool isGodMode = false; // Debug key boolean to reveal all tiles
     private bool isRevealedExceptMines = false; // Debug key boolean to reveal all tiles except mines
 
-    private Board board; // Board object
+    private MultiplayerBoard board; // Board object
     private Highlight highlight; //Highlights on top of board
     private List<Cell> startingHoles = new List<Cell>(); //List of Starting Holes to create the map
     private Cell[,] cells; // 2D array of current cells
@@ -35,6 +35,9 @@ public class MultiPlayerGame : MonoBehaviour
     private SinglePlayerGameUI singlePlayerGameUI; // SinglePlayerGameUI object
 
     private List<int> pendingToReveal = new List<int>();
+    public ColorPlayer color = ColorPlayer.NONE;
+
+    public Client localPlayer;
 
     private EventHandler eventHandler;
     #endregion Variables
@@ -44,7 +47,7 @@ public class MultiPlayerGame : MonoBehaviour
     {
         // Setting up the object variables
         cells = new Cell[width, height];
-        board = GetComponentInChildren<Board>();
+        board = GetComponentInChildren<MultiplayerBoard>();
         highlight = GetComponentInChildren<Highlight>();
 
         gameHasStarted = false;
@@ -62,6 +65,8 @@ public class MultiPlayerGame : MonoBehaviour
         difficulty = SceneManager.multiDifficulty;
         StartGame(difficulty);
 
+        localPlayer = GameObject.Find("ClientManager").GetComponent<Client>();
+
         eventHandler = GameObject.Find("ClientManager").GetComponent<EventHandler>();
     }
 
@@ -73,7 +78,8 @@ public class MultiPlayerGame : MonoBehaviour
             if(pendingToReveal.Count > 1)
             {
                 Reveal(pendingToReveal[0], pendingToReveal[1]);
-                pendingToReveal.Clear();
+                pendingToReveal.RemoveAt(0);
+                pendingToReveal.RemoveAt(0);
             }
 
             // Debug keys handler. F1 -> GodMode. F2 -> RevealedExceptMines. R -> Restart game. Esc -> Quit game
@@ -200,10 +206,12 @@ public class MultiPlayerGame : MonoBehaviour
             // Only tiles that were not revealed can be flagged
             if (!cell.isRevealed)
             {
+                
                 // If there are flags available
                 if (CheckFlagsAvailable())
                 {
                     cell.isFlagged = !cell.isFlagged;
+                    cell.color = localPlayer.clientData.colorPlayer;
                 }
                 else
                 {
@@ -211,6 +219,7 @@ public class MultiPlayerGame : MonoBehaviour
                     if (cell.isFlagged)
                     {
                         cell.isFlagged = false;
+                        cell.color = ColorPlayer.NONE;
                     }
                 }
                 cells[x, y] = cell;
@@ -251,12 +260,13 @@ public class MultiPlayerGame : MonoBehaviour
         Cell cell = cells[x, y];
         if (cell.isFlagged) return;
 
-        //eventHandler.SendRevealCell(x, y);
+        cell.color = color;
 
         // If cell is an empty cell, reveal numbers and empty cells
         if (cell.cellType == Cell.CellType.Empty)
         {
             RevealEmptyCells(cell);
+
             if (CheckWin())
             {
                 Win();
@@ -430,6 +440,8 @@ public class MultiPlayerGame : MonoBehaviour
 
         SetupCells();
 
+        color = ColorPlayer.NONE;
+
         ReloadBoard();
     }
     private void CreateFullMap()
@@ -438,6 +450,7 @@ public class MultiPlayerGame : MonoBehaviour
 
         CreateMines();
         SetupNumbers();
+
 
         ReloadBoard();
     }

@@ -8,7 +8,9 @@ public struct Cell
         Number,
         Mine
     }
-    
+
+    public ColorPlayer color;
+
     public Vector3Int position;
     public CellType cellType;
     public bool isRevealed;

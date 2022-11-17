@@ -9,11 +9,11 @@ using System.Collections.Generic;
 // color enum
 public enum ColorPlayer
 {
+    NONE,
     RED,
     BLUE,
     GREEN,
-    YELLOW,
-    NONE
+    YELLOW
 }
 
 public class ClientData
@@ -256,7 +256,10 @@ public class Client : MonoBehaviour
                 if (game == null)
                     gameJoined = true;
                 else
+                {
+                    game.color = sender.clientData.colorPlayer;
                     game.PendingToReveal(sender.cellPosX, sender.cellPosY);
+                }
 
                 break;
             case SenderType.STARTGAME:
@@ -274,6 +277,9 @@ public class Client : MonoBehaviour
                 if (chat != null) chat.SetPendingMessage(null, sender.clientData.userName + " has joined the server :)");
 
                 if (chat != null) chat.AddPlayer(sender.clientData);
+
+                if (sender.clientData.userID == clientData.userID && sender.clientData.userName == clientData.userName) clientData.colorPlayer = sender.clientData.colorPlayer;
+
                 break;
             default:
                 Debug.Log("[CLIENT] Trying to decode UNKNOWN sender type...");
