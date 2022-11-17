@@ -24,7 +24,9 @@ public class ClientLobby : MonoBehaviour
     
     public Button buttonHostServer;
     public Button buttonJoinServer;
-    
+
+    public Button buttonStartGame;
+
     public TMP_InputField inputChat;
     private string _inputChat;
     public GameObject chat;
@@ -95,6 +97,7 @@ public class ClientLobby : MonoBehaviour
 
         DeactivateAll();
         chat.SetActive(true);
+        buttonStartGame.gameObject.SetActive(false);
     }
 
     public void OnInputChat()
@@ -116,6 +119,7 @@ public class ClientLobby : MonoBehaviour
         checkboxIsTcp.gameObject.SetActive(true);
         buttonCreateServer.gameObject.SetActive(true);
         buttonBack.gameObject.SetActive(true);
+        client.clientData.isHost = true;
     }
     public void OnClickJoinServer()
     {

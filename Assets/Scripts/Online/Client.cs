@@ -21,7 +21,8 @@ public class ClientData
     public string userName;
     public uint userID;
     public ColorPlayer colorPlayer;
-    
+    public bool isHost = false;
+
     public ClientData()
     {
         SetRandomGuest();
