@@ -34,6 +34,8 @@ public class MultiPlayerGame : MonoBehaviour
     private Cell lastRevealedCell; // Last revealed cell
     private SinglePlayerGameUI singlePlayerGameUI; // SinglePlayerGameUI object
 
+    private List<int> pendingToReveal = new List<int>();
+
     private EventHandler eventHandler;
     #endregion Variables
 
@@ -68,6 +70,12 @@ public class MultiPlayerGame : MonoBehaviour
         
         if(gameHasStarted)
         {
+            if(pendingToReveal.Count > 1)
+            {
+                Reveal(pendingToReveal[0], pendingToReveal[1]);
+                pendingToReveal.Clear();
+            }
+
             // Debug keys handler. F1 -> GodMode. F2 -> RevealedExceptMines. R -> Restart game. Esc -> Quit game
             DebugKeys();
 
@@ -78,7 +86,6 @@ public class MultiPlayerGame : MonoBehaviour
             IngameInput();
         } else
         {
-
             // Set up initial holes
             for(int i = 0; i < numberOfStartingHoles; i++)
             {
@@ -133,7 +140,16 @@ public class MultiPlayerGame : MonoBehaviour
         // Left click
         if (Input.GetMouseButtonDown(0))
         {
-            Reveal();
+            Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            int x = Mathf.FloorToInt(position.x);
+            int y = Mathf.FloorToInt(position.y);
+            if (x >= 0 && x < width && y >= 0 && y < height)
+            {
+                Cell cell = cells[x, y];
+                if (cell.isFlagged) return;
+
+                eventHandler.SendRevealCell(x, y);
+            }
         }
         // Right click
         if (Input.GetMouseButtonDown(1))
@@ -230,54 +246,54 @@ public class MultiPlayerGame : MonoBehaviour
     }
 
     // On left click reveal the cell
-    private void Reveal()
+    public void Reveal(int x, int y)
     {
-        Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        int x = Mathf.FloorToInt(position.x);
-        int y = Mathf.FloorToInt(position.y);
-        if (x >= 0 && x < width && y >= 0 && y < height)
+        Cell cell = cells[x, y];
+        if (cell.isFlagged) return;
+
+        //eventHandler.SendRevealCell(x, y);
+
+        // If cell is an empty cell, reveal numbers and empty cells
+        if (cell.cellType == Cell.CellType.Empty)
         {
-            Cell cell = cells[x, y];
-            if (cell.isFlagged) return;
-
-            eventHandler.SendRevealCell(x, y);
-
-            // If cell is an empty cell, reveal numbers and empty cells
-            if (cell.cellType == Cell.CellType.Empty)
+            RevealEmptyCells(cell);
+            if (CheckWin())
             {
-                RevealEmptyCells(cell);
-                if (CheckWin())
-                {
-                    Win();
-                }
+                Win();
             }
-            // If cell is a mine, reveal all mines and end the game
-            else if (cell.cellType == Cell.CellType.Mine)
-            {
-                cell.isExploded = true;
-                cells[x, y] = cell;
-                GameOver();
-            }
-            // Number cell, reveal it
-            else
-            {
-                lastRevealedCell = cell;
-                cell.isRevealed = true;
-                cells[x, y] = cell;
-                if (CheckWin())
-                {
-                    Win();
-                }
-            }
-
-            // Checks if the flags and mines are the same number, and reveals the near cells
-            if (cell.isRevealed && !cell.isExploded)
-            {
-                RevealAdjacentAvailableCells(cell);
-            }
-
-            ReloadBoard();
         }
+        // If cell is a mine, reveal all mines and end the game
+        else if (cell.cellType == Cell.CellType.Mine)
+        {
+            cell.isExploded = true;
+            cells[x, y] = cell;
+            GameOver();
+        }
+        // Number cell, reveal it
+        else
+        {
+            lastRevealedCell = cell;
+            cell.isRevealed = true;
+            cells[x, y] = cell;
+            if (CheckWin())
+            {
+                Win();
+            }
+        }
+
+        // Checks if the flags and mines are the same number, and reveals the near cells
+        if (cell.isRevealed && !cell.isExploded)
+        {
+            RevealAdjacentAvailableCells(cell);
+        }
+
+        ReloadBoard();
+    }
+
+    public void PendingToReveal(int x, int y)
+    {
+        pendingToReveal.Add(x);
+        pendingToReveal.Add(y);
     }
 
     // Recursive function to reveal all empty cells that are close to each other

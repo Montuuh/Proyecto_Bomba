@@ -59,6 +59,8 @@ public class Client : MonoBehaviour
     private EndPoint serverEP;
     
     public Chat chat;
+    private bool gameJoined = false;
+    private MultiPlayerGame game;
 
     private List<SceneManager.Scene> scenesToLoad = new List<SceneManager.Scene>();
 
@@ -70,6 +72,12 @@ public class Client : MonoBehaviour
 
     private void Update()
     {
+        if(gameJoined)
+        {
+            game = GameObject.Find("Grid").GetComponent<MultiPlayerGame>();
+            gameJoined = false;
+        }
+
         if (scenesToLoad.Count > 0)
         {
             SceneManager.LoadScene(scenesToLoad[0]);
@@ -244,8 +252,12 @@ public class Client : MonoBehaviour
                 break;
             case SenderType.CLIENTCELL:
                 Debug.Log("[CLIENT] Received CLIENTCELL sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.cellPosX + " | " + sender.cellPosY);
-                // ToDo: Set pending cell to game
-                
+
+                if (game == null)
+                    gameJoined = true;
+                else
+                    game.PendingToReveal(sender.cellPosX, sender.cellPosY);
+
                 break;
             case SenderType.STARTGAME:
                 Debug.Log("[CLIENT] Received STARTGAME sender type from server");
