@@ -6,19 +6,32 @@ using System.IO;
 using UnityEngine;
 using System.Collections.Generic;
 
+// color enum
+public enum ColorPlayer
+{
+    RED,
+    BLUE,
+    GREEN,
+    YELLOW,
+    NONE
+}
+
 public class ClientData
 {
     public string userName;
     public uint userID;
-    public List<Cell> lastRevealedCells;        
+    public ColorPlayer colorPlayer;
+    
     public ClientData()
     {
         SetRandomGuest();
+        colorPlayer = ColorPlayer.NONE;
     }
-    public ClientData(uint userID, string userName)
+    public ClientData(uint userID, string userName, ColorPlayer colorPlayer)
     {
         this.userName = userName;
         this.userID = userID;
+        this.colorPlayer = colorPlayer;
     }
 
     private void SetRandomGuest()
@@ -107,7 +120,7 @@ public class Client : MonoBehaviour
             {
                 Debug.Log("[CLIENT] Connected to server --> " + serverIP + ":" + serverPort);
                 // Send welcome message
-                SendClientString(clientData, "Username: " + clientData.userName + " | UID: " + clientData.userID + " | Connected to server");
+                SendClientChat(clientData, "Username: " + clientData.userName + " | UID: " + clientData.userID + " | Connected to server");
 
                 while (true)
                 {
@@ -139,9 +152,9 @@ public class Client : MonoBehaviour
     }
 
     #region SENDERS
-    public void SendClientString(ClientData _clientData, string message)
+    public void SendClientChat(ClientData _clientData, string message)
     {
-        Sender sender = new Sender(_clientData, message);
+        Sender sender = new Sender(SenderType.CLIENTCHAT) { clientData = _clientData, clientChat = message };
 
         byte[] data = Serialize.SerializeSender(sender);
 
@@ -160,8 +173,8 @@ public class Client : MonoBehaviour
 
     public void SendClientData(ClientData _clientData)
     {
-        Sender sender = new Sender(_clientData);
-        
+        Sender sender = new Sender(SenderType.CLIENTDATA) { clientData = _clientData };
+
         byte[] data = Serialize.SerializeSender(sender);
         
         if (protocol == Protocol.TCP)
@@ -178,7 +191,7 @@ public class Client : MonoBehaviour
 
     public void SendClientCell(ClientData _clientData, int _cellPosX, int _cellPosY)
     {
-        Sender sender = new Sender(_clientData, _cellPosX, _cellPosY);
+        Sender sender = new Sender(SenderType.CLIENTCELL) { clientData = _clientData, cellPosX = _cellPosX, cellPosY = _cellPosY };
 
         byte[] data = Serialize.SerializeSender(sender);
 
@@ -196,8 +209,7 @@ public class Client : MonoBehaviour
 
     public void SendStartGame()
     {
-        Sender sender = new Sender();
-        sender.senderType = SenderType.STARTGAME;
+        Sender sender = new Sender(SenderType.STARTGAME);
 
         byte[] data = Serialize.SerializeSender(sender);
 
@@ -225,8 +237,8 @@ public class Client : MonoBehaviour
             case SenderType.CLIENTDATA:
                 Debug.Log("[CLIENT] Received CLIENTDATA sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
                 break;
-            case SenderType.CLIENTSTRING:
-                Debug.Log("[CLIENT] Received CLIENTSTRING sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.clientChat);
+            case SenderType.CLIENTCHAT:
+                Debug.Log("[CLIENT] Received CLIENTCHAT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.clientChat);
                 if (chat != null) chat.SetPendingMessage(sender.clientData, sender.clientChat);
                 break;
             case SenderType.CLIENTCELL:

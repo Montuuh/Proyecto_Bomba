@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Unity.VisualScripting;
 
 
 [SerializeField]
@@ -16,7 +17,7 @@ public class Chat : MonoBehaviour
     List<Message> messages = new List<Message>();
     public List<Message> pendingMessages = new List<Message>();
     public List<ClientData> pendingClients = new List<ClientData>();
-    public List<Message> pendingPlayers = new List<Message>();
+    public List<ClientData> pendingPlayers = new List<ClientData>();
     public int maxMessages = 25;
     public GameObject chatPanel, textObject;
     public GameObject playerPanel;
@@ -38,7 +39,7 @@ public class Chat : MonoBehaviour
 
         if (pendingPlayers.Count > 0)
         {
-            AddPlayerToHUD(pendingPlayers[0].text);
+            AddPlayerToHUD(pendingPlayers[0]);
             pendingPlayers.Remove(pendingPlayers[0]);
         }
     }
@@ -77,17 +78,33 @@ public class Chat : MonoBehaviour
 
     public void AddPlayer(ClientData clientData)
     {
-        Message newMessage = new Message();
-        newMessage.text = clientData.userName;
-        pendingPlayers.Add(newMessage);
+        pendingPlayers.Add(clientData);
     }
 
-    public void AddPlayerToHUD(string text)
+    public void AddPlayerToHUD(ClientData clientData)
     {
         GameObject newText = Instantiate(textObject, playerPanel.transform);
         Message newMessage = new Message();
-        newMessage.text = text;
+        newMessage.text = clientData.userName;
         newMessage.textObject = newText.GetComponent<TMP_Text>();
         newMessage.textObject.text = newMessage.text;
+
+        switch (clientData.colorPlayer)
+        {
+            case ColorPlayer.RED:
+                newMessage.textObject.color = Color.red;
+                break;
+            case ColorPlayer.BLUE:
+                newMessage.textObject.color = Color.blue;
+                break;
+            case ColorPlayer.GREEN:
+                newMessage.textObject.color = Color.green;
+                break;
+            case ColorPlayer.YELLOW:
+                newMessage.textObject.color = Color.yellow;
+                break;
+            default:
+                break;
+        }
     }
 }

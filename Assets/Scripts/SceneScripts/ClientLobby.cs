@@ -102,7 +102,7 @@ public class ClientLobby : MonoBehaviour
         _inputChat = inputChat.text;
         if (_inputChat != null && _inputChat != "")
         {
-            client.SendClientString(client.clientData, _inputChat);
+            client.SendClientChat(client.clientData, _inputChat);
             inputChat.text = "";
         }
     }
