@@ -76,9 +76,12 @@ public class Client : MonoBehaviour
         if(gameJoined)
         {
             game = GameObject.Find("Grid").GetComponent<MultiPlayerGame>();
-            game.StartGame(cellsToUpload);
-            cellsToUpload = null;
-            gameJoined = false;
+            if (game != null)
+            {
+                game.StartGame(cellsToUpload);
+                cellsToUpload = null;
+                gameJoined = false;
+            }
         }
 
         if (scenesToLoad.Count > 0)
