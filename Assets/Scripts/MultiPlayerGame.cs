@@ -157,6 +157,16 @@ public class MultiPlayerGame : MonoBehaviour
         {
             QuitGame();
         }
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            int numMines = 0;
+            foreach (Cell cell in cells)
+            {
+                if (cell.cellType == Cell.CellType.Mine)
+                    numMines++;
+            }
+            Debug.Log("Num mines = " + numMines);
+        }
     }
 
     // On right click flag the cell
@@ -227,12 +237,11 @@ public class MultiPlayerGame : MonoBehaviour
         Cell cell = cells[x, y];
         if (cell.isFlagged) return;
 
-        cell.color = color;
-
+        
         // If cell is an empty cell, reveal numbers and empty cells
         if (cell.cellType == Cell.CellType.Empty)
         {
-            //RevealEmptyCells(cell);
+            RevealEmptyCells(cell);
             
             if (CheckWin())
             {
@@ -251,6 +260,7 @@ public class MultiPlayerGame : MonoBehaviour
         {
             lastRevealedCell = cell;
             cell.isRevealed = true;
+            cell.color = color;
             cells[x, y] = cell;
             if (CheckWin())
             {
@@ -276,9 +286,10 @@ public class MultiPlayerGame : MonoBehaviour
     // Recursive function to reveal all empty cells that are close to each other
     private void RevealEmptyCells(Cell cell)
     {
-        if (cell.isRevealed) return;
+        if (cell.isRevealed || cell.color != ColorPlayer.NONE) return;
 
         cell.isRevealed = true;
+        cell.color = color;
         cells[cell.position.x, cell.position.y] = cell;
 
         if (cell.cellType == Cell.CellType.Empty)
@@ -444,8 +455,15 @@ public class MultiPlayerGame : MonoBehaviour
         this.cells = GameGenerator.GenerateNumbers(cells);
         width = cells.GetLength(0);
         height = cells.GetLength(1);
-        mines = GameGenerator.GetWidthHeightMines((DifficultyNew)difficulty)[2];
+        mines = GameGenerator.GetWidthHeightMines(DifficultyNew.Extreme)[2];
         difficulty = Difficulty.Extreme;
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                cells[x, y].position = new Vector3Int(x, y, 0);
+            }
+        }
         SetCamera();
         ReloadBoard();
     }

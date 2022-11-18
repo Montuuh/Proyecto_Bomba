@@ -7,7 +7,7 @@ public enum DifficultyNew
 {
     Beginner, // Beginner = 9x9, 10 mines, 0.12% chance of mine
     Intermediate, // Intermediate = 16x16, 40 mines, 0.16% chance of mine
-    Extreme, // Expert = 20x20, 85 mines, 0.21% chance of mine
+    Extreme, // Expert = 20x20, 100 mines, 0.25% chance of mine
     Legend // Legend = 25x25, 160 mines, 0.25% chance of mine
 }
 
@@ -31,7 +31,7 @@ public static class GameGenerator
             case DifficultyNew.Extreme:
                 widthHeightMines[0] = 20;
                 widthHeightMines[1] = 20;
-                widthHeightMines[2] = 85;
+                widthHeightMines[2] = 100;
                 break;
             case DifficultyNew.Legend:
                 widthHeightMines[0] = 25;
@@ -189,10 +189,10 @@ public static class GameGenerator
     public static int[] GetMultiplayerBigCenterBounds(int x, int y)
     {
         int[] bounds = new int[4];
-        bounds[0] = x - Random.Range(1, 5);
-        bounds[1] = x + Random.Range(1, 5);
-        bounds[2] = y - Random.Range(1, 5);
-        bounds[3] = y + Random.Range(1, 5);
+        bounds[0] = x - Random.Range(1, 4);
+        bounds[1] = x + Random.Range(1, 3);
+        bounds[2] = y - Random.Range(1, 4);
+        bounds[3] = y + Random.Range(1, 3);
         return bounds;
     }
 }
