@@ -50,8 +50,6 @@ public class MultiPlayerGame : MonoBehaviour
         board = GetComponentInChildren<MultiplayerBoard>();
         highlight = GetComponentInChildren<Highlight>();
 
-        gameHasStarted = false;
-
         // Set active a game object from the same parent
         singlePlayerGameUI = GetComponent<SinglePlayerGameUI>();
         singlePlayerGameUI.mainMenuGo.SetActive(false);
@@ -63,7 +61,7 @@ public class MultiPlayerGame : MonoBehaviour
         // For now, the game is generated when the game starts. A menu will be added later
         // StartGame();
         difficulty = SceneManager.multiDifficulty;
-        StartGame(difficulty);
+        //StartGame(difficulty);
 
         localPlayer = GameObject.Find("ClientManager").GetComponent<Client>();
 
@@ -72,51 +70,21 @@ public class MultiPlayerGame : MonoBehaviour
 
     private void Update()
     {
-        
-        if(gameHasStarted)
+        if(pendingToReveal.Count > 1)
         {
-            if(pendingToReveal.Count > 1)
-            {
-                Reveal(pendingToReveal[0], pendingToReveal[1]);
-                pendingToReveal.RemoveAt(0);
-                pendingToReveal.RemoveAt(0);
-            }
-
-            // Debug keys handler. F1 -> GodMode. F2 -> RevealedExceptMines. R -> Restart game. Esc -> Quit game
-            DebugKeys();
-
-            // Besides this line, if the flag is false, won't run the code, so in game input is not allowed
-            if (!letIngameInput) return;
-
-            ReloadHighlight();
-            IngameInput();
-        } else
-        {
-            // Set up initial holes
-            for(int i = 0; i < numberOfStartingHoles; i++)
-            {
-                //int x = Random.Range(0, width/numberOfStartingHoles) + width / numberOfStartingHoles * i;
-                //int y = Random.Range(0, height/numberOfStartingHoles) + width / numberOfStartingHoles * i;
-
-                int x = Random.Range(0, width);
-                int y = Random.Range(0, height);
-
-                Cell cell = cells[x, y];
-                cell.cellType = Cell.CellType.Empty;
-                startingHoles.Add(cell);
-            }
-
-            // Create the full map and reveal the starting holes
-            CreateFullMap();
-            for (int i = 0; i < startingHoles.Count; i++)
-            {
-                RevealEmptyCells(startingHoles[i]);
-            }
-
-            ReloadBoard();
-
-            gameHasStarted = true;
+            Reveal(pendingToReveal[0], pendingToReveal[1]);
+            pendingToReveal.Clear();
         }
+
+        // Debug keys handler. F1 -> GodMode. F2 -> RevealedExceptMines. R -> Restart game. Esc -> Quit game
+        DebugKeys();
+
+        // Besides this line, if the flag is false, won't run the code, so in game input is not allowed
+        if (!letIngameInput) return;
+
+        ReloadHighlight();
+        IngameInput();
+        
     }
 
     private void ReloadHighlight()
@@ -172,7 +140,7 @@ public class MultiPlayerGame : MonoBehaviour
         {
             isGodMode = false;
             isRevealedExceptMines = false;
-            StartGame(difficulty);
+            //StartGame(difficulty);
         }
         if (Input.GetKeyDown(KeyCode.F1))
         {
@@ -294,7 +262,7 @@ public class MultiPlayerGame : MonoBehaviour
         // Checks if the flags and mines are the same number, and reveals the near cells
         if (cell.isRevealed && !cell.isExploded)
         {
-            RevealAdjacentAvailableCells(cell);
+            //RevealAdjacentAvailableCells(cell);
         }
 
         ReloadBoard();
@@ -442,6 +410,15 @@ public class MultiPlayerGame : MonoBehaviour
 
         color = ColorPlayer.NONE;
 
+        ReloadBoard();
+    }
+    public void StartGame(Cell[,] cells)
+    {
+        this.cells = cells;
+        this.cells = GameGenerator.GenerateNumbers(cells);
+        width = cells.GetLength(0);
+        height = cells.GetLength(1);
+        SetCamera();
         ReloadBoard();
     }
     private void CreateFullMap()

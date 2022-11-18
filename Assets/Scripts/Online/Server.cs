@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Server : MonoBehaviour
 {
@@ -33,7 +34,7 @@ public class Server : MonoBehaviour
 
     private List<ColorPlayer> colorPlayerList = new List<ColorPlayer>();
     private List<ColorPlayer> colorPlayerAvailable = new List<ColorPlayer>();
-
+    private bool toSendBoard = false;
     private List<ClientData> pendingClientDataColor = new List<ClientData>();
 
     void Start()
@@ -67,6 +68,13 @@ public class Server : MonoBehaviour
             SendClientConnectedToAll(sender);
 
             pendingClientDataColor.RemoveAt(0);
+        }
+
+        if (toSendBoard)
+        {
+            Sender sender = new Sender(SenderType.SENDBOARD) { cells = GenerateFullMap() };
+            SendBoardToAll(sender);
+            toSendBoard = false;
         }
     }
 
@@ -345,6 +353,26 @@ public class Server : MonoBehaviour
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
 
+    // Send board to all clients except the endpoints passed
+    private void SendBoardToAll(Sender sender, EndPoint senderEP = null)
+    {
+        if (senderEP != null)
+            Debug.Log("[SERVER] Sending sender type board to all clients except: " + senderEP.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type board to all clients");
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderEP);
+    }
+    private void SendBoardToAll(Sender sender, Socket senderSocket)
+    {
+        if (senderSocket != null)
+            Debug.Log("[SERVER] Sending sender type board to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type board to all clients");
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderSocket.RemoteEndPoint);
+    }
+
     // Send data stream to all clients
     private void SendToAll(byte[] data, EndPoint except = null)
     {
@@ -396,6 +424,8 @@ public class Server : MonoBehaviour
             case SenderType.STARTGAME: // Used when the host starts the game
                 Debug.Log("[SERVER] Received Event = STARTGAME game sender type");
                 SendStartGameToAll(sender);
+
+                toSendBoard = true;
                 break;
             case SenderType.CLIENTDISCONNECT: // Used when a client disconnects
                 Debug.Log("[SERVER] Received Event = CLIENTDISCONNECT message from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
@@ -405,6 +435,9 @@ public class Server : MonoBehaviour
             case SenderType.CLIENTCONNECT:
                 Debug.Log("[SERVER] I don't know why, but I received Event = CLIENTCONNECT client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
                 break;
+            case SenderType.SENDBOARD:
+                Debug.Log("[SERVER] I don't know why, but I received Event = SENDBOARD from " + clientEP.ToString());
+                break;
             default:
                 Debug.Log("[SERVER] Trying to decode UNKNOWN sender type...");
                 break;
@@ -412,6 +445,7 @@ public class Server : MonoBehaviour
     }
     #endregion DECODERS
 
+    #region HELPERS
     private void DisconnectClient(ClientData clientData)
     {
         Debug.Log("[SERVER] Disconnecting client... " + clientData.userName + " | " + clientData.userID.ToString());
@@ -450,4 +484,23 @@ public class Server : MonoBehaviour
 
         return colorPlayer;
     }
+    #endregion HELPERS
+
+    #region MAPGEN
+    private Cell[,] GenerateFullMap()
+    {
+        DifficultyNew difficulty = DifficultyNew.Extreme;
+
+        int[] widthHeightMines = GameGenerator.GetWidthHeightMines((DifficultyNew)(int)difficulty);
+        int width = widthHeightMines[0];
+        int height = widthHeightMines[1];
+        int mines = widthHeightMines[2];
+        Cell[,] cells = GameGenerator.GenerateCells(width, height);
+        int[] bounds = GameGenerator.GetMultiplayerBigCenterBounds(width / 2, height / 2);
+        cells = GameGenerator.GenerateMines(cells, mines, bounds);
+        cells = GameGenerator.GenerateNumbers(cells);
+        cells = GameResolver.ResolveCells(cells, width / 2, height / 2);
+        return cells;
+    }
+    #endregion MAPGEN
 }

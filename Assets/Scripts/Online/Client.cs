@@ -64,6 +64,7 @@ public class Client : MonoBehaviour
 
     private List<SceneManager.Scene> scenesToLoad = new List<SceneManager.Scene>();
 
+    private Cell[,] cellsToUpload;
 
     void Start()
     {
@@ -75,6 +76,8 @@ public class Client : MonoBehaviour
         if(gameJoined)
         {
             game = GameObject.Find("Grid").GetComponent<MultiPlayerGame>();
+            game.StartGame(cellsToUpload);
+            cellsToUpload = null;
             gameJoined = false;
         }
 
@@ -151,7 +154,7 @@ public class Client : MonoBehaviour
             while (true)
             {
                 // RECEIVE DATA
-                byte[] data = new byte[1024];
+                byte[] data = new byte[2048];
                 int recv = socket.ReceiveFrom(data, ref serverEP);
                 Sender sender = Serialize.DeserializeSender(data);
                 DecodeSender(sender);
@@ -275,10 +278,16 @@ public class Client : MonoBehaviour
             case SenderType.CLIENTCONNECT:
                 Debug.Log("[CLIENT] Received CLIENTCONNECT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
                 if (chat != null) chat.SetPendingMessage(null, sender.clientData.userName + " has joined the server :)");
-
                 if (chat != null) chat.AddPlayer(sender.clientData);
 
                 if (sender.clientData.userID == clientData.userID && sender.clientData.userName == clientData.userName) clientData.colorPlayer = sender.clientData.colorPlayer;
+
+                break;
+            case SenderType.SENDBOARD:
+                Debug.Log("[CLIENT] Received SENDBOARD sender type from server: ");
+                cellsToUpload = sender.cells;
+                if (game == null)
+                    gameJoined = true;
 
                 break;
             default:

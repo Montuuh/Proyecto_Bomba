@@ -11,7 +11,8 @@ public enum SenderType
     CLIENTCELL,
     STARTGAME,
     CLIENTDISCONNECT,
-    CLIENTCONNECT
+    CLIENTCONNECT,
+    SENDBOARD
 }
 
 public class Sender
@@ -22,7 +23,8 @@ public class Sender
     public string clientChat;
     public int cellPosX;
     public int cellPosY;
-
+    public Cell[,] cells;
+    
     public Sender(SenderType senderType)
     {
         this.senderType = senderType;
@@ -77,6 +79,19 @@ public static class Serialize
                 writer.Write(sender.clientData.userID); // 2 -> uint
                 writer.Write(sender.clientData.userName); // 3 -> string
                 writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
+                break;
+            case SenderType.SENDBOARD:
+                writer.Write((int)sender.senderType); // 1 -> int
+                writer.Write(sender.cells.GetLength(0)); // 2 -> int
+                writer.Write(sender.cells.GetLength(1)); // 3 -> int
+                for (int x = 0; x < sender.cells.GetLength(0); x++)
+                {
+                    for (int y = 0; y < sender.cells.GetLength(1); y++)
+                    {
+                        writer.Write((int)sender.cells[x, y].cellType); // 4 -> int
+                        writer.Write(sender.cells[x, y].isRevealed); // 5 -> bool
+                    }
+                }
                 break;
             default:
                 Debug.Log("[SERIALIZER] Trying to serialize NONE type...");
@@ -145,6 +160,21 @@ public static class Serialize
                 userName = reader.ReadString(); // 3 -> string
                 colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
                 sender.clientData = new ClientData(userID, userName, colorPlayer);
+                break;
+            case SenderType.SENDBOARD:
+                int width = reader.ReadInt32(); // 2 -> int
+                int height = reader.ReadInt32(); // 3 -> int
+                Cell[,] cells = new Cell[width, height];
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        Cell.CellType cellType = (Cell.CellType)reader.ReadInt32(); // 4 -> int
+                        bool isRevealed = reader.ReadBoolean(); // 5 -> bool
+                        cells[x, y] = new Cell { cellType = cellType, isRevealed = isRevealed };
+                    }
+                }
+                sender.cells = cells;
                 break;
             default:
                 Debug.Log("[SERIALIZER] Trying to deserialize NONE type...");

@@ -14,7 +14,7 @@ public class Game : MonoBehaviour
         Extreme, // Expert = 20x20, 85 mines, 0.21% chance of mine
         Legend // Legend = 25x25, 160 mines, 0.25% chance of mine
     }
-    public Difficulty difficulty = Difficulty.Beginner;
+    public Difficulty difficulty;
     private int width;
     private int height;
     private int mines;
@@ -49,7 +49,7 @@ public class Game : MonoBehaviour
     {
         // For now, the game is generated when the game starts. A menu will be added later
         // StartGame();
-        difficulty = SceneManager.difficulty;
+        //difficulty = SceneManager.difficulty;
         StartGame(difficulty);
     }
 
@@ -92,7 +92,26 @@ public class Game : MonoBehaviour
         // Left click
         if (Input.GetMouseButtonDown(0))
         {
-            Reveal();
+            Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            int x = Mathf.FloorToInt(position.x);
+            int y = Mathf.FloorToInt(position.y);
+            if (x >= 0 && x < width && y >= 0 && y < height)
+            {
+                if (!firstGameClick)
+                {
+                    //int[] bounds = GameGenerator.GetBoundsFromFirstCellRevealed(x, y);
+                    //cells = GameGenerator.GenerateMines(cells, mines, bounds);
+                    //cells = GameGenerator.GenerateNumbers(cells);
+                    GameResolver.ResolveCells(cells, x, y);
+                    firstGameClick = true;
+                }
+                else
+                {
+                    cells = GameResolver.ResolveCells(cells, x, y);
+                }
+            }
+            
+            ReloadBoard();
         }
         // Right click
         if (Input.GetMouseButtonDown(1))
@@ -371,78 +390,28 @@ public class Game : MonoBehaviour
     {
         Debug.Log("Creating " + difficulty.ToString() + " map");
 
-        SetBoardSize(difficulty);
-        SetCamera();
+        // Get width, height and mines from difficulty
+        int[] widthHeightMines = GameGenerator.GetWidthHeightMines((DifficultyNew)(int)difficulty);
+        width = widthHeightMines[0];
+        height = widthHeightMines[1];
+        mines = widthHeightMines[2];
+        cells = GameGenerator.GenerateCells(width, height);
 
         letIngameInput = true;
         firstGameClick = false;
 
-        cells = new Cell[width, height];
-
-        SetupCells();
+        SetCamera();
 
         ReloadBoard();
     }
-    private void CreateFullMap()
+    private void CreateFullMap(int[] bounds = null)
     {
-        Debug.Log("Creating full " + difficulty.ToString() + " map");      
+        Debug.Log("Creating full " + difficulty.ToString() + " map");
 
-        CreateMines();
-        SetupNumbers();
+        cells = GameGenerator.GenerateMines(cells, mines, bounds);
+        cells = GameGenerator.GenerateNumbers(cells);
 
         ReloadBoard();
-    }
-
-    private void SetBoardSize(Difficulty difficulty)
-    {
-        this.difficulty = difficulty;
-        switch(this.difficulty)
-        {
-            case Difficulty.Beginner: // 9x9 10 mines
-                width = 9;
-                height = 9;
-                mines = 10;
-                break;
-            case Difficulty.Intermediate: // 16x16 40 mines
-                width = 16;
-                height = 16;
-                mines = 40;
-                break;
-            case Difficulty.Extreme: // 20x20 85 mines
-                width = 20;
-                height = 20;
-                mines = 85;
-                break;
-            case Difficulty.Legend: // 25x25 160 mines
-                width = 25;
-                height = 25;
-                mines = 160;
-                break;
-            default:
-                width = 2;
-                height = 2;
-                mines = 1;
-                break;
-        }
-    }
-    
-    private void SetupCells()
-    {
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                cells[x, y] = new Cell
-                {
-                    position = new Vector3Int(x, y, 0),
-                    cellType = Cell.CellType.Empty,
-                    isRevealed = false,
-                    isFlagged = false,
-                    isExploded = false,
-                    number = 0
-                };
-            }
-        }
     }
 
     // Mine generation
