@@ -21,7 +21,6 @@ public class MultiPlayerGame : MonoBehaviour
     private int mines;
 
     private bool letIngameInput = true; // This boolean locks the input of the player. If false player can not play
-    private bool gameHasStarted = false; // Flag used for the first clicks of the game. If true, the first click will be ignored
     public int numberOfStartingHoles = 4;
     private bool invalidBomb = false;
     private bool isGodMode = false; // Debug key boolean to reveal all tiles
@@ -120,7 +119,7 @@ public class MultiPlayerGame : MonoBehaviour
             if (x >= 0 && x < width && y >= 0 && y < height)
             {
                 Cell cell = cells[x, y];
-                if (cell.isFlagged) return;
+                if (cell.isFlagged || cell.isRevealed) return;
 
                 eventHandler.SendRevealCell(x, y);
             }
@@ -233,8 +232,8 @@ public class MultiPlayerGame : MonoBehaviour
         // If cell is an empty cell, reveal numbers and empty cells
         if (cell.cellType == Cell.CellType.Empty)
         {
-            RevealEmptyCells(cell);
-
+            //RevealEmptyCells(cell);
+            
             if (CheckWin())
             {
                 Win();
@@ -278,22 +277,49 @@ public class MultiPlayerGame : MonoBehaviour
     private void RevealEmptyCells(Cell cell)
     {
         if (cell.isRevealed) return;
-        if (cell.cellType == Cell.CellType.Mine) return;
 
-        lastRevealedCell = cell;
         cell.isRevealed = true;
         cells[cell.position.x, cell.position.y] = cell;
-        
-        eventHandler.SendRevealCell(cell.position.x, cell.position.y);
 
         if (cell.cellType == Cell.CellType.Empty)
         {
-            List<Cell> nearCells = GetNearCells(cell);
-            foreach (Cell nearCell in nearCells)
+            for (int i = -1; i <= 1; i++)
             {
-                RevealEmptyCells(nearCell);
+                for (int j = -1; j <= 1; j++)
+                {
+                    int x = cell.position.x + i;
+                    int y = cell.position.y + j;
+                    if (x >= 0 && x < width && y >= 0 && y < height)
+                    {
+                        Cell cell1 = cells[x, y];
+                        if (!cell1.isRevealed)
+                        {
+                            //eventHandler.SendRevealCell(x, y);
+                            RevealEmptyCells(cell1);
+                        }
+                    }
+                }
             }
         }
+        //if (cell.isRevealed) return;
+        //if (cell.cellType == Cell.CellType.Mine) return;
+
+        ////lastRevealedCell = cell;
+        //cell.isRevealed = true;
+        //cell.color = color;
+        //cells[cell.position.x, cell.position.y] = cell;
+
+
+        //if (cell.cellType == Cell.CellType.Empty)
+        //{
+        //    List<Cell> nearCells = GetNearCells(cell);
+        //    foreach (Cell nearCell in nearCells)
+        //    {
+        //        RevealEmptyCells(nearCell);
+        //    }
+        //}
+
+
     }
 
     // This functions return all the cells that are near the cell passed as parameter
@@ -418,6 +444,8 @@ public class MultiPlayerGame : MonoBehaviour
         this.cells = GameGenerator.GenerateNumbers(cells);
         width = cells.GetLength(0);
         height = cells.GetLength(1);
+        mines = GameGenerator.GetWidthHeightMines((DifficultyNew)difficulty)[2];
+        difficulty = Difficulty.Extreme;
         SetCamera();
         ReloadBoard();
     }
