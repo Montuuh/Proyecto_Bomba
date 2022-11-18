@@ -63,7 +63,7 @@ public class MultiPlayerGame : MonoBehaviour
         //StartGame(difficulty);
 
         localPlayer = GameObject.Find("ClientManager").GetComponent<Client>();
-
+        localPlayer.game = this;
         eventHandler = GameObject.Find("ClientManager").GetComponent<EventHandler>();
     }
 

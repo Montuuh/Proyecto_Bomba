@@ -60,7 +60,7 @@ public class Client : MonoBehaviour
     
     public Chat chat;
     private bool gameJoined = false;
-    private MultiPlayerGame game;
+    public MultiPlayerGame game;
 
     private List<SceneManager.Scene> scenesToLoad = new List<SceneManager.Scene>();
 
@@ -73,21 +73,17 @@ public class Client : MonoBehaviour
 
     private void Update()
     {
-        if(gameJoined)
-        {
-            game = GameObject.Find("Grid").GetComponent<MultiPlayerGame>();
-            if (game != null)
-            {
-                game.StartGame(cellsToUpload);
-                cellsToUpload = null;
-                gameJoined = false;
-            }
-        }
-
         if (scenesToLoad.Count > 0)
         {
             SceneManager.LoadScene(scenesToLoad[0]);
             scenesToLoad.Remove(scenesToLoad[0]);
+        }
+
+        if (game != null && gameJoined)
+        {
+            game.StartGame(cellsToUpload);
+            cellsToUpload = null;
+            gameJoined = false;
         }
     }
 
@@ -258,15 +254,8 @@ public class Client : MonoBehaviour
                 break;
             case SenderType.CLIENTCELL:
                 Debug.Log("[CLIENT] Received CLIENTCELL sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.cellPosX + " | " + sender.cellPosY);
-
-                if (game == null)
-                    gameJoined = true;
-                else
-                {
                     game.color = sender.clientData.colorPlayer;
                     game.PendingToReveal(sender.cellPosX, sender.cellPosY);
-                }
-
                 break;
             case SenderType.STARTGAME:
                 Debug.Log("[CLIENT] Received STARTGAME sender type from server");
@@ -291,7 +280,6 @@ public class Client : MonoBehaviour
                 cellsToUpload = sender.cells;
                 if (game == null)
                     gameJoined = true;
-
                 break;
             default:
                 Debug.Log("[CLIENT] Trying to decode UNKNOWN sender type...");
