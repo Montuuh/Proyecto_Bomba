@@ -579,10 +579,13 @@ public class Game : MonoBehaviour
     #region Helpers
     private void QuitGame()
     {
+        #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
+        #else
         Application.Quit();
+        #endif
     }
-    
+
     // This function reloads the drawing of the board.
     // Called whenever a cell changes the state
     private void ReloadBoard()
@@ -621,5 +624,5 @@ public class Game : MonoBehaviour
                 break;
         }
     }
-    #endregion Helpers
+#endregion Helpers
 }
