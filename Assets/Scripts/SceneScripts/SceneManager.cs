@@ -4,10 +4,6 @@ using UnityEngine;
 
 public static class SceneManager
 {
-    // Variable holder
-    public static Game.Difficulty difficulty;
-    public static MultiPlayerGame.Difficulty multiDifficulty;
-
     // Enum with all scenes
     // Has to be named exactly like the scene in Unity
     public enum Scene

@@ -14,48 +14,44 @@ public class SinglePlayerLobbyUI : MonoBehaviour
     public void BeginnerButton()
     {
         // Set difficulty to easy
-        SceneManager.difficulty = Game.Difficulty.Beginner;
-        Play();
+        Play(DifficultyNew.Beginner);
     }
 
     public void IntermediateButton()
     {
         // Set difficulty to medium
-        SceneManager.difficulty = Game.Difficulty.Intermediate;
-        Play();
+        Play(DifficultyNew.Intermediate);
     }
 
     public void ExtremeButton()
     {
         // Set difficulty to hard
-        SceneManager.difficulty = Game.Difficulty.Extreme;
-        Play();
+        Play(DifficultyNew.Extreme);
     }
 
     public void LegendButton()
     {
         // Set difficulty to hard
-        SceneManager.difficulty = Game.Difficulty.Legend;
-        Play();
+        Play(DifficultyNew.Legend);
     }
 
-    public void Play()
+    public void Play(DifficultyNew difficulty)
     {
-        switch (SceneManager.difficulty)
+        switch (difficulty)
         {
-            case Game.Difficulty.Beginner:
+            case DifficultyNew.Beginner:
                 Debug.Log("Beginner");
                 SceneManager.LoadScene(SceneManager.Scene.SinglePlayerGame);
                 break;
-            case Game.Difficulty.Intermediate:
+            case DifficultyNew.Intermediate:
                 Debug.Log("Intermediate");
                 SceneManager.LoadScene(SceneManager.Scene.SinglePlayerGame);
                 break;
-            case Game.Difficulty.Extreme:
+            case DifficultyNew.Extreme:
                 Debug.Log("Extreme");
                 SceneManager.LoadScene(SceneManager.Scene.SinglePlayerGame);
                 break;
-            case Game.Difficulty.Legend:
+            case DifficultyNew.Legend:
                 Debug.Log("Legend");
                 SceneManager.LoadScene(SceneManager.Scene.SinglePlayerGame);
                 break;

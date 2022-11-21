@@ -45,12 +45,10 @@ public class ClientData
 
 public class Client : MonoBehaviour
 {
-    public enum Protocol { TCP, UDP }
-    public Protocol protocol;
-
     public ClientData clientData;
-
-    private int serverPort;
+    
+    private Protocol protocol;
+    
     private string serverIP;
     
     private Thread clientThread;
@@ -58,14 +56,18 @@ public class Client : MonoBehaviour
     private IPEndPoint serverIPEP;
     private EndPoint serverEP;
     
-    public Chat chat;
-    private bool gameJoined = false;
+
+    [HideInInspector]
     public MultiPlayerGame game;
-
-    private List<SceneManager.Scene> scenesToLoad = new List<SceneManager.Scene>();
-
+    private List<Vector2Int> pendingRevealedCells = new List<Vector2Int>();
     private Cell[,] cellsToUpload;
+    
+    public Chat chat;
+    private List<Message> pendingMessages = new List<Message>();
+    private List<ClientData> pendingPlayers = new List<ClientData>();
 
+    private List<SceneManager.Scene> pendingScenes = new List<SceneManager.Scene>();
+    
     void Start()
     {
         clientData = new ClientData();
@@ -73,17 +75,42 @@ public class Client : MonoBehaviour
 
     private void Update()
     {
-        if (scenesToLoad.Count > 0)
+        if (pendingScenes.Count > 0)
         {
-            SceneManager.LoadScene(scenesToLoad[0]);
-            scenesToLoad.Remove(scenesToLoad[0]);
+            SceneManager.LoadScene(pendingScenes[0]);
+            pendingScenes.Remove(pendingScenes[0]);
         }
 
-        if (game != null && gameJoined)
+        if (game != null)
         {
-            game.StartGame(cellsToUpload);
-            cellsToUpload = null;
-            gameJoined = false;
+            if (cellsToUpload != null)
+            {
+                game.StartGame(cellsToUpload);
+                cellsToUpload = null;
+            }
+            if (pendingRevealedCells.Count > 0)
+            {
+                game.Reveal(pendingRevealedCells[0].x, pendingRevealedCells[0].y);
+                pendingRevealedCells.RemoveAt(0);
+            }
+        }
+
+        if (chat == null)
+        {
+            chat = FindObjectOfType<Chat>();
+        }
+        else
+        {
+            if (pendingMessages.Count > 0)
+            {
+                chat.SendMessageToChat(pendingMessages[0].clientData, pendingMessages[0].text);
+                pendingMessages.RemoveAt(0);
+            }
+            if (pendingPlayers.Count > 0)
+            {
+                chat.AddPlayerToHUD(pendingPlayers[0]);
+                pendingPlayers.RemoveAt(0);
+            }
         }
     }
 
@@ -95,12 +122,13 @@ public class Client : MonoBehaviour
             clientThread.Abort();
     }
     
-    public void ConnectToServer(string ip = null, int port = 0)
+    public void ConnectToServer(string ip, bool isTcp = false)
     {
-        if (ip != null)
-            serverIP = ip;
-        if (port != 0)
-            serverPort = port;
+        serverIP = ip;
+        if (isTcp)
+            protocol = Protocol.TCP;
+        else
+            protocol = Protocol.UDP;
 
         // Socket initialization
         if (protocol == Protocol.TCP)
@@ -117,10 +145,10 @@ public class Client : MonoBehaviour
     private void ClientThread()
     {
         // Client IP EndPoint
-        Debug.Log("[CLIENT] Trying to connect to server --> " + serverIP + ":" + serverPort);
         IPAddress ipAddress = IPAddress.Parse(serverIP);
-        serverIPEP = new IPEndPoint(ipAddress, serverPort);
+        serverIPEP = new IPEndPoint(ipAddress, 9500);
         serverEP = (EndPoint)serverIPEP;
+        Debug.Log("[CLIENT] Trying to connect to server --> " + serverIPEP.ToString());
 
         if (protocol == Protocol.TCP)
         {
@@ -129,7 +157,7 @@ public class Client : MonoBehaviour
 
             if (socket.Connected)
             {
-                Debug.Log("[CLIENT] Connected to server --> " + serverIP + ":" + serverPort);
+                Debug.Log("[CLIENT] Connected to server --> " + serverIP + ":9500");
                 // Send welcome message
                 SendClientChat(clientData, "Username: " + clientData.userName + " | UID: " + clientData.userID + " | Connected to server");
 
@@ -250,36 +278,31 @@ public class Client : MonoBehaviour
                 break;
             case SenderType.CLIENTCHAT:
                 Debug.Log("[CLIENT] Received CLIENTCHAT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.clientChat);
-                if (chat != null) chat.SetPendingMessage(sender.clientData, sender.clientChat);
+                pendingMessages.Add(new Message { text = sender.clientChat, clientData = sender.clientData });                
                 break;
             case SenderType.CLIENTCELL:
                 Debug.Log("[CLIENT] Received CLIENTCELL sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.cellPosX + " | " + sender.cellPosY);
-                    game.color = sender.clientData.colorPlayer;
-                    game.PendingToReveal(sender.cellPosX, sender.cellPosY);
+                game.color = sender.clientData.colorPlayer;
+                pendingRevealedCells.Add(new Vector2Int(sender.cellPosX, sender.cellPosY));
                 break;
             case SenderType.STARTGAME:
                 Debug.Log("[CLIENT] Received STARTGAME sender type from server");
-                scenesToLoad.Add(SceneManager.Scene.MultiplayerGame);
+                pendingScenes.Add(SceneManager.Scene.MultiplayerGame);
                 break;
             case SenderType.CLIENTDISCONNECT:
                 Debug.Log("[CLIENT] Received CLIENTDISCONNECT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
-                if (chat != null) chat.SetPendingMessage(null, sender.clientData.userName + " has left the server :(");
+                pendingMessages.Add(new Message { text = sender.clientData.userName + " has left the server :(" });
                 // ToDo: Check if you have been disconnected
-
                 break;
             case SenderType.CLIENTCONNECT:
                 Debug.Log("[CLIENT] Received CLIENTCONNECT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
-                if (chat != null) chat.SetPendingMessage(null, sender.clientData.userName + " has joined the server :)");
-                if (chat != null) chat.AddPlayer(sender.clientData);
-
-                if (sender.clientData.userID == clientData.userID && sender.clientData.userName == clientData.userName) clientData.colorPlayer = sender.clientData.colorPlayer;
-
+                pendingMessages.Add(new Message { text = sender.clientData.userName + " has joined the server :)" });
+                pendingPlayers.Add(sender.clientData);
+                SetColorIfPlayer(sender.clientData);
                 break;
             case SenderType.SENDBOARD:
                 Debug.Log("[CLIENT] Received SENDBOARD sender type from server: ");
                 cellsToUpload = sender.cells;
-                if (game == null)
-                    gameJoined = true;
                 break;
             default:
                 Debug.Log("[CLIENT] Trying to decode UNKNOWN sender type...");
@@ -287,4 +310,12 @@ public class Client : MonoBehaviour
         }
     }
     #endregion DECODERS
+
+    private void SetColorIfPlayer(ClientData clientData)
+    {
+        if (clientData.userName == this.clientData.userName && clientData.userID == this.clientData.userID)
+        {
+            this.clientData.colorPlayer = clientData.colorPlayer;
+        }
+    }
 }

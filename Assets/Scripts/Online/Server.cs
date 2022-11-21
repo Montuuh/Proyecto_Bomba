@@ -9,16 +9,16 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+public enum Protocol { TCP, UDP }
+
 public class Server : MonoBehaviour
 {
-    public enum Protocol { TCP, UDP }
     public Protocol protocol;
 
-    public int serverPort;
     public string serverIP;
     private IPEndPoint serverIPEP;
 
-    private Socket serverSocket;
+    public Socket serverSocket;
 
     // Thread
     private Thread serverAcceptThread;
@@ -30,12 +30,15 @@ public class Server : MonoBehaviour
     private EndPoint clientEP;
 
     private List<EndPoint> clientEPList = new List<EndPoint>();
+    private Dictionary<EndPoint, ClientData> clientsUDP = new Dictionary<EndPoint, ClientData>();
     private List<Socket> clientSocketList = new List<Socket>();
+    private Dictionary<Socket, ClientData> clientsTCP = new Dictionary<Socket, ClientData>();
+
 
     private List<ColorPlayer> colorPlayerList = new List<ColorPlayer>();
     private List<ColorPlayer> colorPlayerAvailable = new List<ColorPlayer>();
+    private List<ClientData> pendingNewPlayer = new List<ClientData>();
     private bool toSendBoard = false;
-    private List<ClientData> pendingClientDataColor = new List<ClientData>();
 
     void Start()
     {
@@ -60,14 +63,14 @@ public class Server : MonoBehaviour
 
     private void Update()
     {
-        if (pendingClientDataColor.Count > 0)
+        if (pendingNewPlayer.Count > 0)
         {
-            ColorPlayer colorPlayer = GetColorPlayer();
-            Sender sender = new Sender(SenderType.CLIENTCONNECT) { clientData = pendingClientDataColor[0] };
+            ColorPlayer colorPlayer = GetRandomColorPlayer();
+            Sender sender = new Sender(SenderType.CLIENTCONNECT) { clientData = pendingNewPlayer[0] };
             sender.clientData.colorPlayer = colorPlayer;
             SendClientConnectedToAll(sender);
 
-            pendingClientDataColor.RemoveAt(0);
+            pendingNewPlayer.RemoveAt(0);
         }
 
         if (toSendBoard)
@@ -78,19 +81,12 @@ public class Server : MonoBehaviour
         }
     }
 
-    public void StartServer(string ip = null, int port = 0, bool isTcp = false)
+    public void StartServer(bool isTcp = false)
     {
-        if (ip != null)
-            serverIP = ip;
-        if (port != 0)
-            serverPort = port;
         if (isTcp)
             protocol = Protocol.TCP;
         else
             protocol = Protocol.UDP;
-
-        clientSocketList = new List<Socket>();
-        clientEPList = new List<EndPoint>();
 
         // Initialize serverSocket
         if (protocol == Protocol.TCP)
@@ -107,9 +103,9 @@ public class Server : MonoBehaviour
         clientEP = (EndPoint)clientIPEP;
 
         // Server start
-        serverIPEP = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
+        serverIPEP = new IPEndPoint(IPAddress.Any, 9500);
         serverSocket.Bind(serverIPEP);
-        Debug.Log("[SERVER] Server started on " + serverIP + ":" + serverPort);
+        Debug.Log("[SERVER] Server started on " + serverIPEP.ToString());
 
         if (protocol == Protocol.TCP)
         {
@@ -176,14 +172,10 @@ public class Server : MonoBehaviour
             if (!clientEPList.Contains(clientEP))
             {
                 clientEPList.Add(clientEP);
+                clientsUDP.Add(clientEP, sender.clientData);
                 Debug.Log("[SERVER] Client connected: " + clientEP.ToString() + " with username: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString());
 
-                // Send welcome message to all clients
-                //sender.senderType = SenderType.CLIENTCONNECT;
-                //SendClientConnectedToAll(sender);
-
-                // We get a random color and send it to everyone
-                pendingClientDataColor.Add(sender.clientData);
+                pendingNewPlayer.Add(sender.clientData);
             }
             else
             {
@@ -424,7 +416,6 @@ public class Server : MonoBehaviour
             case SenderType.STARTGAME: // Used when the host starts the game
                 Debug.Log("[SERVER] Received Event = STARTGAME game sender type");
                 SendStartGameToAll(sender);
-
                 toSendBoard = true;
                 break;
             case SenderType.CLIENTDISCONNECT: // Used when a client disconnects
@@ -465,6 +456,7 @@ public class Server : MonoBehaviour
         else
         {
             clientEPList.Remove(clientEP);
+            clientsUDP.Remove(clientEP);
         }
 
         // Remove color form list and add color to available colors
@@ -472,11 +464,10 @@ public class Server : MonoBehaviour
         colorPlayerList.Remove(clientData.colorPlayer);
     }
 
-    private ColorPlayer GetColorPlayer()
+    private ColorPlayer GetRandomColorPlayer()
     {
         ColorPlayer colorPlayer = new ColorPlayer();
         
-
         int randomIndex = UnityEngine.Random.Range(0, colorPlayerAvailable.Count);
         colorPlayer = colorPlayerAvailable[randomIndex];
         colorPlayerAvailable.Remove(colorPlayer);
