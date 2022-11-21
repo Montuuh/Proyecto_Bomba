@@ -103,7 +103,7 @@ public class Server : MonoBehaviour
         clientEP = (EndPoint)clientIPEP;
 
         // Server start
-        serverIPEP = new IPEndPoint(IPAddress.Any, 9500);
+        serverIPEP = new IPEndPoint(IPAddress.Parse(IPAddressHelper.GetLocalIPAddress()), 9500);
         serverSocket.Bind(serverIPEP);
         Debug.Log("[SERVER] Server started on " + serverIPEP.ToString());
 
