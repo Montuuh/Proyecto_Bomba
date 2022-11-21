@@ -22,8 +22,6 @@ public class MultiPlayerGame : MonoBehaviour
     private Cell[,] cells; // 2D array of current cells
     private SinglePlayerGameUI buttonMainMenuUI; // SinglePlayerGameUI object
 
-    public ColorPlayer color = ColorPlayer.NONE;
-
     public Client localPlayer;
 
     private EventHandler eventHandler;
@@ -117,7 +115,7 @@ public class MultiPlayerGame : MonoBehaviour
 
     #region Input Logic
     // When received Reveal cell from server
-    public void Reveal(int x, int y)
+    public void Reveal(int x, int y, ClientData clientData)
     {
         Cell cell = cells[x, y];
         if (cell.isFlagged) return;
@@ -153,7 +151,7 @@ public class MultiPlayerGame : MonoBehaviour
                                 Cell cellNearby = cells[x + i, y + j];
                                 if (!cellNearby.isFlagged && !cellNearby.isRevealed)
                                 {
-                                    Reveal(x + i, y + j);
+                                    eventHandler.SendRevealCell(x + i, y + j);
                                 }
                             }
                         }
@@ -171,7 +169,7 @@ public class MultiPlayerGame : MonoBehaviour
         // If cell is an empty cell, reveal numbers and empty cells
         if (cell.cellType == Cell.CellType.Empty)
         {
-            RevealEmptyCells(cell);
+            RevealEmptyCells(cell, clientData);
 
             if (CheckWin())
             {
@@ -189,7 +187,7 @@ public class MultiPlayerGame : MonoBehaviour
         else
         {
             cell.isRevealed = true;
-            cell.color = color;
+            cell.color = clientData.colorPlayer;
             cells[x, y] = cell;
             if (CheckWin())
             {
@@ -201,12 +199,12 @@ public class MultiPlayerGame : MonoBehaviour
     }
 
     // Recursive function to reveal all empty cells that are close to each other
-    private void RevealEmptyCells(Cell cell)
+    private void RevealEmptyCells(Cell cell, ClientData clientData)
     {
         if (cell.isRevealed || cell.color != ColorPlayer.NONE) return;
 
         cell.isRevealed = true;
-        cell.color = color;
+        cell.color = clientData.colorPlayer;
         cells[cell.position.x, cell.position.y] = cell;
 
         if (cell.cellType == Cell.CellType.Empty)
@@ -222,7 +220,7 @@ public class MultiPlayerGame : MonoBehaviour
                         Cell cell1 = cells[x, y];
                         if (!cell1.isRevealed)
                         {
-                            RevealEmptyCells(cell1);
+                            RevealEmptyCells(cell1, clientData);
                         }
                     }
                 }

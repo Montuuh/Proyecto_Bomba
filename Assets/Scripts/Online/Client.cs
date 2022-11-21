@@ -59,7 +59,7 @@ public class Client : MonoBehaviour
 
     [HideInInspector]
     public MultiPlayerGame game;
-    private List<Vector2Int> pendingRevealedCells = new List<Vector2Int>();
+    private Dictionary<Vector2Int, ClientData> pendingRevealedCells = new Dictionary<Vector2Int, ClientData>();
     private Cell[,] cellsToUpload;
     
     public Chat chat;
@@ -90,8 +90,11 @@ public class Client : MonoBehaviour
             }
             if (pendingRevealedCells.Count > 0)
             {
-                game.Reveal(pendingRevealedCells[0].x, pendingRevealedCells[0].y);
-                pendingRevealedCells.RemoveAt(0);
+                foreach (KeyValuePair<Vector2Int, ClientData> revealedCell in pendingRevealedCells)
+                {
+                    game.Reveal(revealedCell.Key.x, revealedCell.Key.y, revealedCell.Value);
+                }
+                pendingRevealedCells.Clear();
             }
         }
 
@@ -282,8 +285,7 @@ public class Client : MonoBehaviour
                 break;
             case SenderType.CLIENTCELL:
                 Debug.Log("[CLIENT] Received CLIENTCELL sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.cellPosX + " | " + sender.cellPosY);
-                game.color = sender.clientData.colorPlayer;
-                pendingRevealedCells.Add(new Vector2Int(sender.cellPosX, sender.cellPosY));
+                pendingRevealedCells.Add(new Vector2Int(sender.cellPosX, sender.cellPosY), sender.clientData);
                 break;
             case SenderType.STARTGAME:
                 Debug.Log("[CLIENT] Received STARTGAME sender type from server");
