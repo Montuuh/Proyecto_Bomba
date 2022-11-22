@@ -90,5 +90,17 @@ public static class IPAddressHelper
         return "192.168." + decodedIP;
     }
 
+    // Server code validator
+    public static bool IsValidServerCode(string code)
+    {
+        //if (code.Length != 6)
+        //    return false;
 
+        foreach (char c in code)
+        {
+            if (c != 'A' && c != 'B' && c != 'C' && c != 'D' && c != 'E' && c != 'F' && c != 'G' && c != 'H' && c != 'I' && c != 'J' && c != 'Z')
+                return false;
+        }
+        return true;
+    }
 }

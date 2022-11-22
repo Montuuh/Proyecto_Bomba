@@ -78,8 +78,12 @@ public class ClientLobby : MonoBehaviour
     }
     public void OnClickJoinToServer()
     {
-        if (_inputJoinCode == null || _inputJoinCode == "")
+        if (_inputJoinCode == null || _inputJoinCode == "" || !IPAddressHelper.IsValidServerCode(_inputJoinCode))
+        {
+            inputJoinIP.text = _inputJoinCode = "";
+            inputJoinIP.placeholder.GetComponent<TMP_Text>().text = "Invalid code";
             return;
+        }
 
         string ip = IPAddressHelper.DecodeIPAddress(_inputJoinCode);
         client.ConnectToServer(ip);
