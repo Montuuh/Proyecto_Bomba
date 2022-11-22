@@ -17,6 +17,7 @@ public class Server : MonoBehaviour
 
     public string serverIP;
     private IPEndPoint serverIPEP;
+    private string serverCode;
 
     public Socket serverSocket;
 
@@ -105,7 +106,9 @@ public class Server : MonoBehaviour
         // Server start
         serverIPEP = new IPEndPoint(IPAddress.Parse(IPAddressHelper.GetLocalIPAddress()), 9500);
         serverSocket.Bind(serverIPEP);
-        Debug.Log("[SERVER] Server started on " + serverIPEP.ToString());
+        serverCode = IPAddressHelper.EncodeIPAddress(serverIPEP.Address.ToString());
+        Debug.Log("[SERVER] Server started on " + serverIPEP.ToString() + " with protocol " + protocol.ToString());
+        Debug.Log("[SERVER] Server code: " + serverCode);
 
         if (protocol == Protocol.TCP)
         {

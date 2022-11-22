@@ -55,7 +55,7 @@ public class Client : MonoBehaviour
     private Socket socket;
     private IPEndPoint serverIPEP;
     private EndPoint serverEP;
-    
+    public string serverCode;
 
     [HideInInspector]
     public MultiPlayerGame game;
@@ -143,6 +143,8 @@ public class Client : MonoBehaviour
         clientThread = new Thread(ClientThread);
         clientThread.IsBackground = true;
         clientThread.Start();
+
+        serverCode = IPAddressHelper.EncodeIPAddress(ip);
     }
 
     private void ClientThread()

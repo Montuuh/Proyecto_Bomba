@@ -10,6 +10,7 @@ public class ClientLobby : MonoBehaviour
 {
     public TMP_InputField inputJoinIP;
     private string _inputJoinIP;
+    private string _inputJoinCode;
     public Button buttonJoinToServer;
     
     public Button buttonCreateServer;
@@ -23,9 +24,10 @@ public class ClientLobby : MonoBehaviour
     public Button buttonStartGame;
 
     public TMP_InputField inputChat;
+    public TMP_Text serverCodeIn;
     private string _inputChat;
     public GameObject chat;
-
+    
     public Toggle checkboxIsTcp;
     private bool isTcp = false;
 
@@ -58,29 +60,33 @@ public class ClientLobby : MonoBehaviour
         GameObject serverGo = new GameObject("ServerManager", typeof(Server), typeof(DontDestroyMe));
         Server server = serverGo.GetComponent<Server>();
         server.StartServer(isTcp);
-
-        string A = IPAddressHelper.GetLocalIPAddress();
-        string b = IPAddressHelper.EncodeIPAddress(A);
-        string c = IPAddressHelper.DecodeIPAddress(b);
-        client.ConnectToServer(c, isTcp);
+        client.ConnectToServer(IPAddressHelper.GetLocalIPAddress(), isTcp);
 
         DeactivateAll();
         chat.SetActive(true);
+        serverCodeIn.text = client.serverCode;
     }
 
+    // Not used for now, we are using join by server code
     public void OnInputJoinIP()
     {
         _inputJoinIP = inputJoinIP.text;
     }
+    public void OnInputJoinServerCode()
+    {
+        _inputJoinCode = inputJoinIP.text;
+    }
     public void OnClickJoinToServer()
     {
-        if ((_inputJoinIP == null || _inputJoinIP == ""))
+        if (_inputJoinCode == null || _inputJoinCode == "")
             return;
 
-        client.ConnectToServer(_inputJoinIP);
+        string ip = IPAddressHelper.DecodeIPAddress(_inputJoinCode);
+        client.ConnectToServer(ip);
 
         DeactivateAll();
         chat.SetActive(true);
+        serverCodeIn.text = client.serverCode;
         buttonStartGame.gameObject.SetActive(false);
     }
 
@@ -93,7 +99,6 @@ public class ClientLobby : MonoBehaviour
             inputChat.text = "";
         }
     }
-
 
     public void OnClickHostServer()
     {
@@ -109,6 +114,7 @@ public class ClientLobby : MonoBehaviour
         inputJoinIP.gameObject.SetActive(true);
         buttonJoinToServer.gameObject.SetActive(true);
         buttonBack.gameObject.SetActive(true);
+        client.serverCode= _inputJoinCode;
     }
 
     public void OnValueChangeIsTcp()
@@ -118,7 +124,7 @@ public class ClientLobby : MonoBehaviour
 
     public void OnClickBack()
     {
-        _inputJoinIP = inputJoinIP.text = "";
+        _inputJoinIP = inputJoinIP.text = _inputJoinCode = "";
         DeactivateAll();
         buttonJoinServer.gameObject.SetActive(true);
         buttonHostServer.gameObject.SetActive(true);
@@ -126,7 +132,8 @@ public class ClientLobby : MonoBehaviour
     
     public void OnClickStartGame()
     {
-        client.SendStartGame();
+        if (client.clientData.isHost)
+            client.SendStartGame();
     }
     #endregion INPUT EVENTS
 
