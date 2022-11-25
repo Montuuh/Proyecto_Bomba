@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 // color enum
 public enum ColorPlayer
@@ -70,7 +71,8 @@ public class Client : MonoBehaviour
     
     void Start()
     {
-        clientData = new ClientData();
+        if (clientData == null)
+            clientData = new ClientData();
     }
 
     private void Update()
@@ -119,10 +121,7 @@ public class Client : MonoBehaviour
 
     private void OnDisable()
     {
-        if (socket != null)
-            socket.Close();
-        if (clientThread != null)
-            clientThread.Abort();
+        DisconnectFromServer();
     }
     
     public void ConnectToServer(string ip, bool isTcp = false)
@@ -147,6 +146,13 @@ public class Client : MonoBehaviour
         serverCode = IPAddressHelper.EncodeIPAddress(ip);
     }
 
+    public void DisconnectFromServer()
+    {
+        if (socket != null)
+            socket.Close();
+        if (clientThread != null)
+            clientThread.Abort();
+    }
     private void ClientThread()
     {
         // Client IP EndPoint
@@ -268,6 +274,24 @@ public class Client : MonoBehaviour
             socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
     }
+
+    public void GetClientListFromServer()
+    {
+        Sender sender = new Sender(SenderType.SENDCLIENTLIST);
+
+        byte[] data = Serialize.SerializeSender(sender);
+
+        if (protocol == Protocol.TCP)
+        {
+            Debug.Log("[CLIENT] Sending SENDCLIENTLIST to server: " + socket.RemoteEndPoint.ToString() + " || Sender type: " + sender.senderType);
+            socket.Send(data, data.Length, SocketFlags.None);
+        }
+        else
+        {
+            Debug.Log("[CLIENT] Sending SENDCLIENTLIST to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType);
+            socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
+        }
+    }
     #endregion SENDERS
 
     #region DECODERS
@@ -303,10 +327,15 @@ public class Client : MonoBehaviour
                 pendingMessages.Add(new Message { text = sender.clientData.userName + " has joined the server :)" });
                 pendingPlayers.Add(sender.clientData);
                 SetColorIfPlayer(sender.clientData);
+                GetClientListFromServer();
                 break;
             case SenderType.SENDBOARD:
                 Debug.Log("[CLIENT] Received SENDBOARD sender type from server: ");
                 cellsToUpload = sender.cells;
+                break;
+            case SenderType.SENDCLIENTLIST:
+                Debug.Log("[CLIENT] Received SENDCLIENTLIST sender type from server: ");
+                pendingPlayers = sender.clientList.ToList<ClientData>();
                 break;
             default:
                 Debug.Log("[CLIENT] Trying to decode UNKNOWN sender type...");

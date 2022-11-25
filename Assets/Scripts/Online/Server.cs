@@ -52,14 +52,7 @@ public class Server : MonoBehaviour
 
     private void OnDisable()
     {
-        if (serverSocket != null)
-            serverSocket.Close();
-        if (serverAcceptThread != null)
-            serverAcceptThread.Abort();
-        if (serverThread != null)
-            serverThread.Abort();
-        if (clientThread != null)
-            clientThread.Abort();
+        CloseServer();
     }
 
     private void Update()
@@ -123,6 +116,18 @@ public class Server : MonoBehaviour
             serverThread.IsBackground = true;
             serverThread.Start();
         }
+    }
+
+    public void CloseServer()
+    {
+        if (serverSocket != null)
+            serverSocket.Close();
+        if (serverAcceptThread != null)
+            serverAcceptThread.Abort();
+        if (serverThread != null)
+            serverThread.Abort();
+        if (clientThread != null)
+            clientThread.Abort();
     }
 
     // ToDo: Not yet adapted to serialization
@@ -368,6 +373,46 @@ public class Server : MonoBehaviour
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
 
+    // Send close server event to all clients except the endpoints passed
+    private void SendCloseServerToAll(Sender sender, EndPoint senderEP = null)
+    {
+        if (senderEP != null)
+            Debug.Log("[SERVER] Sending sender type close server to all clients except: " + senderEP.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type close server to all clients");
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderEP);
+    }
+    private void SendCloseServerToAll(Sender sender, Socket senderSocket)
+    {
+        if (senderSocket != null)
+            Debug.Log("[SERVER] Sending sender type close server to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type close server to all clients");
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderSocket.RemoteEndPoint);
+    }
+
+    // Send client list to all clients except the endpoints passed
+    private void SendClientListToAll(Sender sender, EndPoint senderEP = null)
+    {
+        if (senderEP != null)
+            Debug.Log("[SERVER] Sending sender type client list to all clients except: " + senderEP.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type client list to all clients");
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderEP);
+    }
+    private void SendClientListToAll(Sender sender, Socket senderSocket)
+    {
+        if (senderSocket != null)
+            Debug.Log("[SERVER] Sending sender type client list to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type client list to all clients");
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderSocket.RemoteEndPoint);
+    }
+
     // Send data stream to all clients
     private void SendToAll(byte[] data, EndPoint except = null)
     {
@@ -431,6 +476,27 @@ public class Server : MonoBehaviour
                 break;
             case SenderType.SENDBOARD:
                 Debug.Log("[SERVER] I don't know why, but I received Event = SENDBOARD from " + clientEP.ToString());
+                break;
+            case SenderType.SENDCLIENTLIST:
+                Debug.Log("[SERVER] Received Event = SENDCLIENTLIST from " + clientEP.ToString());
+                
+                if (protocol == Protocol.TCP)
+                {
+                    sender.clientList = new ClientData[clientsTCP.Count];
+                    clientsTCP.Values.CopyTo(sender.clientList, 0);
+                }
+                else
+                {
+                    sender.clientList = new ClientData[clientsUDP.Count];
+                    clientsUDP.Values.CopyTo(sender.clientList, 0);
+                }
+                    
+                SendClientListToAll(sender);
+                break;
+            case SenderType.CLOSESERVER:
+                Debug.Log("[SERVER] Received Event = CLOSESERVER from " + clientEP.ToString());
+                SendCloseServerToAll(sender);
+                CloseServer();
                 break;
             default:
                 Debug.Log("[SERVER] Trying to decode UNKNOWN sender type...");

@@ -16,6 +16,7 @@ public class Chat : MonoBehaviour
     List<Message> currentMessages = new List<Message>();
     public int maxMessages = 25;
     public GameObject chatPanel, textObject, playerPanel;
+    List<Message> currentPlayers = new List<Message>();
 
     public void SendMessageToChat(ClientData clientData, string text)
     {
@@ -41,6 +42,16 @@ public class Chat : MonoBehaviour
 
     public void AddPlayerToHUD(ClientData clientData)
     {
+        // If player is already in the list, skip the instantiate of the gameobject
+        foreach (Message message in currentPlayers)
+        {
+            if (message.clientData.userID == clientData.userID)
+            {
+                message.textObject.text = clientData.userName;
+                return;
+            }
+        }
+        
         GameObject newText = Instantiate(textObject, playerPanel.transform);
         Message newMessage = new Message();
         newMessage.text = clientData.userName;
@@ -64,5 +75,28 @@ public class Chat : MonoBehaviour
             default:
                 break;
         }
+
+        currentPlayers.Add(newMessage);
+    }
+
+    public void RemovePlayerFromHUD(ClientData clientData)
+    {
+        for (int i = 0; i < currentPlayers.Count; i++)
+        {
+            if (currentPlayers[i].clientData == clientData)
+            {
+                Destroy(currentPlayers[i].textObject.gameObject);
+                currentPlayers.Remove(currentPlayers[i]);
+            }
+        }
+    }
+
+    public void RemoveAllPlayersFromHUD()
+    {
+        for (int i = 0; i < currentPlayers.Count; i++)
+        {
+            Destroy(currentPlayers[i].textObject.gameObject);
+        }
+        currentPlayers.Clear();
     }
 }

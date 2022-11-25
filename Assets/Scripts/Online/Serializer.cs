@@ -1,6 +1,7 @@
 using System.IO;
 using Unity.VisualScripting;
 using UnityEngine;
+using System.Collections.Generic;
 
 public enum SenderType
 {
@@ -12,7 +13,9 @@ public enum SenderType
     STARTGAME,
     CLIENTDISCONNECT,
     CLIENTCONNECT,
-    SENDBOARD
+    SENDBOARD,
+    SENDCLIENTLIST,
+    CLOSESERVER
 }
 
 public class Sender
@@ -24,7 +27,8 @@ public class Sender
     public int cellPosX;
     public int cellPosY;
     public Cell[,] cells;
-    
+    public ClientData[] clientList;
+
     public Sender(SenderType senderType)
     {
         this.senderType = senderType;
@@ -92,6 +96,26 @@ public static class Serialize
                         writer.Write(sender.cells[x, y].isRevealed); // 5 -> bool
                     }
                 }
+                break;
+            case SenderType.SENDCLIENTLIST:
+                writer.Write((int)sender.senderType); // 1 -> int
+                if (sender.clientList != null)
+                {
+                    writer.Write(sender.clientList.Length); // 2 -> int
+                    for (int i = 0; i < sender.clientList.Length; i++)
+                    {
+                        writer.Write(sender.clientList[i].userID); // 3 -> uint
+                        writer.Write(sender.clientList[i].userName); // 4 -> string
+                        writer.Write((int)sender.clientList[i].colorPlayer); // 5 -> int
+                    }
+                }
+                else
+                {
+                    writer.Write(0); // 2 -> int
+                }
+                break;
+            case SenderType.CLOSESERVER:
+                writer.Write((int)sender.senderType); // 1 -> int
                 break;
             default:
                 Debug.Log("[SERIALIZER] Trying to serialize NONE type...");
@@ -175,6 +199,24 @@ public static class Serialize
                     }
                 }
                 sender.cells = cells;
+                break;
+            case SenderType.SENDCLIENTLIST:
+                int clientListCount = reader.ReadInt32(); // 2 -> int
+                if (clientListCount > 0)
+                {
+                    ClientData[] clientList = new ClientData[clientListCount];
+                    for (int i = 0; i < clientListCount; i++)
+                    {
+                        userID = reader.ReadUInt32(); // 3 -> uint
+                        userName = reader.ReadString(); // 4 -> string
+                        colorPlayer = (ColorPlayer)reader.ReadInt32(); // 5 -> int
+                        clientList[i] = new ClientData(userID, userName, colorPlayer);
+                    }
+                    sender.clientList = clientList;
+                }
+                break;
+            case SenderType.CLOSESERVER:
+                // Does not need anything, just the event. Maybe in the future will need the clientdata of the host who started
                 break;
             default:
                 Debug.Log("[SERIALIZER] Trying to deserialize NONE type...");
