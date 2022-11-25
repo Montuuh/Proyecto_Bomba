@@ -16,6 +16,10 @@ public class SinglePlayerGameUI : MonoBehaviour
 
     public void MainMenuButton()
     {
+        // destroy client gameobject
+        Destroy(GameObject.Find("ClientManager"));
+        // destroy server gameobject
+        Destroy(GameObject.Find("ServerManager"));
         SceneManager.LoadScene(SceneManager.Scene.MainMenu);
     }
 }

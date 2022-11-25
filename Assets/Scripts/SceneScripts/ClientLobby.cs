@@ -57,9 +57,12 @@ public class ClientLobby : MonoBehaviour
     public void OnClickCreateServer()
     {
         // Start server
+        // check if servermanager doesn't exist
+
         GameObject serverGo = new GameObject("ServerManager", typeof(Server), typeof(DontDestroyMe));
         Server server = serverGo.GetComponent<Server>();
         server.StartServer(isTcp);
+        
         client.ConnectToServer(IPAddressHelper.GetLocalIPAddress(), isTcp);
 
         DeactivateAll();
