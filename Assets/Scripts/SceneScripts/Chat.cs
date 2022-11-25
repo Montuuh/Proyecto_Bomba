@@ -54,6 +54,7 @@ public class Chat : MonoBehaviour
         
         GameObject newText = Instantiate(textObject, playerPanel.transform);
         Message newMessage = new Message();
+        newMessage.clientData = clientData;
         newMessage.text = clientData.userName;
         newMessage.textObject = newText.GetComponent<TMP_Text>();
         newMessage.textObject.text = newMessage.text;

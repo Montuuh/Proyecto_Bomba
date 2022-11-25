@@ -325,7 +325,7 @@ public class Client : MonoBehaviour
             case SenderType.CLIENTCONNECT:
                 Debug.Log("[CLIENT] Received CLIENTCONNECT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
                 pendingMessages.Add(new Message { text = sender.clientData.userName + " has joined the server :)" });
-                pendingPlayers.Add(sender.clientData);
+                //pendingPlayers.Add(sender.clientData);
                 SetColorIfPlayer(sender.clientData);
                 GetClientListFromServer();
                 break;
