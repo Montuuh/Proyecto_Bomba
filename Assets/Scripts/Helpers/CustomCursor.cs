@@ -1,44 +1,41 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class CustomCursor : MonoBehaviour
+public class CustomCursor : ScriptableObject
 {
-    private Texture2D cursorTexture;
-    private CursorMode cursorMode = CursorMode.Auto;
-    private Vector2 hotSpot = Vector2.zero;
+    private Texture2D cursorTexture { get; set; }
+    private Vector2 position { get; set; }
 
-    void Start()
+    public void Init(ColorPlayer colorPlayer, bool isPlayer = false)
     {
-        SetWhiteCursor();
-    }
-    
-    void SetColorCursor(ColorPlayer color)
-    {
-        switch (color)
+        cursorTexture = Resources.Load<Texture2D>(GetCursorTextureName(colorPlayer));
+        if (isPlayer)
         {
-            case ColorPlayer.RED:
-                cursorTexture = Resources.Load("Cursors/Arrow_red") as Texture2D;
-                break;
-            case ColorPlayer.BLUE:
-                cursorTexture = Resources.Load("Cursors/Arrow_blue") as Texture2D;
-                break;
-            case ColorPlayer.GREEN:
-                cursorTexture = Resources.Load("Cursors/Arrow_green") as Texture2D;
-                break;
-            case ColorPlayer.YELLOW:
-                cursorTexture = Resources.Load("Cursors/Arrow_yellow") as Texture2D;
-                break;
-            default:
-                break;
+            Cursor.SetCursor(cursorTexture, new Vector2(0, 0), CursorMode.Auto);
         }
-        Cursor.SetCursor(cursorTexture, hotSpot, cursorMode);
+        else
+        {
+            this.position = new Vector2(30, 30);
+        }
     }
 
-    void SetWhiteCursor()
+    private string GetCursorTextureName(ColorPlayer colorPlayer)
     {
-        // load the texture
-        cursorTexture = Resources.Load<Texture2D>("Cursors/Arrow_white");
-        Cursor.SetCursor(cursorTexture, hotSpot, cursorMode);
+        string cursorTextureName = "Cursors/";
+        switch (colorPlayer)
+        {
+            case ColorPlayer.NONE:
+                return cursorTextureName += "Arrow_white";
+            case ColorPlayer.RED:
+                return cursorTextureName += "Arrow_red";
+            case ColorPlayer.BLUE:
+                return cursorTextureName += "Arrow_blue";
+            case ColorPlayer.GREEN:
+                return cursorTextureName += "Arrow_green";
+            case ColorPlayer.YELLOW:
+                return cursorTextureName += "Arrow_yellow";
+            default:
+                Debug.Log("Trying to load texure: " + cursorTextureName + "NONE");
+                return "NONE";
+        }
     }
 }
