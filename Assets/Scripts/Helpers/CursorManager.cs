@@ -4,15 +4,21 @@ using UnityEngine;
 
 public class CursorManager : MonoBehaviour
 {
-    public CustomCursor cursorPlayer;
-    public CustomCursor cursorPlayer2;
-    public CustomCursor cursorPlayer3;
-    public CustomCursor cursorPlayer4;
+    private CustomCursor cursorPlayer;
+    private CustomCursor cursorPlayer2;
+    private CustomCursor cursorPlayer3;
+    private CustomCursor cursorPlayer4;
 
     private void Start()
     {
-        cursorPlayer = ScriptableObject.CreateInstance<CustomCursor>();
-        cursorPlayer.Init(ColorPlayer.NONE, true);
+        // Find game object in children
+        cursorPlayer = GameObject.Find("CursorPlayer1").GetComponent<CustomCursor>();
+        cursorPlayer2 = GameObject.Find("CursorPlayer2").GetComponent<CustomCursor>();
+        cursorPlayer3 = GameObject.Find("CursorPlayer3").GetComponent<CustomCursor>();
+        cursorPlayer4 = GameObject.Find("CursorPlayer4").GetComponent<CustomCursor>();
+
+        // Init cursors
+        cursorPlayer.Init(ColorPlayer.RED, true);
     }
 
     private void Update()
@@ -35,24 +41,50 @@ public class CursorManager : MonoBehaviour
         }
     }
 
-    public void ChangeCursorTexture(int playerNumber, ColorPlayer color)
+    public void UpdateCursor(int x, int y, ColorPlayer color, int playerNumber)
     {
         switch (playerNumber)
         {
             case 1:
-                cursorPlayer = ScriptableObject.CreateInstance<CustomCursor>();
+                if (cursorPlayer.color != color)
+                    cursorPlayer.UpdateTexture(color);
+                cursorPlayer.UpdatePosition(x, y);
+                break;
+            case 2:
+                if (cursorPlayer2.color != color)
+                    cursorPlayer2.UpdateTexture(color);
+                cursorPlayer2.UpdatePosition(x, y);
+                break;
+            case 3:
+                if (cursorPlayer3.color != color)
+                    cursorPlayer3.UpdateTexture(color);
+                cursorPlayer3.UpdatePosition(x, y);
+                break;
+            case 4:
+                if (cursorPlayer4.color != color)
+                    cursorPlayer4.UpdateTexture(color);
+                cursorPlayer4.UpdatePosition(x, y);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void ChangeCursorTexture(int playerNumber, ColorPlayer color)
+    {
+        Debug.Log("ChangeCursorTexture: player=" + playerNumber + " color=" + color);
+        switch (playerNumber)
+        {
+            case 1:
                 cursorPlayer.Init(color, true);
                 break;
             case 2:
-                cursorPlayer2 = ScriptableObject.CreateInstance<CustomCursor>();
                 cursorPlayer2.Init(color);
                 break;
             case 3:
-                cursorPlayer3 = ScriptableObject.CreateInstance<CustomCursor>();
                 cursorPlayer3.Init(color);
                 break;
             case 4:
-                cursorPlayer4 = ScriptableObject.CreateInstance<CustomCursor>();
                 cursorPlayer4.Init(color);
                 break;
             default:

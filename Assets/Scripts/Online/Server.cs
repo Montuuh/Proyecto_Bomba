@@ -413,6 +413,26 @@ public class Server : MonoBehaviour
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
 
+    // Send mouse position to all clients except the endpoints passed
+    private void SendMousePositionToAll(Sender sender, EndPoint senderEP = null)
+    {
+        if (senderEP != null)
+            Debug.Log("[SERVER] Sending sender type mouse position to all clients except: " + senderEP.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type mouse position to all clients");
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderEP);
+    }
+    private void SendMousePositionToAll(Sender sender, Socket senderSocket)
+    {
+        if (senderSocket != null)
+            Debug.Log("[SERVER] Sending sender type mouse position to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+        else
+            Debug.Log("[SERVER] Sending sender type mouse position to all clients");
+        byte[] data = Serialize.SerializeSender(sender);
+        SendToAll(data, senderSocket.RemoteEndPoint);
+    }
+
     // Send data stream to all clients
     private void SendToAll(byte[] data, EndPoint except = null)
     {
@@ -497,6 +517,10 @@ public class Server : MonoBehaviour
                 Debug.Log("[SERVER] Received Event = CLOSESERVER from " + clientEP.ToString());
                 SendCloseServerToAll(sender);
                 CloseServer();
+                break;
+            case SenderType.MOUSE:
+                Debug.Log("[SERVER] Received Event = MOUSE from " + clientEP.ToString());
+                SendMousePositionToAll(sender);
                 break;
             default:
                 Debug.Log("[SERVER] Trying to decode UNKNOWN sender type...");

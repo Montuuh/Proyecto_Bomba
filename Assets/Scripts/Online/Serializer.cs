@@ -7,7 +7,7 @@ public enum SenderType
 {
     NONE,
     STRING, // This will serve as a message from server
-    CLIENTDATA, // For the moment clientdata, but in the future it will be like CELL, EMOJI... that will also include client data
+    CLIENTDATA,
     CLIENTCHAT,
     CLIENTCELL,
     STARTGAME,
@@ -15,7 +15,8 @@ public enum SenderType
     CLIENTCONNECT,
     SENDBOARD,
     SENDCLIENTLIST,
-    CLOSESERVER
+    CLOSESERVER,
+    MOUSE
 }
 
 public class Sender
@@ -28,6 +29,8 @@ public class Sender
     public int cellPosY;
     public Cell[,] cells;
     public ClientData[] clientList;
+    public int mousePosX;
+    public int mousePosY;
 
     public Sender(SenderType senderType)
     {
@@ -83,6 +86,7 @@ public static class Serialize
                 writer.Write(sender.clientData.userID); // 2 -> uint
                 writer.Write(sender.clientData.userName); // 3 -> string
                 writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
+                writer.Write(sender.clientData.playerNumber); // 5 -> int
                 break;
             case SenderType.SENDBOARD:
                 writer.Write((int)sender.senderType); // 1 -> int
@@ -117,6 +121,15 @@ public static class Serialize
             case SenderType.CLOSESERVER:
                 writer.Write((int)sender.senderType); // 1 -> int
                 break;
+            case SenderType.MOUSE:
+                writer.Write((int)sender.senderType); // 1 -> int
+                writer.Write(sender.clientData.userID); // 2 -> uint
+                writer.Write(sender.clientData.userName); // 3 -> string
+                writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
+                writer.Write(sender.mousePosX); // 5 -> int
+                writer.Write(sender.mousePosY); // 6 -> int
+                writer.Write(sender.clientData.playerNumber); // 7 -> int
+                break;
             default:
                 Debug.Log("[SERIALIZER] Trying to serialize NONE type...");
                 break;
@@ -137,7 +150,7 @@ public static class Serialize
 
         Sender sender = new Sender(senderType);
         uint userID = 0;
-        int cellPosX, cellPosY = 0;
+        int cellPosX, cellPosY, playerNumber = 0;
         string userName, clientChat, message = "";
         ColorPlayer colorPlayer = ColorPlayer.NONE;
         switch (sender.senderType)
@@ -183,7 +196,8 @@ public static class Serialize
                 userID = reader.ReadUInt32(); // 2 -> uint
                 userName = reader.ReadString(); // 3 -> string
                 colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
-                sender.clientData = new ClientData(userID, userName, colorPlayer);
+                playerNumber = reader.ReadInt32(); // 5 -> int
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { playerNumber = playerNumber };
                 break;
             case SenderType.SENDBOARD:
                 int width = reader.ReadInt32(); // 2 -> int
@@ -217,6 +231,17 @@ public static class Serialize
                 break;
             case SenderType.CLOSESERVER:
                 // Does not need anything, just the event. Maybe in the future will need the clientdata of the host who started
+                break;
+            case SenderType.MOUSE:
+                userID = reader.ReadUInt32(); // 2 -> uint
+                userName = reader.ReadString(); // 3 -> string
+                colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
+                int mousePosX = reader.ReadInt32(); // 5 -> int
+                int mousePosY = reader.ReadInt32(); // 6 -> int
+                playerNumber = reader.ReadInt32(); // 7 -> int
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { playerNumber = playerNumber };
+                sender.mousePosX = mousePosX;
+                sender.mousePosY = mousePosY;
                 break;
             default:
                 Debug.Log("[SERIALIZER] Trying to deserialize NONE type...");

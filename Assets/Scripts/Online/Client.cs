@@ -17,13 +17,22 @@ public enum ColorPlayer
     YELLOW
 }
 
+public class MouseData
+{
+    public int x;
+    public int y;
+    public ColorPlayer color;
+    public int playerNumber;
+}
+
 public class ClientData
 {
     public string userName;
     public uint userID;
     public ColorPlayer colorPlayer;
     public bool isHost = false;
-
+    public int playerNumber = 0;
+    
     public ClientData()
     {
         SetRandomGuest();
@@ -68,7 +77,10 @@ public class Client : MonoBehaviour
     private List<ClientData> pendingPlayers = new List<ClientData>();
 
     private List<SceneManager.Scene> pendingScenes = new List<SceneManager.Scene>();
-    
+
+    public CursorManager cursorManager;
+    private List<MouseData> pendingMousePositions = new List<MouseData>();
+
     void Start()
     {
         if (clientData == null)
@@ -115,6 +127,19 @@ public class Client : MonoBehaviour
             {
                 chat.AddPlayerToHUD(pendingPlayers[0]);
                 pendingPlayers.RemoveAt(0);
+            }
+        }
+
+        if (cursorManager == null)
+        {
+            cursorManager = FindObjectOfType<CursorManager>();
+        }
+        else
+        {
+            if (pendingMousePositions.Count > 0)
+            {
+                cursorManager.UpdateCursor(pendingMousePositions[0].x, pendingMousePositions[0].y, pendingMousePositions[0].color, pendingMousePositions[0].playerNumber);
+                pendingMousePositions.RemoveAt(0);
             }
         }
     }
@@ -292,6 +317,24 @@ public class Client : MonoBehaviour
             socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
     }
+
+    public void SendMousePosition(int _mousePosX, int _mousePosY)
+    {
+        Sender sender = new Sender(SenderType.MOUSE) { mousePosX = _mousePosX, mousePosY = _mousePosY, clientData = clientData };
+
+        byte[] data = Serialize.SerializeSender(sender);
+
+        if (protocol == Protocol.TCP)
+        {
+            Debug.Log("[CLIENT] Sending MOUSEPOSITION to server: " + socket.RemoteEndPoint.ToString() + " || Sender type: " + sender.senderType + " || Mouse position: " + sender.mousePosX + " | " + sender.mousePosY);
+            socket.Send(data, data.Length, SocketFlags.None);
+        }
+        else
+        {
+            Debug.Log("[CLIENT] Sending MOUSEPOSITION to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType + " || Mouse position: " + sender.mousePosX + " | " + sender.mousePosY);
+            socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
+        }
+    }
     #endregion SENDERS
 
     #region DECODERS
@@ -326,6 +369,8 @@ public class Client : MonoBehaviour
                 Debug.Log("[CLIENT] Received CLIENTCONNECT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
                 pendingMessages.Add(new Message { text = sender.clientData.userName + " has joined the server :)" });
                 //pendingPlayers.Add(sender.clientData);
+                if (sender.clientData.userID == clientData.userID)
+                    clientData.playerNumber = sender.clientData.playerNumber;
                 SetColorIfPlayer(sender.clientData);
                 GetClientListFromServer();
                 break;
@@ -336,6 +381,10 @@ public class Client : MonoBehaviour
             case SenderType.SENDCLIENTLIST:
                 Debug.Log("[CLIENT] Received SENDCLIENTLIST sender type from server: ");
                 pendingPlayers = sender.clientList.ToList<ClientData>();
+                break;
+            case SenderType.MOUSE:
+                Debug.Log("[CLIENT] Received MOUSE sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.mousePosX + " | " + sender.mousePosY);
+                pendingMousePositions.Add(new MouseData { playerNumber = sender.clientData.playerNumber, x = sender.mousePosX, y = sender.mousePosY, color = sender.clientData.colorPlayer });
                 break;
             default:
                 Debug.Log("[CLIENT] Trying to decode UNKNOWN sender type...");
