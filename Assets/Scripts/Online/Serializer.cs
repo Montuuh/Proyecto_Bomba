@@ -56,21 +56,24 @@ public static class Serialize
                 writer.Write(sender.clientData.userID); // 2 -> uint
                 writer.Write(sender.clientData.userName); // 3 -> string
                 writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
+                writer.Write(sender.clientData.score); // 5 --> int
                 break;
             case SenderType.CLIENTCHAT:
                 writer.Write((int)sender.senderType); // 1 -> int
                 writer.Write(sender.clientData.userID); // 2 -> uint
                 writer.Write(sender.clientData.userName); // 3 -> string
                 writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
-                writer.Write(sender.clientChat); // 5 -> string
+                writer.Write(sender.clientData.score); // 5 --> int
+                writer.Write(sender.clientChat); // 6 -> string
                 break;
             case SenderType.CLIENTCELL:
                 writer.Write((int)sender.senderType); // 1 -> int
                 writer.Write(sender.clientData.userID); // 2 -> uint
                 writer.Write(sender.clientData.userName); // 3 -> string
                 writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
-                writer.Write(sender.cellPosX); // 5 -> int
-                writer.Write(sender.cellPosY); // 6 -> int
+                writer.Write(sender.clientData.score); // 5 --> int
+                writer.Write(sender.cellPosX); // 6 -> int
+                writer.Write(sender.cellPosY); // 7 -> int
                 break;
             case SenderType.STARTGAME:
                 writer.Write((int)sender.senderType); // 1 -> int
@@ -80,13 +83,16 @@ public static class Serialize
                 writer.Write(sender.clientData.userID); // 2 -> uint
                 writer.Write(sender.clientData.userName); // 3 -> string
                 writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
+                writer.Write(sender.clientData.score); // 5 --> int
                 break;
             case SenderType.CLIENTCONNECT:
                 writer.Write((int)sender.senderType); // 1 -> int
                 writer.Write(sender.clientData.userID); // 2 -> uint
                 writer.Write(sender.clientData.userName); // 3 -> string
                 writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
-                writer.Write(sender.clientData.playerNumber); // 5 -> int
+                writer.Write(sender.clientData.score); // 5 --> int
+                writer.Write(sender.clientData.playerNumber); // 6 -> int
+
                 break;
             case SenderType.SENDBOARD:
                 writer.Write((int)sender.senderType); // 1 -> int
@@ -111,6 +117,7 @@ public static class Serialize
                         writer.Write(sender.clientList[i].userID); // 3 -> uint
                         writer.Write(sender.clientList[i].userName); // 4 -> string
                         writer.Write((int)sender.clientList[i].colorPlayer); // 5 -> int
+                        writer.Write(sender.clientList[i].score); // 6 --> int
                     }
                 }
                 else
@@ -126,9 +133,11 @@ public static class Serialize
                 writer.Write(sender.clientData.userID); // 2 -> uint
                 writer.Write(sender.clientData.userName); // 3 -> string
                 writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
-                writer.Write(sender.mousePosX); // 5 -> int
-                writer.Write(sender.mousePosY); // 6 -> int
-                writer.Write(sender.clientData.playerNumber); // 7 -> int
+                writer.Write(sender.clientData.score); // 5 --> int
+
+                writer.Write(sender.mousePosX); // 6 -> int
+                writer.Write(sender.mousePosY); // 7 -> int
+                writer.Write(sender.clientData.playerNumber); // 8 -> int
                 break;
             default:
                 Debug.Log("[SERIALIZER] Trying to serialize NONE type...");
@@ -150,7 +159,7 @@ public static class Serialize
 
         Sender sender = new Sender(senderType);
         uint userID = 0;
-        int cellPosX, cellPosY, playerNumber = 0;
+        int cellPosX, cellPosY, playerNumber, score = 0;
         string userName, clientChat, message = "";
         ColorPlayer colorPlayer = ColorPlayer.NONE;
         switch (sender.senderType)
@@ -163,23 +172,26 @@ public static class Serialize
                 userID = reader.ReadUInt32(); // 2 -> uint
                 userName = reader.ReadString(); // 3 -> string
                 colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
-                sender.clientData = new ClientData(userID, userName, colorPlayer);
+                score = reader.ReadInt32(); // 5 --> int
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { score = score };
                 break;
             case SenderType.CLIENTCHAT:
                 userID = reader.ReadUInt32(); // 2 -> uint
                 userName = reader.ReadString(); // 3 -> string
                 colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
-                clientChat = reader.ReadString(); // 5 -> string
-                sender.clientChat = clientChat; // 5 -> string
-                sender.clientData = new ClientData(userID, userName, colorPlayer);
+                score = reader.ReadInt32(); // 5 --> int
+                clientChat = reader.ReadString(); // 6 -> string
+                sender.clientChat = clientChat; // 7 -> string
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { score = score };
                 break;
             case SenderType.CLIENTCELL:
                 userID = reader.ReadUInt32(); // 2 -> uint
                 userName = reader.ReadString(); // 3 -> string
                 colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
-                cellPosX = reader.ReadInt32(); // 5 -> int
-                cellPosY = reader.ReadInt32(); // 6 -> int
-                sender.clientData = new ClientData(userID, userName, colorPlayer);
+                score = reader.ReadInt32(); // 5 --> int
+                cellPosX = reader.ReadInt32(); // 6 -> int
+                cellPosY = reader.ReadInt32(); // 7 -> int
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { score = score };
                 sender.cellPosX = cellPosX;
                 sender.cellPosY = cellPosY;
                 break;
@@ -190,14 +202,17 @@ public static class Serialize
                 userID = reader.ReadUInt32(); // 2 -> uint
                 userName = reader.ReadString(); // 3 -> string
                 colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
-                sender.clientData = new ClientData(userID, userName, colorPlayer);
+                score = reader.ReadInt32(); // 5 --> int
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { score = score };
                 break;
             case SenderType.CLIENTCONNECT:
                 userID = reader.ReadUInt32(); // 2 -> uint
                 userName = reader.ReadString(); // 3 -> string
                 colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
                 playerNumber = reader.ReadInt32(); // 5 -> int
-                sender.clientData = new ClientData(userID, userName, colorPlayer) { playerNumber = playerNumber };
+                score = reader.ReadInt32(); // 6 --> int
+
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { playerNumber = playerNumber, score = score };
                 break;
             case SenderType.SENDBOARD:
                 int width = reader.ReadInt32(); // 2 -> int
@@ -224,7 +239,9 @@ public static class Serialize
                         userID = reader.ReadUInt32(); // 3 -> uint
                         userName = reader.ReadString(); // 4 -> string
                         colorPlayer = (ColorPlayer)reader.ReadInt32(); // 5 -> int
-                        clientList[i] = new ClientData(userID, userName, colorPlayer);
+                        score = reader.ReadInt32(); // 6 --> int
+
+                        clientList[i] = new ClientData(userID, userName, colorPlayer) { score = score };
                     }
                     sender.clientList = clientList;
                 }
@@ -236,10 +253,12 @@ public static class Serialize
                 userID = reader.ReadUInt32(); // 2 -> uint
                 userName = reader.ReadString(); // 3 -> string
                 colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
-                int mousePosX = reader.ReadInt32(); // 5 -> int
-                int mousePosY = reader.ReadInt32(); // 6 -> int
-                playerNumber = reader.ReadInt32(); // 7 -> int
-                sender.clientData = new ClientData(userID, userName, colorPlayer) { playerNumber = playerNumber };
+                score = reader.ReadInt32(); // 5 --> int
+                int mousePosX = reader.ReadInt32(); // 6 -> int
+                int mousePosY = reader.ReadInt32(); // 7 -> int
+                playerNumber = reader.ReadInt32(); // 8 -> int
+
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { playerNumber = playerNumber, score = score };
                 sender.mousePosX = mousePosX;
                 sender.mousePosY = mousePosY;
                 break;

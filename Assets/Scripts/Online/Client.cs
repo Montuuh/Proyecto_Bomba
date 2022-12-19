@@ -32,7 +32,8 @@ public class ClientData
     public ColorPlayer colorPlayer;
     public bool isHost = false;
     public int playerNumber = 0;
-    
+    public int score = 0;
+
     public ClientData()
     {
         SetRandomGuest();
@@ -81,6 +82,12 @@ public class Client : MonoBehaviour
     public CursorManager cursorManager;
     private List<MouseData> pendingMousePositions = new List<MouseData>();
 
+    [SerializeField]
+    public List<ClientData> lobbyPlayers = new List<ClientData>();
+    public int a = 12;
+
+    public ScoreManager scoreManager;
+
     void Start()
     {
         if (clientData == null)
@@ -97,6 +104,7 @@ public class Client : MonoBehaviour
 
         if (game != null)
         {
+
             if (cellsToUpload != null)
             {
                 game.StartGame(cellsToUpload);
@@ -123,8 +131,26 @@ public class Client : MonoBehaviour
                 chat.SendMessageToChat(pendingMessages[0].clientData, pendingMessages[0].text);
                 pendingMessages.RemoveAt(0);
             }
+            
             if (pendingPlayers.Count > 0)
             {
+                bool existing = false;
+
+                foreach (var player in lobbyPlayers)
+                {
+
+                    if(player.userID == pendingPlayers[0].userID)
+                        existing = true;
+                }
+                
+                if (!existing)
+                {
+                    lobbyPlayers.Add(pendingPlayers[0]);
+                    scoreManager.currentPlayingPlayers = lobbyPlayers;
+                }
+
+                existing = false;
+
                 chat.AddPlayerToHUD(pendingPlayers[0]);
                 pendingPlayers.RemoveAt(0);
             }

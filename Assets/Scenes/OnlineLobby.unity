@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311918, g: 0.3807398, b: 0.35872716, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1312,7 +1312,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 0, y: 45.647675}
+  m_AnchoredPosition: {x: 0, y: 45.647766}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.07}
 --- !u!114 &479995622
@@ -2742,7 +2742,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 508974648}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.93
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2797,6 +2797,7 @@ GameObject:
   - component: {fileID: 956514974}
   - component: {fileID: 956514975}
   - component: {fileID: 956514976}
+  - component: {fileID: 956514977}
   m_Layer: 0
   m_Name: ClientManager
   m_TagString: Untagged
@@ -2835,6 +2836,8 @@ MonoBehaviour:
   game: {fileID: 0}
   chat: {fileID: 1150454415}
   cursorManager: {fileID: 0}
+  a: 12
+  scoreManager: {fileID: 956514977}
 --- !u!114 &956514975
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2858,6 +2861,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2aa50c6bf7841cc4192570484d8314e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &956514977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 956514972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4291196ccf125d4e9eeff8cbf67fda3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1029711310

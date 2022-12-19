@@ -13,6 +13,8 @@ public class MultiPlayerGame : MonoBehaviour
     private int height;
     private int mines;
 
+    private int emptyCellScore = 1;
+
     private bool letIngameInput = true; // This boolean locks the input of the player. If false player can not play
     private bool isGodMode = false; // Debug key boolean to reveal all tiles
     private bool isRevealedExceptMines = false; // Debug key boolean to reveal all tiles except mines
@@ -21,6 +23,8 @@ public class MultiPlayerGame : MonoBehaviour
     private Highlight highlight; //Highlights on top of board
     private Cell[,] cells; // 2D array of current cells
     private SinglePlayerGameUI buttonMainMenuUI; // SinglePlayerGameUI object
+
+    private ScoreManager scoreManager;
 
     public Client localPlayer;
 
@@ -39,6 +43,8 @@ public class MultiPlayerGame : MonoBehaviour
         localPlayer = GameObject.Find("ClientManager").GetComponent<Client>();
         localPlayer.game = this;
         eventHandler = GameObject.Find("ClientManager").GetComponent<EventHandler>();
+
+        scoreManager = localPlayer.scoreManager;
     }
 
     private void Update()
@@ -93,6 +99,8 @@ public class MultiPlayerGame : MonoBehaviour
         this.cells = GameGenerator.GenerateNumbers(cells);
         SetCamera();
         ReloadBoard();
+
+
     }
 
     private void ReloadHighlight()
@@ -186,6 +194,7 @@ public class MultiPlayerGame : MonoBehaviour
         // Number cell, reveal it
         else
         {
+            AddScore(clientData, emptyCellScore);
             cell.isRevealed = true;
             cell.color = clientData.colorPlayer;
             cells[x, y] = cell;
@@ -202,6 +211,9 @@ public class MultiPlayerGame : MonoBehaviour
     private void RevealEmptyCells(Cell cell, ClientData clientData)
     {
         if (cell.isRevealed || cell.color != ColorPlayer.NONE) return;
+
+        clientData.score += emptyCellScore;
+        AddScore(clientData, 0);
 
         cell.isRevealed = true;
         cell.color = clientData.colorPlayer;
@@ -225,6 +237,21 @@ public class MultiPlayerGame : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    //Paneo
+    private void AddScore(ClientData clientData, int ammount)
+    {
+        if (localPlayer.clientData.userID == clientData.userID)
+        {
+            localPlayer.clientData.score = clientData.score + ammount;
+            scoreManager.UpdateScores(localPlayer.clientData);
+        }
+        else
+        {
+            clientData.score += ammount;
+            scoreManager.UpdateScores(clientData);
         }
     }
 
@@ -313,6 +340,12 @@ public class MultiPlayerGame : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             //QuitGame();
+        }
+
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            Debug.Log(scoreManager.currentPlayingPlayers[0].score);
+            Debug.Log(scoreManager.currentPlayingPlayers[1].score);
         }
     }
     #endregion Input Logic
