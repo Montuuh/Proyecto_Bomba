@@ -422,6 +422,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   highlight: {fileID: 11400000, guid: fdc41751d2f723c40a92a713a37f8822, type: 2}
+  width: 0
+  height: 0
 --- !u!483693784 &557357830
 TilemapRenderer:
   m_ObjectHideFlags: 0
@@ -1028,6 +1030,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 946714909}
     m_Modifications:
+    - target: {fileID: 3242975245638619991, guid: 423ec2e7ead365d41b692100af507f5d, type: 3}
+      propertyPath: normalTile
+      value: 
+      objectReference: {fileID: 2361018055137750527, guid: 9d2dd4f840cfe3f4382807a0e0ce6d59, type: 3}
     - target: {fileID: 8773135058598696982, guid: 423ec2e7ead365d41b692100af507f5d, type: 3}
       propertyPath: m_Name
       value: Tilemap

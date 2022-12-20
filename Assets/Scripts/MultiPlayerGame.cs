@@ -21,6 +21,8 @@ public class MultiPlayerGame : MonoBehaviour
 
     private MultiplayerBoard board; // Board object
     private Highlight highlight; //Highlights on top of board
+    private TileClear tileClear;
+
     private Cell[,] cells; // 2D array of current cells
     private SinglePlayerGameUI buttonMainMenuUI; // SinglePlayerGameUI object
 
@@ -35,7 +37,12 @@ public class MultiPlayerGame : MonoBehaviour
     private void Awake()
     {
         board = GetComponentInChildren<MultiplayerBoard>();
+
         highlight = GetComponentInChildren<Highlight>();
+        highlight.width = width;
+        highlight.height = height;
+
+        tileClear = GetComponentInChildren<TileClear>();
 
         buttonMainMenuUI = GetComponent<SinglePlayerGameUI>();
         buttonMainMenuUI.mainMenuGo.SetActive(false);
@@ -63,6 +70,7 @@ public class MultiPlayerGame : MonoBehaviour
             Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             int x = Mathf.FloorToInt(position.x);
             int y = Mathf.FloorToInt(position.y);
+
             if (x >= 0 && x < width && y >= 0 && y < height)
             {
                 Cell cell = cells[x, y];
@@ -187,6 +195,8 @@ public class MultiPlayerGame : MonoBehaviour
         // If cell is a mine, reveal all mines and end the game
         else if (cell.cellType == Cell.CellType.Mine)
         {
+            tileClear.SendTileToNarnia(cell.position);
+
             cell.isExploded = true;
             cells[x, y] = cell;
             GameOver();
@@ -194,6 +204,8 @@ public class MultiPlayerGame : MonoBehaviour
         // Number cell, reveal it
         else
         {
+            tileClear.SendTileToNarnia(cell.position);
+
             AddScore(clientData, emptyCellScore);
             cell.isRevealed = true;
             cell.color = clientData.colorPlayer;
@@ -211,6 +223,8 @@ public class MultiPlayerGame : MonoBehaviour
     private void RevealEmptyCells(Cell cell, ClientData clientData)
     {
         if (cell.isRevealed || cell.color != ColorPlayer.NONE) return;
+
+        tileClear.SendTileToNarnia(cell.position);
 
         clientData.score += emptyCellScore;
         AddScore(clientData, 0);
@@ -399,6 +413,8 @@ public class MultiPlayerGame : MonoBehaviour
                 {
                     if (!cell.isFlagged)
                     {
+                        tileClear.SendTileToNarnia(cell.position);
+
                         cell.isRevealed = true;
                         cells[x, y] = cell;
                     }
@@ -407,6 +423,7 @@ public class MultiPlayerGame : MonoBehaviour
                 {
                     if (cell.isFlagged)
                     {
+
                         cell.isBadFlagged = true;
                         cell.isRevealed = false;
                         cells[x, y] = cell;
