@@ -30,6 +30,13 @@ public class MultiPlayerGame : MonoBehaviour
 
     public Client localPlayer;
 
+    private CameraShaker cameraShaker;
+    
+    public float normalShakerDuration ;
+    public float normalShakerIntensity;
+    public float bombShakerDuration;
+    public float bombShakerIntensity;
+
     private EventHandler eventHandler;
     #endregion Variables
 
@@ -50,6 +57,8 @@ public class MultiPlayerGame : MonoBehaviour
         localPlayer = GameObject.Find("ClientManager").GetComponent<Client>();
         localPlayer.game = this;
         eventHandler = GameObject.Find("ClientManager").GetComponent<EventHandler>();
+
+        cameraShaker = Camera.main.GetComponent<CameraShaker>();
 
         scoreManager = localPlayer.scoreManager;
     }
@@ -197,6 +206,9 @@ public class MultiPlayerGame : MonoBehaviour
         {
             tileClear.SendTileToNarnia(cell.position);
 
+            if (localPlayer.clientData.userID == clientData.userID)
+                cameraShaker.TriggerShake(bombShakerDuration, bombShakerIntensity);
+
             cell.isExploded = true;
             cells[x, y] = cell;
             GameOver();
@@ -205,6 +217,9 @@ public class MultiPlayerGame : MonoBehaviour
         else
         {
             tileClear.SendTileToNarnia(cell.position);
+
+            if (localPlayer.clientData.userID == clientData.userID)
+                cameraShaker.TriggerShake(normalShakerDuration, normalShakerIntensity);
 
             AddScore(clientData, emptyCellScore);
             cell.isRevealed = true;
@@ -226,6 +241,9 @@ public class MultiPlayerGame : MonoBehaviour
 
         tileClear.SendTileToNarnia(cell.position);
 
+        if (localPlayer.clientData.userID == clientData.userID)
+            cameraShaker.TriggerShake(normalShakerDuration, bombShakerIntensity);
+        
         clientData.score += emptyCellScore;
         AddScore(clientData, 0);
 
