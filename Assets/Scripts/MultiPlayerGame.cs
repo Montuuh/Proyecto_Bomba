@@ -83,7 +83,7 @@ public class MultiPlayerGame : MonoBehaviour
             if (x >= 0 && x < width && y >= 0 && y < height)
             {
                 Cell cell = cells[x, y];
-                if (cell.isFlagged || (cell.isRevealed && cell.cellType != Cell.CellType.Number)) return;
+                if (cell.isFlagged || (cell.isRevealed /*&& cell.cellType != Cell.CellType.Number*/)) return;
 
                 eventHandler.SendRevealCell(x, y);
             }
@@ -143,7 +143,7 @@ public class MultiPlayerGame : MonoBehaviour
     public void Reveal(int x, int y, ClientData clientData)
     {
         Cell cell = cells[x, y];
-        if (cell.isFlagged) return;
+        if (cell.isFlagged || cell.isRevealed) return;
 
         // Reveal adjacent cells if the cell is a number and all flags are placed correctly
         /*
@@ -388,24 +388,13 @@ public class MultiPlayerGame : MonoBehaviour
     // Check if all mines are flagged or all cells are revealed except mines
     private bool CheckWin()
     {
-        int flagsUsed = 0;
-        int cellsRevealed = 0;
-        for (int x = 0; x < width; x++)
+        int flagsUsedWell = 0;
+        foreach (Cell cell in cells)
         {
-            for (int y = 0; y < height; y++)
-            {
-                Cell cell = cells[x, y];
-                if (cell.isFlagged)
-                {
-                    flagsUsed++;
-                }
-                if (cell.isRevealed)
-                {
-                    cellsRevealed++;
-                }
-            }
+            if (cell.isFlagged && cell.cellType == Cell.CellType.Mine)
+                flagsUsedWell++;
         }
-        return (flagsUsed == mines || cellsRevealed == width * height - mines) ? true : false;
+        return flagsUsedWell == mines ? true : false;
     }
 
     private void Win()
