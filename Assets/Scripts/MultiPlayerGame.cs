@@ -146,6 +146,7 @@ public class MultiPlayerGame : MonoBehaviour
         if (cell.isFlagged) return;
 
         // Reveal adjacent cells if the cell is a number and all flags are placed correctly
+        /*
         if (cell.isRevealed)
         {
             if (cell.cellType == Cell.CellType.Number)
@@ -190,6 +191,7 @@ public class MultiPlayerGame : MonoBehaviour
                 return;
             }
         }
+        */
 
         // If cell is an empty cell, reveal numbers and empty cells
         if (cell.cellType == Cell.CellType.Empty)
