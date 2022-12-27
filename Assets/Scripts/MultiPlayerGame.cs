@@ -208,12 +208,14 @@ public class MultiPlayerGame : MonoBehaviour
         {
             tileClear.SendTileToNarnia(cell.position);
 
-            if (localPlayer.clientData.userID == clientData.userID)
-                cameraShaker.TriggerShake(bombShakerDuration, bombShakerIntensity);
-
             cell.isExploded = true;
             cells[x, y] = cell;
-            GameOver();
+
+            if (localPlayer.clientData.userID == clientData.userID)
+            {
+                cameraShaker.TriggerShake(bombShakerDuration, bombShakerIntensity);
+                GameOver();
+            }
         }
         // Number cell, reveal it
         else
