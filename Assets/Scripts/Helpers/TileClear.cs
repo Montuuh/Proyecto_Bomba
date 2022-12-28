@@ -14,7 +14,7 @@ public class TileClear : MonoBehaviour
 
         tmpObj.transform.SetParent(GameObject.Find("Grid").transform, false);
 
-        position.z = -0.1f;
+        //position.z = -0.1f;
 
         tmpObj.transform.position = position;
     }

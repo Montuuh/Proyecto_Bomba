@@ -711,6 +711,7 @@ GameObject:
   - component: {fileID: 946714908}
   - component: {fileID: 946714910}
   - component: {fileID: 946714911}
+  - component: {fileID: 946714912}
   m_Layer: 0
   m_Name: Grid
   m_TagString: Untagged
@@ -778,6 +779,22 @@ MonoBehaviour:
   normalShakerIntensity: 0.2
   bombShakerDuration: 0.75
   bombShakerIntensity: 1
+--- !u!114 &946714912
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 946714906}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da6015fbfe37f884798630f05a5cf8b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  numbers:
+  - {fileID: 2361018055137750527, guid: 639b8133d64f9ab448a2b5aefee35b9b, type: 3}
+  - {fileID: 2361018055137750527, guid: 1fc5468e77343fe449f91b0b981d2da1, type: 3}
+  - {fileID: 2361018055137750527, guid: 31cbd0982a6338049aad8280d8976b4a, type: 3}
 --- !u!1 &1190395575
 GameObject:
   m_ObjectHideFlags: 0

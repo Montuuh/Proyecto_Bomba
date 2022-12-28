@@ -19,8 +19,10 @@ public class MultiPlayerGame : MonoBehaviour
     private bool isGodMode = false; // Debug key boolean to reveal all tiles
     private bool isRevealedExceptMines = false; // Debug key boolean to reveal all tiles except mines
 
-    private float countdownTime = 3.0f;
+    private float countdownTimePerNumber = 3.0f; // Starting counter before the game
+    private int countdownNumber = 0; // Starting counter before the game
     private bool once = true;
+    private StartingCountdown countdown;
 
     private MultiplayerBoard board; // Board object
     private Highlight highlight; //Highlights on top of board
@@ -53,6 +55,7 @@ public class MultiPlayerGame : MonoBehaviour
         highlight.height = height;
 
         tileClear = GetComponentInChildren<TileClear>();
+        countdown = GetComponent<StartingCountdown>();
 
         buttonMainMenuUI = GetComponent<SinglePlayerGameUI>();
         buttonMainMenuUI.mainMenuGo.SetActive(false);
@@ -72,17 +75,7 @@ public class MultiPlayerGame : MonoBehaviour
         DebugKeys();
 
         // Starting Countdown before game starts
-        if(countdownTime > 0f)
-        {
-            countdownTime -= Time.deltaTime;
-            return;
-        }
-
-        if (once)
-        {
-            eventHandler.SendRevealCell(width / 2, height / 2);
-            once = false;
-        }
+        if (StartingCountdown()) return;
 
         // Besides this line, if the flag is false, won't run the code, so in game input is not allowed
         if (!letIngameInput) return;
@@ -134,6 +127,48 @@ public class MultiPlayerGame : MonoBehaviour
         ReloadBoard();
     }
 
+    private bool StartingCountdown()
+    {
+        bool ret = false;
+
+        if (countdownNumber == 0)
+        {
+            countdownTimePerNumber = 1f;
+            countdown.SendNumber(countdownNumber, width / 2, height / 2);
+            countdownNumber++;
+            return true;
+        }
+        
+        if (countdownTimePerNumber > 0f)
+        {
+            countdownTimePerNumber -= Time.deltaTime;
+            return true;
+        }
+
+        if (countdownNumber < 3)
+        {
+            countdownTimePerNumber = 1f;
+            countdown.SendNumber(countdownNumber, width / 2, height / 2);
+            countdownNumber++;
+            return true;
+
+        }
+        else if (countdownNumber == 4)
+        {
+            countdownTimePerNumber = 1f;
+            countdownNumber++;
+            return true;
+
+        }
+
+        if (once)
+        {
+            eventHandler.SendRevealCell(width / 2, height / 2);
+            once = false;
+        }
+
+        return ret;
+    }
     private void ReloadHighlight()
     {
         // Get mouse position and convert it to world position (2D)
