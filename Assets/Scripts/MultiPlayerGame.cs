@@ -19,6 +19,9 @@ public class MultiPlayerGame : MonoBehaviour
     private bool isGodMode = false; // Debug key boolean to reveal all tiles
     private bool isRevealedExceptMines = false; // Debug key boolean to reveal all tiles except mines
 
+    private float countdownTime = 3.0f;
+    private bool once = true;
+
     private MultiplayerBoard board; // Board object
     private Highlight highlight; //Highlights on top of board
     private TileClear tileClear;
@@ -68,6 +71,19 @@ public class MultiPlayerGame : MonoBehaviour
         // Debug keys handler
         DebugKeys();
 
+        // Starting Countdown before game starts
+        if(countdownTime > 0f)
+        {
+            countdownTime -= Time.deltaTime;
+            return;
+        }
+
+        if (once)
+        {
+            eventHandler.SendRevealCell(width / 2, height / 2);
+            once = false;
+        }
+
         // Besides this line, if the flag is false, won't run the code, so in game input is not allowed
         if (!letIngameInput) return;
 
@@ -116,8 +132,6 @@ public class MultiPlayerGame : MonoBehaviour
         this.cells = GameGenerator.GenerateNumbers(cells);
         SetCamera();
         ReloadBoard();
-
-
     }
 
     private void ReloadHighlight()

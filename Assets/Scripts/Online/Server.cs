@@ -583,7 +583,6 @@ public class Server : MonoBehaviour
         int[] bounds = GameGenerator.GetMultiplayerBigCenterBounds(width / 2, height / 2);
         cells = GameGenerator.GenerateMines(cells, mines, bounds);
         cells = GameGenerator.GenerateNumbers(cells);
-        cells = GameResolver.ResolveCells(cells, width / 2, height / 2);
         return cells;
     }
     #endregion MAPGEN
