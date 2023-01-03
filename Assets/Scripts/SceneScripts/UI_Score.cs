@@ -13,8 +13,6 @@ public class UI_Score : MonoBehaviour
 
     void Start()
     {
-        scoreManager = GameObject.Find("ClientManager").GetComponent<ScoreManager>();
-
         scoreObject = gameObject.GetComponent<TMP_Text>();
     }
 
@@ -22,6 +20,8 @@ public class UI_Score : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        scoreManager = GameObject.Find("ClientManager").GetComponent<ScoreManager>();
+
         scoreText = "";
 
         foreach (var player in scoreManager.currentPlayingPlayers)
