@@ -163,7 +163,7 @@ public class MultiPlayerGame : MonoBehaviour
 
         if (once)
         {
-            eventHandler.SendRevealCell(width / 2, height / 2);
+            eventHandler.SendFirstCell(width / 2, height / 2);
             once = false;
         }
 
@@ -277,6 +277,7 @@ public class MultiPlayerGame : MonoBehaviour
             AddScore(clientData, emptyCellScore);
             cell.isRevealed = true;
             cell.color = clientData.colorPlayer;
+            
             cells[x, y] = cell;
             if (CheckWin())
             {
@@ -328,6 +329,8 @@ public class MultiPlayerGame : MonoBehaviour
     //Paneo
     private void AddScore(ClientData clientData, int ammount)
     {
+        if (clientData.colorPlayer == ColorPlayer.NONE) return;
+
         if (localPlayer.clientData.userID == clientData.userID)
         {
             localPlayer.clientData.score = clientData.score + ammount;
