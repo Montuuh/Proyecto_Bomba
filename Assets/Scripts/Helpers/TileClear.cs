@@ -8,13 +8,13 @@ public class TileClear : MonoBehaviour
 
     public GameObject normalTile;
 
-    public void SendTileToNarnia(Vector3 position)
+    public void SendTileToNarnia(Vector3 position, ColorPlayer color)
     {
         GameObject tmpObj = Instantiate(normalTile);
 
         tmpObj.transform.SetParent(GameObject.Find("Grid").transform, false);
 
-        //position.z = -0.1f;
+        tmpObj.GetComponent<TileClearBehaviour>().color = color;
 
         tmpObj.transform.position = position;
     }

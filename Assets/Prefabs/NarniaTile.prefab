@@ -98,6 +98,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16510221a6a8ddc488b970f21daf6021, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  makeItRainInBackground: 1
+  cellColors:
+  - {fileID: 21300000, guid: 06f502c817c42a0419d1e43d80cac8d0, type: 3}
+  - {fileID: 21300000, guid: 62d956803ab3ab8489496347ca4d4fee, type: 3}
+  - {fileID: 21300000, guid: 9a047865d0c087140b487b6923d998f5, type: 3}
+  - {fileID: 21300000, guid: 588d5d23fdccb3149bda15962e86067f, type: 3}
+  - {fileID: 21300000, guid: 3fe3d98457f857244b6b37b42a63b983, type: 3}
+  color: 0
 --- !u!50 &-3850998150570181927
 Rigidbody2D:
   serializedVersion: 4

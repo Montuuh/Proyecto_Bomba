@@ -255,7 +255,7 @@ public class MultiPlayerGame : MonoBehaviour
         // If cell is a mine, reveal all mines and end the game
         else if (cell.cellType == Cell.CellType.Mine)
         {
-            tileClear.SendTileToNarnia(cell.position);
+            tileClear.SendTileToNarnia(cell.position, clientData.colorPlayer);
 
             cell.isExploded = true;
             cells[x, y] = cell;
@@ -269,7 +269,7 @@ public class MultiPlayerGame : MonoBehaviour
         // Number cell, reveal it
         else
         {
-            tileClear.SendTileToNarnia(cell.position);
+            tileClear.SendTileToNarnia(cell.position, clientData.colorPlayer);
 
             if (localPlayer.clientData.userID == clientData.userID)
                 cameraShaker.TriggerShake(normalShakerDuration, normalShakerIntensity);
@@ -293,7 +293,7 @@ public class MultiPlayerGame : MonoBehaviour
     {
         if (cell.isRevealed || cell.color != ColorPlayer.NONE) return;
 
-        tileClear.SendTileToNarnia(cell.position);
+        tileClear.SendTileToNarnia(cell.position, clientData.colorPlayer);
 
         if (localPlayer.clientData.userID == clientData.userID)
             cameraShaker.TriggerShake(normalShakerDuration, bombShakerIntensity);
@@ -476,7 +476,7 @@ public class MultiPlayerGame : MonoBehaviour
                 {
                     if (!cell.isFlagged)
                     {
-                        tileClear.SendTileToNarnia(cell.position);
+                        tileClear.SendTileToNarnia(cell.position, ColorPlayer.NONE);
 
                         cell.isRevealed = true;
                         cells[x, y] = cell;
