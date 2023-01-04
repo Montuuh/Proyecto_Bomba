@@ -6,8 +6,9 @@ using UnityEngine;
 public class ScoreManager : MonoBehaviour
 {
     public List<ClientData> currentPlayingPlayers = new List<ClientData>();
-    
 
+    public ClientData localPlayer;
+   
     public void UpdateScores(ClientData clientData)
     {
         foreach (var player in currentPlayingPlayers)

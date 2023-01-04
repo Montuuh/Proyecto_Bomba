@@ -67,6 +67,7 @@ public class MultiPlayerGame : MonoBehaviour
         cameraShaker = Camera.main.GetComponent<CameraShaker>();
 
         scoreManager = localPlayer.scoreManager;
+        scoreManager.localPlayer = localPlayer.clientData;
     }
 
     private void Update()
