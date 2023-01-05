@@ -17,7 +17,7 @@ public class CameraShaker : MonoBehaviour
     // The initial position of the GameObject
     Vector3 initialPosition;
 
-    bool active = false;
+    public bool active = false;
 
     void Update()
     {
@@ -29,6 +29,7 @@ public class CameraShaker : MonoBehaviour
         }
         else if(active)
         {
+            active = false;
             shakeDuration = 0f;
             transform.localPosition = initialPosition;
         }
@@ -39,6 +40,14 @@ public class CameraShaker : MonoBehaviour
         initialPosition = transform.localPosition;
         shakeDuration = duration;
         shakeMagnitude = intensity;
+        active = true;
+    }
+
+    public void TriggerStandardShake()
+    {
+        initialPosition = transform.localPosition;
+        shakeDuration = 1f;
+        shakeMagnitude = 20f;
         active = true;
     }
 }

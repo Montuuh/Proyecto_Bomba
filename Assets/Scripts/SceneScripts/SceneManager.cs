@@ -8,6 +8,7 @@ public static class SceneManager
     // Has to be named exactly like the scene in Unity
     public enum Scene
     {
+        TitleScreen,
         MainMenu,
         OnlineLobby,
         SinglePlayerLobby,
