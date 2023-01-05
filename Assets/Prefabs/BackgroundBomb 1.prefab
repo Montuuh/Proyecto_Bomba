@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 6437446648531124341}
   - component: {fileID: 187060433672439907}
   m_Layer: 5
-  m_Name: BackgroundBomb
+  m_Name: BackgroundBomb 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -124,7 +124,7 @@ MonoBehaviour:
   horizontalSpeed: 250
   normalBomb: {fileID: 21300000, guid: e8732a2d27c620b4699f27cbc7d29757, type: 3}
   explodedBomb: {fileID: 21300000, guid: 8c8572a5ec7da574385fadcb7eb8ced3, type: 3}
-  backgroundBomb: {fileID: 6437446648531124351, guid: 29ec9898db025c24ab96508ed37acf05, type: 3}
+  backgroundBomb: {fileID: 6437446648531124351, guid: b03acd1dfaea50d4db570666b47feace, type: 3}
   movementType: 0
 --- !u!212 &6437446648531124341
 SpriteRenderer:
