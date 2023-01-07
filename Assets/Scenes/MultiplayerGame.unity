@@ -593,8 +593,8 @@ Canvas:
   m_GameObject: {fileID: 577969967}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
+  m_RenderMode: 1
+  m_Camera: {fileID: 519420031}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -602,7 +602,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
-  m_SortingLayerID: 0
+  m_SortingLayerID: 248602265
   m_SortingOrder: 0
   m_TargetDisplay: 0
 --- !u!224 &577969971
@@ -1004,11 +1004,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1623256047649658496, guid: d4f77c83a13c88041a929905b66a0c4e, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 14.700012
+      value: 41.599976
       objectReference: {fileID: 0}
     - target: {fileID: 1623256047649658496, guid: d4f77c83a13c88041a929905b66a0c4e, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -99.3
+      value: -121.100006
       objectReference: {fileID: 0}
     - target: {fileID: 1623256047649658496, guid: d4f77c83a13c88041a929905b66a0c4e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1031,13 +1031,25 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7775526036256235984, guid: d4f77c83a13c88041a929905b66a0c4e, type: 3}
+      propertyPath: m_fontSize
+      value: 32.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7775526036256235984, guid: d4f77c83a13c88041a929905b66a0c4e, type: 3}
       propertyPath: m_margin.w
       value: -70.51665
+      objectReference: {fileID: 0}
+    - target: {fileID: 7775526036256235984, guid: d4f77c83a13c88041a929905b66a0c4e, type: 3}
+      propertyPath: m_margin.z
+      value: -131.7944
       objectReference: {fileID: 0}
     - target: {fileID: 7775526036256235984, guid: d4f77c83a13c88041a929905b66a0c4e, type: 3}
       propertyPath: m_fontAsset
       value: 
       objectReference: {fileID: 11400000, guid: a49afa648aab6a94e9ee246ca4b8182e, type: 2}
+    - target: {fileID: 7775526036256235984, guid: d4f77c83a13c88041a929905b66a0c4e, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 32.5
+      objectReference: {fileID: 0}
     - target: {fileID: 7775526036256235984, guid: d4f77c83a13c88041a929905b66a0c4e, type: 3}
       propertyPath: m_sharedMaterial
       value: 
