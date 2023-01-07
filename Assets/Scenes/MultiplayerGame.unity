@@ -254,7 +254,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b62132d395d3ef43a12a40bd652606c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  active: 0
 --- !u!1 &548067251
 GameObject:
   m_ObjectHideFlags: 0
@@ -1219,7 +1218,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.16037738, g: 0.13112615, b: 0.13112615, a: 1}
+  m_Color: {r: 0.24528301, g: 0.2144298, b: 0.2144298, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1258,8 +1257,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   background: {fileID: 2114198058}
   periodTime: 10
-  maxColor: 40
-  minColor: 24
+  maxColor: 65
+  minColor: 55
 --- !u!1001 &8773135059024704606
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -113,7 +113,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f73230b0f430ba547bebabfe66ad8574, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timerTime: 10
   forceMin: 1.5
   forceMax: 2
   timeForceMin: 0.5
@@ -121,11 +120,8 @@ MonoBehaviour:
   rotSpeedMin: -60
   rotSpeedMax: 60
   mass: 1.5
-  horizontalSpeed: 250
   normalBomb: {fileID: 21300000, guid: e8732a2d27c620b4699f27cbc7d29757, type: 3}
   explodedBomb: {fileID: 21300000, guid: 8c8572a5ec7da574385fadcb7eb8ced3, type: 3}
-  backgroundBomb: {fileID: 6437446648531124351, guid: 29ec9898db025c24ab96508ed37acf05, type: 3}
-  movementType: 0
 --- !u!212 &6437446648531124341
 SpriteRenderer:
   m_ObjectHideFlags: 0
