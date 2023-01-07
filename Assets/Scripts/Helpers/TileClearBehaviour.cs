@@ -26,7 +26,7 @@ public class TileClearBehaviour : MonoBehaviour
         rb.AddForce(direction * force);
 
 
-        rotSpeed = (float)Random.Range(-25, 25);
+        rotSpeed = (float)Random.Range(-15, 15);
 
         rb.AddTorque(force * rotSpeed);
 
@@ -38,6 +38,8 @@ public class TileClearBehaviour : MonoBehaviour
     {
         if(makeItRainInBackground)
         {
+            if (GameObject.Find("Grid").GetComponent<MultiPlayerGame>().win) Destroy(gameObject);
+
             spriteRenderer.sortingOrder = 0;
 
             float spawnY =  Camera.main.ScreenToWorldPoint(new Vector2(0, Screen.height/2)).y;

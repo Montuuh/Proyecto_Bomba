@@ -126,6 +126,7 @@ public class BackgroundBehaviour : MonoBehaviour
                         currentPos.x = rtransform.position.x - horizontalSpeed * Time.deltaTime;
 
                     currentPos.y = rtransform.position.y;
+
                     rtransform.position = currentPos;
                 } else {
                     Destroy(this.gameObject);

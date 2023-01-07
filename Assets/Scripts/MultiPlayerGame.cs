@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using Unity.VisualScripting;
 using UnityEngine;
+using TMPro;
 
 public class MultiPlayerGame : MonoBehaviour
 {
@@ -42,6 +43,11 @@ public class MultiPlayerGame : MonoBehaviour
     public float bombShakerDuration;
     public float bombShakerIntensity;
 
+    public GameObject winnerText;
+
+    [HideInInspector]
+    public bool win = false;
+
     private EventHandler eventHandler;
     #endregion Variables
 
@@ -68,6 +74,9 @@ public class MultiPlayerGame : MonoBehaviour
 
         scoreManager = localPlayer.scoreManager;
         scoreManager.localPlayer = localPlayer.clientData;
+
+        TMP_Text scoreText = GameObject.Find("Score").GetComponent<TMP_Text>();
+        scoreText.alignment = TextAlignmentOptions.Left;
     }
 
     private void Update()
@@ -433,8 +442,7 @@ public class MultiPlayerGame : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.F3))
         {
-            Debug.Log(scoreManager.currentPlayingPlayers[0].score);
-            Debug.Log(scoreManager.currentPlayingPlayers[1].score);
+            Win();
         }
     }
     #endregion Input Logic
@@ -457,11 +465,28 @@ public class MultiPlayerGame : MonoBehaviour
         Debug.Log("Win");
         letIngameInput = false;
 
+        GameObject.Find("Tilemap").SetActive(false);
+        GameObject.Find("HighlightMap").SetActive(false);
+
+        Vector3 newPos = new Vector3(0, -100, 0);
+        RectTransform rTransform = GameObject.Find("Score").GetComponent<RectTransform>();
+        rTransform.anchoredPosition = newPos;
+
+        TMP_Text scoreText = GameObject.Find("Score").GetComponent<TMP_Text>();
+        scoreText.alignment = TextAlignmentOptions.Center;
+
+        scoreManager.currentPlayingPlayers.Sort(SortByScore);
+        winnerText.SetActive(true);
+        winnerText.GetComponent<TMP_Text>().text = scoreManager.currentPlayingPlayers[0].userName.ToUpper() + " HAS WON!";
+
         buttonMainMenuUI.mainMenuGo.SetActive(true);
 
-        // Future: Event has Won
+        win = true;
     }
-
+    private int SortByScore(ClientData c1, ClientData c2)
+    {
+        return c2.score.CompareTo(c1.score);
+    }
     private void GameOver()
     {
         Debug.Log("GameOver");
@@ -500,6 +525,9 @@ public class MultiPlayerGame : MonoBehaviour
 
         // Make the main menu button appear
         buttonMainMenuUI.mainMenuGo.SetActive(true);
+        foreach (Transform child in buttonMainMenuUI.mainMenuGo.transform)
+            child.gameObject.SetActive(true);
+
 
         // Future: Event has Lost
     }
