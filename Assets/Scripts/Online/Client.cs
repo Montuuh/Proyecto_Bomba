@@ -66,6 +66,7 @@ public class Client : MonoBehaviour
     private Socket socket;
     private IPEndPoint serverIPEP;
     private EndPoint serverEP;
+
     public string serverCode;
 
     [HideInInspector]
@@ -344,9 +345,9 @@ public class Client : MonoBehaviour
         }
     }
 
-    public void SendMousePosition(int _mousePosX, int _mousePosY)
+    public void SendMousePosition(ClientData _clientData, int _mousePosX, int _mousePosY)
     {
-        Sender sender = new Sender(SenderType.MOUSE) { mousePosX = _mousePosX, mousePosY = _mousePosY, clientData = clientData };
+        Sender sender = new Sender(SenderType.MOUSE) { mousePosX = _mousePosX, mousePosY = _mousePosY, clientData = _clientData };
 
         byte[] data = Serialize.SerializeSender(sender);
 

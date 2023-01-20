@@ -16,6 +16,10 @@ public class MultiPlayerGame : MonoBehaviour
 
     private int emptyCellScore = 1;
 
+    private float mousePositionTime = 0.3f;
+    private float mousePositionTimer = 0.3f;
+
+
     private bool letIngameInput = true; // This boolean locks the input of the player. If false player can not play
     private bool isGodMode = false; // Debug key boolean to reveal all tiles
     private bool isRevealedExceptMines = false; // Debug key boolean to reveal all tiles except mines
@@ -83,6 +87,23 @@ public class MultiPlayerGame : MonoBehaviour
     {
         // Debug keys handler
         DebugKeys();
+
+        // Send Mouse Position periodically
+        if (mousePositionTimer > 0)
+        {
+            mousePositionTimer -= Time.deltaTime;
+        }
+        else
+        {
+            mousePositionTimer = mousePositionTime;
+
+            // Get mouse position and convert it to world position (2D)
+            Vector3 position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            int x = Mathf.FloorToInt(position.x);
+            int y = Mathf.FloorToInt(position.y);
+
+            eventHandler.SendMousePosition(x, y);
+        }
 
         // Starting Countdown before game starts
         if (StartingCountdown()) return;

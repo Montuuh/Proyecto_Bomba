@@ -29,4 +29,11 @@ public class EventHandler : MonoBehaviour
         Debug.Log("[EVENT] SendFlagCell event received, SendFlagCell: " + x + ", " + y + " from " + client.clientData.userName);
         client.SendClientCell(client.clientData, x, y);
     }
+
+    public void SendMousePosition(int mouseX, int mouseY)
+    {
+        Debug.Log("[EVENT] SendCursorPosition event received, SendCursorPosition: " + mouseX + ", " + mouseY + ". From " + client.clientData.userName);
+        client.SendMousePosition(client.clientData, mouseX, mouseY);
+    }
+
 }
