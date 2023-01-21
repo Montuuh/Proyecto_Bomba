@@ -42,6 +42,8 @@ public class ClientLobby : MonoBehaviour
     }
 
     #region INPUT EVENTS
+
+    // Show host/join buttons after username
     public void OnInputUsername()
     {
         _inputUsername = inputUsername.text;
@@ -54,9 +56,9 @@ public class ClientLobby : MonoBehaviour
         }
     }
     
+    // Creates server
     public void OnClickCreateServer()
     {
-        // Start server
         // check if servermanager doesn't exist
 
         GameObject serverGo = new GameObject("ServerManager", typeof(Server), typeof(DontDestroyMe));
@@ -79,8 +81,11 @@ public class ClientLobby : MonoBehaviour
     {
         _inputJoinCode = inputJoinIP.text;
     }
+
+    // Joins server
     public void OnClickJoinToServer()
     {
+        // If cant connect
         if (_inputJoinCode == null || _inputJoinCode == "" || !IPAddressHelper.IsValidServerCode(_inputJoinCode))
         {
             inputJoinIP.text = _inputJoinCode = "";
@@ -97,6 +102,7 @@ public class ClientLobby : MonoBehaviour
         buttonStartGame.gameObject.SetActive(false);
     }
 
+    // Send chat 
     public void OnInputChat()
     {
         _inputChat = inputChat.text;
@@ -107,6 +113,7 @@ public class ClientLobby : MonoBehaviour
         }
     }
 
+    // On hosting server
     public void OnClickHostServer()
     {
         DeactivateAll();
@@ -115,6 +122,8 @@ public class ClientLobby : MonoBehaviour
         buttonBack.gameObject.SetActive(true);
         client.clientData.isHost = true;
     }
+
+     // On joining server
     public void OnClickJoinServer()
     {
         DeactivateAll();
@@ -129,6 +138,7 @@ public class ClientLobby : MonoBehaviour
         isTcp = !isTcp;
     }
 
+    // Return to host/join state
     public void OnClickBack()
     {
         _inputJoinIP = inputJoinIP.text = _inputJoinCode = "";
@@ -137,6 +147,7 @@ public class ClientLobby : MonoBehaviour
         buttonHostServer.gameObject.SetActive(true);
     }
     
+    // Start game
     public void OnClickStartGame()
     {
         if (client.clientData.isHost)

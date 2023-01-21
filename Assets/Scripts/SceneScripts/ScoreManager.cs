@@ -9,6 +9,7 @@ public class ScoreManager : MonoBehaviour
 
     public ClientData localPlayer;
    
+    // Updates score of specific player
     public void UpdateScores(ClientData clientData)
     {
         foreach (var player in currentPlayingPlayers)

@@ -16,8 +16,7 @@ public class UI_Score : MonoBehaviour
         scoreObject = gameObject.GetComponent<TMP_Text>();
     }
 
-
-    // Update is called once per frame
+    // Displays current scores of players
     void Update()
     {
         scoreManager = GameObject.Find("ClientManager").GetComponent<ScoreManager>();

@@ -8,16 +8,19 @@ public class BackgroundChange : MonoBehaviour
     public Image background;
     private Color32 imageColorToBeUsed;
 
+    // How long it takes to return to the same color
     public float periodTime = 10f;
+
     private float intervalTime = 0f;
     private int interval = 1;
     private float counter = 0f;
 
+    // Initial color
     public int maxColor = 132;
     public int minColor = 83;
     private float difference;
 
-    // Start is called before the first frame update
+    // Initial values for the color change
     void Start()
     {
         imageColorToBeUsed = new Color(maxColor, minColor, minColor);
@@ -27,13 +30,14 @@ public class BackgroundChange : MonoBehaviour
         background.color = imageColorToBeUsed;
     }
 
-    // Update is called once per frame
+    // Changes color smothly
     void Update()
     {
         if(counter < intervalTime)
         {
             int currentColorNum = 0;
 
+            // 6 intervals of the RGB wheel to apply gradient
             switch (interval)
             {
                 case 1:
@@ -76,8 +80,6 @@ public class BackgroundChange : MonoBehaviour
                     break;
             }
 
-            //Debug.Log("Red: " + imageColorToBeUsed.r + "    Green: " + imageColorToBeUsed.g + "    Blue: " + imageColorToBeUsed.b);
-
             background.color = imageColorToBeUsed;
 
             counter += Time.deltaTime;
@@ -86,8 +88,6 @@ public class BackgroundChange : MonoBehaviour
             counter = 0f;
             interval++;
             
-            //Debug.Log("Change");
-
             if (interval > 6) interval = 1;
         }
     }

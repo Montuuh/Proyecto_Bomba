@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+// Keep this object between scenes
 public class DontDestroyMe : MonoBehaviour
 {
     void Awake()

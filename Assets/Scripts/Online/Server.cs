@@ -100,8 +100,8 @@ public class Server : MonoBehaviour
         serverIPEP = new IPEndPoint(IPAddress.Parse(IPAddressHelper.GetLocalIPAddress()), 9500);
         serverSocket.Bind(serverIPEP);
         serverCode = IPAddressHelper.EncodeIPAddress(serverIPEP.Address.ToString());
-        Debug.Log("[SERVER] Server started on " + serverIPEP.ToString() + " with protocol " + protocol.ToString());
-        Debug.Log("[SERVER] Server code: " + serverCode);
+        //Debug.Log("[SERVER] Server started on " + serverIPEP.ToString() + " with protocol " + protocol.ToString());
+        //Debug.Log("[SERVER] Server code: " + serverCode);
 
         if (protocol == Protocol.TCP)
         {
@@ -138,7 +138,7 @@ public class Server : MonoBehaviour
             // Accept new connections
             Socket clientSocket = serverSocket.Accept();
             clientSocketList.Add(clientSocket);
-            Debug.Log("[SERVER] Client connected: " + clientSocket.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Client connected: " + clientSocket.RemoteEndPoint.ToString());
 
             clientThread = new Thread(ClientThread);
             clientThread.IsBackground = true;
@@ -156,7 +156,7 @@ public class Server : MonoBehaviour
             byte[] data = new byte[1024];
             int recv = client.Receive(data);
             string stringData = Encoding.ASCII.GetString(data, 0, recv);
-            Debug.Log("[SERVER] Received: " + stringData + " from " + client.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Received: " + stringData + " from " + client.RemoteEndPoint.ToString());
 
             // Send reply
             string reply = "OK: " + stringData;
@@ -181,7 +181,7 @@ public class Server : MonoBehaviour
             {
                 clientEPList.Add(clientEP);
                 clientsUDP.Add(clientEP, sender.clientData);
-                Debug.Log("[SERVER] Client connected: " + clientEP.ToString() + " with username: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString());
+                //Debug.Log("[SERVER] Client connected: " + clientEP.ToString() + " with username: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString());
 
                 pendingNewPlayer.Add(sender.clientData);
             }
@@ -197,18 +197,18 @@ public class Server : MonoBehaviour
     private void SendClientDataToAll(Sender sender, EndPoint senderEP = null)
     {
         if (senderEP != null)
-            Debug.Log("[SERVER] Sending sender type client data: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " to all clients except: " + senderEP.ToString());
+            //Debug.Log("[SERVER] Sending sender type client data: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " to all clients except: " + senderEP.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type client data: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " to all clients");
+            //Debug.Log("[SERVER] Sending sender type client data: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
     }
     private void SendClientDataToAll(Sender sender, Socket senderSocket)
     {
         if (senderSocket != null)
-            Debug.Log("[SERVER] Sending sender type client data: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Sending sender type client data: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type client data: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " to all clients");
+            //Debug.Log("[SERVER] Sending sender type client data: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -217,18 +217,18 @@ public class Server : MonoBehaviour
     private void SendStringToAll(Sender sender, EndPoint senderEP = null)
     {
         if (senderEP != null)
-            Debug.Log("[SERVER] Sending sender type string: " + sender.message + " to all clients except: " + senderEP.ToString());
+            //Debug.Log("[SERVER] Sending sender type string: " + sender.message + " to all clients except: " + senderEP.ToString());
         else
-            Debug.Log("[SERVER] Sending string: " + sender.message + " to all clients");
+            //Debug.Log("[SERVER] Sending string: " + sender.message + " to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
     }
     private void SendStringToAll(Sender sender, Socket senderSocket)
     {
         if (senderSocket != null)
-            Debug.Log("[SERVER] Sending sender type string: " + sender.message + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Sending sender type string: " + sender.message + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         else
-            Debug.Log("[SERVER] Sending string: " + sender.message + " to all clients");
+            //Debug.Log("[SERVER] Sending string: " + sender.message + " to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -237,18 +237,18 @@ public class Server : MonoBehaviour
     private void SendClientChatToAll(Sender sender, EndPoint senderEP = null)
     {
         if (senderEP != null)
-            Debug.Log("[SERVER] Sending sender type client string: " + sender.clientChat + " to all clients except: " + senderEP.ToString());
+            //Debug.Log("[SERVER] Sending sender type client string: " + sender.clientChat + " to all clients except: " + senderEP.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type client string: " + sender.clientChat + " to all clients");
+            //Debug.Log("[SERVER] Sending sender type client string: " + sender.clientChat + " to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
     }
     private void SendClientChatToAll(Sender sender, Socket senderSocket)
     {
         if (senderSocket != null)
-            Debug.Log("[SERVER] Sending sender type client string: " + sender.clientChat + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Sending sender type client string: " + sender.clientChat + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type client string: " + sender.clientChat + " to all clients");
+            //Debug.Log("[SERVER] Sending sender type client string: " + sender.clientChat + " to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -257,18 +257,18 @@ public class Server : MonoBehaviour
     private void SendClientCellToAll(Sender sender, EndPoint senderEP = null)
     {
         if (senderEP != null)
-            Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients except: " + senderEP.ToString());
+            //Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients except: " + senderEP.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients");
+            //Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
     }
     private void SendClientCellToAll(Sender sender, Socket senderSocket)
     {
         if (senderSocket != null)
-            Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients");
+            //Debug.Log("[SERVER] Sending sender type client cell: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -277,18 +277,18 @@ public class Server : MonoBehaviour
     private void SendStartGameToAll(Sender sender, EndPoint senderEP = null)
     {
         if (senderEP != null)
-            Debug.Log("[SERVER] Sending sender type start game to all clients except: " + senderEP.ToString());
+            //Debug.Log("[SERVER] Sending sender type start game to all clients except: " + senderEP.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type start game to all clients");
+            //Debug.Log("[SERVER] Sending sender type start game to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
     }
     private void SendStartGameToAll(Sender sender, Socket senderSocket)
     {
         if (senderSocket != null)
-            Debug.Log("[SERVER] Sending sender type start game to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Sending sender type start game to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type start game to all clients");
+            //Debug.Log("[SERVER] Sending sender type start game to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -297,18 +297,18 @@ public class Server : MonoBehaviour
     private void SendClientDisconnectedToAll(Sender sender, EndPoint senderEP = null)
     {
         if (senderEP != null)
-            Debug.Log("[SERVER] Sending sender type client disconnected to all clients except: " + senderEP.ToString());
+            //Debug.Log("[SERVER] Sending sender type client disconnected to all clients except: " + senderEP.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type client disconnected to all clients");
+            //Debug.Log("[SERVER] Sending sender type client disconnected to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
     }
     private void SendClientDisconnectedToAll(Sender sender, Socket senderSocket)
     {
         if (senderSocket != null)
-            Debug.Log("[SERVER] Sending sender type client disconnected to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Sending sender type client disconnected to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type client disconnected to all clients");
+            //Debug.Log("[SERVER] Sending sender type client disconnected to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -317,18 +317,18 @@ public class Server : MonoBehaviour
     private void SendClientConnectedToAll(Sender sender, EndPoint senderEP = null)
     {
         if (senderEP != null)
-            Debug.Log("[SERVER] Sending sender type client connected to all clients except: " + senderEP.ToString());
+            //Debug.Log("[SERVER] Sending sender type client connected to all clients except: " + senderEP.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type client connected to all clients");
+            //Debug.Log("[SERVER] Sending sender type client connected to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
     }
     private void SendClientConnectedToAll(Sender sender, Socket senderSocket)
     {
         if (senderSocket != null)
-            Debug.Log("[SERVER] Sending sender type client connected to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Sending sender type client connected to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type client connected to all clients");
+            //Debug.Log("[SERVER] Sending sender type client connected to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -337,18 +337,18 @@ public class Server : MonoBehaviour
     private void SendColorPlayerToAll(Sender sender, EndPoint senderEP = null)
     {
         if (senderEP != null)
-            Debug.Log("[SERVER] Sending sender type color player to all clients except: " + senderEP.ToString());
+            //Debug.Log("[SERVER] Sending sender type color player to all clients except: " + senderEP.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type color player to all clients");
+            //Debug.Log("[SERVER] Sending sender type color player to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
     }
     private void SendColorPlayerToAll(Sender sender, Socket senderSocket)
     {
         if (senderSocket != null)
-            Debug.Log("[SERVER] Sending sender type color player to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Sending sender type color player to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type color player to all clients");
+            //Debug.Log("[SERVER] Sending sender type color player to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -357,18 +357,18 @@ public class Server : MonoBehaviour
     private void SendBoardToAll(Sender sender, EndPoint senderEP = null)
     {
         if (senderEP != null)
-            Debug.Log("[SERVER] Sending sender type board to all clients except: " + senderEP.ToString());
+            //Debug.Log("[SERVER] Sending sender type board to all clients except: " + senderEP.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type board to all clients");
+            //Debug.Log("[SERVER] Sending sender type board to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
     }
     private void SendBoardToAll(Sender sender, Socket senderSocket)
     {
         if (senderSocket != null)
-            Debug.Log("[SERVER] Sending sender type board to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Sending sender type board to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type board to all clients");
+            //Debug.Log("[SERVER] Sending sender type board to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -377,18 +377,18 @@ public class Server : MonoBehaviour
     private void SendCloseServerToAll(Sender sender, EndPoint senderEP = null)
     {
         if (senderEP != null)
-            Debug.Log("[SERVER] Sending sender type close server to all clients except: " + senderEP.ToString());
+            //Debug.Log("[SERVER] Sending sender type close server to all clients except: " + senderEP.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type close server to all clients");
+            //Debug.Log("[SERVER] Sending sender type close server to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
     }
     private void SendCloseServerToAll(Sender sender, Socket senderSocket)
     {
         if (senderSocket != null)
-            Debug.Log("[SERVER] Sending sender type close server to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Sending sender type close server to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type close server to all clients");
+            //Debug.Log("[SERVER] Sending sender type close server to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -397,18 +397,18 @@ public class Server : MonoBehaviour
     private void SendClientListToAll(Sender sender, EndPoint senderEP = null)
     {
         if (senderEP != null)
-            Debug.Log("[SERVER] Sending sender type client list to all clients except: " + senderEP.ToString());
+            //Debug.Log("[SERVER] Sending sender type client list to all clients except: " + senderEP.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type client list to all clients");
+            //Debug.Log("[SERVER] Sending sender type client list to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
     }
     private void SendClientListToAll(Sender sender, Socket senderSocket)
     {
         if (senderSocket != null)
-            Debug.Log("[SERVER] Sending sender type client list to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Sending sender type client list to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type client list to all clients");
+            //Debug.Log("[SERVER] Sending sender type client list to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -417,18 +417,18 @@ public class Server : MonoBehaviour
     private void SendMousePositionToAll(Sender sender, EndPoint senderEP = null)
     {
         if (senderEP != null)
-            Debug.Log("[SERVER] Sending sender type mouse position to all clients except: " + senderEP.ToString());
+            //Debug.Log("[SERVER] Sending sender type mouse position to all clients except: " + senderEP.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type mouse position to all clients");
+            //Debug.Log("[SERVER] Sending sender type mouse position to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderEP);
     }
     private void SendMousePositionToAll(Sender sender, Socket senderSocket)
     {
         if (senderSocket != null)
-            Debug.Log("[SERVER] Sending sender type mouse position to all clients except: " + senderSocket.RemoteEndPoint.ToString());
+            //Debug.Log("[SERVER] Sending sender type mouse position to all clients except: " + senderSocket.RemoteEndPoint.ToString());
         else
-            Debug.Log("[SERVER] Sending sender type mouse position to all clients");
+            //Debug.Log("[SERVER] Sending sender type mouse position to all clients");
         byte[] data = Serialize.SerializeSender(sender);
         SendToAll(data, senderSocket.RemoteEndPoint);
     }
@@ -467,38 +467,38 @@ public class Server : MonoBehaviour
         switch (sender.senderType)
         {
             case SenderType.STRING: // Used to pass a string to all clients, being sent by [SERVER]
-                Debug.Log("[SERVER] Received Event = STRING: " + sender.message);
+                //Debug.Log("[SERVER] Received Event = STRING: " + sender.message);
                 break;
             case SenderType.CLIENTDATA: // Used to pass client data to all clients (username, uid...)
-                Debug.Log("[SERVER] Received Event = CLIENTDATA from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
+                //Debug.Log("[SERVER] Received Event = CLIENTDATA from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
                 SendClientDataToAll(sender);
                 break;
             case SenderType.CLIENTCHAT: // Used for chat only, for now
-                Debug.Log("[SERVER] Received Event = CLIENTCHAT: " + sender.clientChat + " || from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
+                //Debug.Log("[SERVER] Received Event = CLIENTCHAT: " + sender.clientChat + " || from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
                 SendClientChatToAll(sender);
                 break;
             case SenderType.CLIENTCELL: // Used to pass client data and pressed cell info
-                Debug.Log("[SERVER] Received Event = CLIENTCELL position: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " || from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
+                //Debug.Log("[SERVER] Received Event = CLIENTCELL position: " + sender.cellPosX.ToString() + " " + sender.cellPosY.ToString() + " || from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
                 SendClientCellToAll(sender);
                 break;
             case SenderType.STARTGAME: // Used when the host starts the game
-                Debug.Log("[SERVER] Received Event = STARTGAME game sender type");
+                //Debug.Log("[SERVER] Received Event = STARTGAME game sender type");
                 SendStartGameToAll(sender);
                 toSendBoard = true;
                 break;
             case SenderType.CLIENTDISCONNECT: // Used when a client disconnects
-                Debug.Log("[SERVER] Received Event = CLIENTDISCONNECT message from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
+                //Debug.Log("[SERVER] Received Event = CLIENTDISCONNECT message from client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
                 SendClientDisconnectedToAll(sender);
                 DisconnectClient(sender.clientData);
                 break;
             case SenderType.CLIENTCONNECT:
-                Debug.Log("[SERVER] I don't know why, but I received Event = CLIENTCONNECT client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
+                //Debug.Log("[SERVER] I don't know why, but I received Event = CLIENTCONNECT client: " + sender.clientData.userName + " | " + sender.clientData.userID.ToString() + " from " + clientEP.ToString());
                 break;
             case SenderType.SENDBOARD:
-                Debug.Log("[SERVER] I don't know why, but I received Event = SENDBOARD from " + clientEP.ToString());
+                //Debug.Log("[SERVER] I don't know why, but I received Event = SENDBOARD from " + clientEP.ToString());
                 break;
             case SenderType.SENDCLIENTLIST:
-                Debug.Log("[SERVER] Received Event = SENDCLIENTLIST from " + clientEP.ToString());
+                //Debug.Log("[SERVER] Received Event = SENDCLIENTLIST from " + clientEP.ToString());
                 
                 if (protocol == Protocol.TCP)
                 {
@@ -514,16 +514,16 @@ public class Server : MonoBehaviour
                 SendClientListToAll(sender);
                 break;
             case SenderType.CLOSESERVER:
-                Debug.Log("[SERVER] Received Event = CLOSESERVER from " + clientEP.ToString());
+                //Debug.Log("[SERVER] Received Event = CLOSESERVER from " + clientEP.ToString());
                 SendCloseServerToAll(sender);
                 CloseServer();
                 break;
             case SenderType.MOUSE:
-                Debug.Log("[SERVER] Received Event = MOUSE from " + clientEP.ToString());
+                //Debug.Log("[SERVER] Received Event = MOUSE from " + clientEP.ToString());
                 SendMousePositionToAll(sender);
                 break;
             default:
-                Debug.Log("[SERVER] Trying to decode UNKNOWN sender type...");
+                //Debug.Log("[SERVER] Trying to decode UNKNOWN sender type...");
                 break;
         }
     }
@@ -532,7 +532,7 @@ public class Server : MonoBehaviour
     #region HELPERS
     private void DisconnectClient(ClientData clientData)
     {
-        Debug.Log("[SERVER] Disconnecting client... " + clientData.userName + " | " + clientData.userID.ToString());
+        //Debug.Log("[SERVER] Disconnecting client... " + clientData.userName + " | " + clientData.userID.ToString());
         if (protocol == Protocol.TCP)
         {
             // ToDo: TCP NOT YET TESTED, IM NOT SURE IF THIS WILL WORK

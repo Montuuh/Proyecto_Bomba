@@ -42,14 +42,11 @@ public class Game : MonoBehaviour
         // Set active a game object from the same parent
         singlePlayerGameUI = GetComponent<SinglePlayerGameUI>();
         singlePlayerGameUI.mainMenuGo.SetActive(false);
-        //mainMenuGo.SetActive(false);
     }
 
     private void Start()
     {
         // For now, the game is generated when the game starts. A menu will be added later
-        // StartGame();
-        //difficulty = SceneManager.difficulty;
         StartGame(difficulty);
     }
 
@@ -99,9 +96,6 @@ public class Game : MonoBehaviour
             {
                 if (!firstGameClick)
                 {
-                    //int[] bounds = GameGenerator.GetBoundsFromFirstCellRevealed(x, y);
-                    //cells = GameGenerator.GenerateMines(cells, mines, bounds);
-                    //cells = GameGenerator.GenerateNumbers(cells);
                     GameResolver.ResolveCells(cells, x, y);
                     firstGameClick = true;
                 }
@@ -185,7 +179,6 @@ public class Game : MonoBehaviour
                 // Update the board
                 ReloadBoard();
 
-                // Future: Event has flagged cell X
             }
         }
     }
@@ -265,7 +258,6 @@ public class Game : MonoBehaviour
 
             ReloadBoard();
 
-            // Future: Event has revealed cell X
         }
     }
 
@@ -278,7 +270,6 @@ public class Game : MonoBehaviour
         lastRevealedCell = cell;
         cell.isRevealed = true;
         cells[cell.position.x, cell.position.y] = cell;
-        // Future: Event has revealed cell X
 
         if (cell.cellType == Cell.CellType.Empty)
         {
@@ -532,7 +523,6 @@ public class Game : MonoBehaviour
 
         singlePlayerGameUI.mainMenuGo.SetActive(true);
 
-        // Future: Event has Won
     }
 
     private void GameOver()
@@ -572,7 +562,6 @@ public class Game : MonoBehaviour
         // Make the main menu button appear
         singlePlayerGameUI.mainMenuGo.SetActive(true);
 
-        // Future: Event has Lost
     }
     #endregion Win&Lose
 

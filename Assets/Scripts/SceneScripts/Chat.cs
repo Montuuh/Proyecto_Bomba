@@ -18,6 +18,7 @@ public class Chat : MonoBehaviour
     public GameObject chatPanel, textObject, playerPanel;
     List<Message> currentPlayers = new List<Message>();
 
+    // Send message
     public void SendMessageToChat(ClientData clientData, string text)
     {
         if (currentMessages.Count >= maxMessages)
@@ -40,6 +41,7 @@ public class Chat : MonoBehaviour
         currentMessages.Add(newMessage);
     }
 
+    // Player list UI
     public void AddPlayerToHUD(ClientData clientData)
     {
         // If player is already in the list, skip the instantiate of the gameobject

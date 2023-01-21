@@ -20,7 +20,7 @@ public class TileColors : MonoBehaviour
     public Tile tileNumber6_grey;
     public Tile tileNumber7_grey;
     public Tile tileNumber8_grey;
-    //
+    
 
     //Red
     public Tile tileEmpty_red;
@@ -35,7 +35,7 @@ public class TileColors : MonoBehaviour
     public Tile tileNumber6_red;
     public Tile tileNumber7_red;
     public Tile tileNumber8_red;
-    //
+    
 
     //Blue
     public Tile tileEmpty_blue;
@@ -50,7 +50,7 @@ public class TileColors : MonoBehaviour
     public Tile tileNumber6_blue;
     public Tile tileNumber7_blue;
     public Tile tileNumber8_blue;
-    //
+    
 
     //Green
     public Tile tileEmpty_green;
@@ -65,7 +65,7 @@ public class TileColors : MonoBehaviour
     public Tile tileNumber6_green;
     public Tile tileNumber7_green;
     public Tile tileNumber8_green;
-    //
+    
 
     //Yellow
     public Tile tileEmpty_yellow;
@@ -80,5 +80,5 @@ public class TileColors : MonoBehaviour
     public Tile tileNumber6_yellow;
     public Tile tileNumber7_yellow;
     public Tile tileNumber8_yellow;
-    //
+    
 }

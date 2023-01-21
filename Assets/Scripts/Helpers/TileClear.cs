@@ -8,6 +8,7 @@ public class TileClear : MonoBehaviour
 
     public GameObject normalTile;
 
+    // Called every time a cell is revealed to instantiate background cell
     public void SendTileToNarnia(Vector3 position, ColorPlayer color)
     {
         GameObject tmpObj = Instantiate(normalTile);

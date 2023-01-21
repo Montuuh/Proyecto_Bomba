@@ -10,12 +10,13 @@ public class TileClearBehaviour : MonoBehaviour
     private float rotSpeed = 0;
 
 
-    public bool makeItRainInBackground;
+    public bool makeItRainInBackground; // Determines if cell needs to respawn when offscreen
+
     public Sprite[] cellColors;
     public ColorPlayer color;
 
 
-    // Start is called before the first frame update
+    //Apply initial force and torque
     void Start()
     {
         rb = gameObject.GetComponent<Rigidbody2D>();
@@ -38,10 +39,11 @@ public class TileClearBehaviour : MonoBehaviour
     {
         if(makeItRainInBackground)
         {
-            if (GameObject.Find("Grid").GetComponent<MultiPlayerGame>().win) Destroy(gameObject);
+            if (GameObject.Find("Grid").GetComponent<MultiPlayerGame>().win) Destroy(gameObject); // Win checker
 
             spriteRenderer.sortingOrder = 0;
 
+            // Respawn, apply random force and torque
             float spawnY =  Camera.main.ScreenToWorldPoint(new Vector2(0, Screen.height/2)).y;
             float spawnX = Random.Range(Camera.main.ScreenToWorldPoint(new Vector2(Screen.width/3, 0)).x, Camera.main.ScreenToWorldPoint(new Vector2(Screen.width*2/3, 0)).x);
             Vector2 spawnPosition = new Vector2(spawnX, spawnY);
@@ -58,6 +60,7 @@ public class TileClearBehaviour : MonoBehaviour
 
             rb.gravityScale = Random.Range(0.5f, 1.5f);
 
+            // Set tile color, empty cells do not reappear
             switch (color)
             {
                 case ColorPlayer.NONE:

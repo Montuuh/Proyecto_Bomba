@@ -5,9 +5,10 @@ using UnityEngine;
 public class BacgroundSpawner : MonoBehaviour
 {
 
-    public float spawnTime = 1f;
+    // + Right, - Left -> direction of movement
     public bool isHorizontalPositive;
 
+    public float spawnTime = 1f;
     private float spawnCounter;
 
     public GameObject objectToSpawn;
@@ -17,9 +18,9 @@ public class BacgroundSpawner : MonoBehaviour
         spawnCounter = spawnTime;
     }
 
-    // Update is called once per frame
     void Update()
     {
+        // Keep instantiating bombs periodically
         if(spawnCounter > 0)
         {
             spawnCounter -= Time.deltaTime;

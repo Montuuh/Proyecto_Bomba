@@ -21,6 +21,7 @@ public class CameraShaker : MonoBehaviour
 
     void Update()
     {
+        // Displace camera in random ways and then return to origin
         if (shakeDuration > 0)
         {
             transform.localPosition = initialPosition + Random.insideUnitSphere * shakeMagnitude;
@@ -35,6 +36,7 @@ public class CameraShaker : MonoBehaviour
         }
     }
 
+
     public void TriggerShake(float duration, float intensity)
     {
         initialPosition = transform.localPosition;
@@ -43,6 +45,7 @@ public class CameraShaker : MonoBehaviour
         active = true;
     }
 
+    // Default shake
     public void TriggerStandardShake()
     {
         initialPosition = transform.localPosition;

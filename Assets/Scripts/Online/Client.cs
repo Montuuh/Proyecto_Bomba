@@ -94,14 +94,17 @@ public class Client : MonoBehaviour
             clientData = new ClientData();
     }
 
+    // Perform pending actions on main thread
     private void Update()
     {
+        // Change scene
         if (pendingScenes.Count > 0)
         {
             SceneManager.LoadScene(pendingScenes[0]);
             pendingScenes.Remove(pendingScenes[0]);
         }
 
+        // Start game and calls reveal cell logic
         if (game != null)
         {
 
@@ -120,6 +123,7 @@ public class Client : MonoBehaviour
             }
         }
 
+        // Updates chat messages and playerList
         if (chat == null)
         {
             chat = FindObjectOfType<Chat>();
@@ -156,6 +160,7 @@ public class Client : MonoBehaviour
             }
         }
 
+        // Updates cursor positions
         if (cursorManager == null)
         {
             cursorManager = FindObjectOfType<CursorManager>();
@@ -212,7 +217,7 @@ public class Client : MonoBehaviour
         IPAddress ipAddress = IPAddress.Parse(serverIP);
         serverIPEP = new IPEndPoint(ipAddress, 9500);
         serverEP = (EndPoint)serverIPEP;
-        Debug.Log("[CLIENT] Trying to connect to server --> " + serverIPEP.ToString());
+        //Debug.Log("[CLIENT] Trying to connect to server --> " + serverIPEP.ToString());
 
         if (protocol == Protocol.TCP)
         {
@@ -221,7 +226,7 @@ public class Client : MonoBehaviour
 
             if (socket.Connected)
             {
-                Debug.Log("[CLIENT] Connected to server --> " + serverIP + ":9500");
+                //Debug.Log("[CLIENT] Connected to server --> " + serverIP + ":9500");
                 // Send welcome message
                 SendClientChat(clientData, "Username: " + clientData.userName + " | UID: " + clientData.userID + " | Connected to server");
 
@@ -233,7 +238,7 @@ public class Client : MonoBehaviour
                     receivedDataLength = socket.Receive(data);
                     if (receivedDataLength == 0)
                         break;
-                    Debug.Log("[CLIENT] Received: " + Encoding.ASCII.GetString(data, 0, receivedDataLength));
+                    //Debug.Log("[CLIENT] Received: " + Encoding.ASCII.GetString(data, 0, receivedDataLength));
                 }
             }
         }
@@ -264,12 +269,12 @@ public class Client : MonoBehaviour
         if (protocol == Protocol.TCP)
         {
             // ToDo: Not yet adapted to serializing
-            Debug.Log("[CLIENT] Sending to server: " + socket.RemoteEndPoint.ToString() + " Message: " + message);
+            //Debug.Log("[CLIENT] Sending to server: " + socket.RemoteEndPoint.ToString() + " Message: " + message);
             socket.Send(data, data.Length, SocketFlags.None);
         }
         else
         {
-            Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + sender.clientChat);
+            //Debug.Log("[CLIENT] Sending to server: " + serverIPEP.ToString() + " Message: " + sender.clientChat);
             socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
     }
@@ -282,12 +287,12 @@ public class Client : MonoBehaviour
         
         if (protocol == Protocol.TCP)
         {
-            Debug.Log("[CLIENT] Sending CLIENTDATA to server: " + socket.RemoteEndPoint.ToString() + " Message: " + data.Length);
+            //Debug.Log("[CLIENT] Sending CLIENTDATA to server: " + socket.RemoteEndPoint.ToString() + " Message: " + data.Length);
             socket.Send(data, data.Length, SocketFlags.None);
         }
         else
         {
-            Debug.Log("[CLIENT] Sending CLIENTDATA to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType + " || Sender username and UID: " + sender.clientData.userName + " | " + sender.clientData.userID);
+            //Debug.Log("[CLIENT] Sending CLIENTDATA to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType + " || Sender username and UID: " + sender.clientData.userName + " | " + sender.clientData.userID);
             socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
     }
@@ -300,12 +305,12 @@ public class Client : MonoBehaviour
 
         if (protocol == Protocol.TCP)
         {
-            Debug.Log("[CLIENT] Sending CLIENTCELL to server: " + socket.RemoteEndPoint.ToString() + " || Sender type: " + sender.senderType + " || Sender username and UID: " + sender.clientData.userName + " | " + sender.clientData.userID + " || Cell revealed: " + sender.cellPosX + " | " + sender.cellPosY);
+            //Debug.Log("[CLIENT] Sending CLIENTCELL to server: " + socket.RemoteEndPoint.ToString() + " || Sender type: " + sender.senderType + " || Sender username and UID: " + sender.clientData.userName + " | " + sender.clientData.userID + " || Cell revealed: " + sender.cellPosX + " | " + sender.cellPosY);
             socket.Send(data, data.Length, SocketFlags.None);
         }
         else
         {
-            Debug.Log("[CLIENT] Sending CLIENTCELL to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType + " || Sender username and UID: " + sender.clientData.userName + " | " + sender.clientData.userID + " || Cell revealed: " + sender.cellPosX + " | " + sender.cellPosY);
+            //Debug.Log("[CLIENT] Sending CLIENTCELL to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType + " || Sender username and UID: " + sender.clientData.userName + " | " + sender.clientData.userID + " || Cell revealed: " + sender.cellPosX + " | " + sender.cellPosY);
             socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
     }
@@ -318,12 +323,12 @@ public class Client : MonoBehaviour
 
         if (protocol == Protocol.TCP)
         {
-            Debug.Log("[CLIENT] Sending STARTGAME to server: " + socket.RemoteEndPoint.ToString() + " || Sender type: " + sender.senderType);
+            //Debug.Log("[CLIENT] Sending STARTGAME to server: " + socket.RemoteEndPoint.ToString() + " || Sender type: " + sender.senderType);
             socket.Send(data, data.Length, SocketFlags.None);
         }
         else
         {
-            Debug.Log("[CLIENT] Sending STARTGAME to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType);
+            //Debug.Log("[CLIENT] Sending STARTGAME to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType);
             socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
     }
@@ -336,12 +341,12 @@ public class Client : MonoBehaviour
 
         if (protocol == Protocol.TCP)
         {
-            Debug.Log("[CLIENT] Sending SENDCLIENTLIST to server: " + socket.RemoteEndPoint.ToString() + " || Sender type: " + sender.senderType);
+            //Debug.Log("[CLIENT] Sending SENDCLIENTLIST to server: " + socket.RemoteEndPoint.ToString() + " || Sender type: " + sender.senderType);
             socket.Send(data, data.Length, SocketFlags.None);
         }
         else
         {
-            Debug.Log("[CLIENT] Sending SENDCLIENTLIST to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType);
+            //Debug.Log("[CLIENT] Sending SENDCLIENTLIST to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType);
             socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
     }
@@ -354,12 +359,12 @@ public class Client : MonoBehaviour
 
         if (protocol == Protocol.TCP)
         {
-            Debug.Log("[CLIENT] Sending MOUSEPOSITION to server: " + socket.RemoteEndPoint.ToString() + " || Sender type: " + sender.senderType + " || Mouse position: " + sender.mousePosX + " | " + sender.mousePosY);
+            //Debug.Log("[CLIENT] Sending MOUSEPOSITION to server: " + socket.RemoteEndPoint.ToString() + " || Sender type: " + sender.senderType + " || Mouse position: " + sender.mousePosX + " | " + sender.mousePosY);
             socket.Send(data, data.Length, SocketFlags.None);
         }
         else
         {
-            Debug.Log("[CLIENT] Sending MOUSEPOSITION to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType + " || Mouse position: " + sender.mousePosX + " | " + sender.mousePosY);
+            //Debug.Log("[CLIENT] Sending MOUSEPOSITION to server: " + serverIPEP.ToString() + " || Sender type: " + sender.senderType + " || Mouse position: " + sender.mousePosX + " | " + sender.mousePosY);
             socket.SendTo(data, data.Length, SocketFlags.None, serverEP);
         }
     }
@@ -371,30 +376,30 @@ public class Client : MonoBehaviour
         switch (sender.senderType)
         {
             case SenderType.STRING:
-                Debug.Log("[CLIENT] Received STRING sender type from server: " + sender.message);
+                //Debug.Log("[CLIENT] Received STRING sender type from server: " + sender.message);
                 break;
             case SenderType.CLIENTDATA:
-                Debug.Log("[CLIENT] Received CLIENTDATA sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
+                //Debug.Log("[CLIENT] Received CLIENTDATA sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
                 break;
             case SenderType.CLIENTCHAT:
-                Debug.Log("[CLIENT] Received CLIENTCHAT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.clientChat);
+                //Debug.Log("[CLIENT] Received CLIENTCHAT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.clientChat);
                 pendingMessages.Add(new Message { text = sender.clientChat, clientData = sender.clientData });                
                 break;
             case SenderType.CLIENTCELL:
-                Debug.Log("[CLIENT] Received CLIENTCELL sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.cellPosX + " | " + sender.cellPosY);
+                //Debug.Log("[CLIENT] Received CLIENTCELL sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.cellPosX + " | " + sender.cellPosY);
                 pendingRevealedCells.Add(new Vector2Int(sender.cellPosX, sender.cellPosY), sender.clientData);
                 break;
             case SenderType.STARTGAME:
-                Debug.Log("[CLIENT] Received STARTGAME sender type from server");
+                //Debug.Log("[CLIENT] Received STARTGAME sender type from server");
                 pendingScenes.Add(SceneManager.Scene.MultiplayerGame);
                 break;
             case SenderType.CLIENTDISCONNECT:
-                Debug.Log("[CLIENT] Received CLIENTDISCONNECT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
+                //Debug.Log("[CLIENT] Received CLIENTDISCONNECT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
                 pendingMessages.Add(new Message { text = sender.clientData.userName + " has left the server :(" });
                 // ToDo: Check if you have been disconnected
                 break;
             case SenderType.CLIENTCONNECT:
-                Debug.Log("[CLIENT] Received CLIENTCONNECT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
+                //Debug.Log("[CLIENT] Received CLIENTCONNECT sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID);
                 pendingMessages.Add(new Message { text = sender.clientData.userName + " has joined the server :)" });
                 //pendingPlayers.Add(sender.clientData);
                 if (sender.clientData.userID == clientData.userID)
@@ -403,19 +408,19 @@ public class Client : MonoBehaviour
                 GetClientListFromServer();
                 break;
             case SenderType.SENDBOARD:
-                Debug.Log("[CLIENT] Received SENDBOARD sender type from server: ");
+                //Debug.Log("[CLIENT] Received SENDBOARD sender type from server: ");
                 cellsToUpload = sender.cells;
                 break;
             case SenderType.SENDCLIENTLIST:
-                Debug.Log("[CLIENT] Received SENDCLIENTLIST sender type from server: ");
+                //Debug.Log("[CLIENT] Received SENDCLIENTLIST sender type from server: ");
                 pendingPlayers = sender.clientList.ToList<ClientData>();
                 break;
             case SenderType.MOUSE:
-                Debug.Log("[CLIENT] Received MOUSE sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.mousePosX + " | " + sender.mousePosY);
+                //Debug.Log("[CLIENT] Received MOUSE sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.mousePosX + " | " + sender.mousePosY);
                 pendingMousePositions.Add(new MouseData { clientData = sender.clientData, x = sender.mousePosX, y = sender.mousePosY });
                 break;
             default:
-                Debug.Log("[CLIENT] Trying to decode UNKNOWN sender type...");
+                //Debug.Log("[CLIENT] Trying to decode UNKNOWN sender type...");
                 break;
         }
     }

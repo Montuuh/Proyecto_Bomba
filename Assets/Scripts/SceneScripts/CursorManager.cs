@@ -10,18 +10,20 @@ public class CursorManager : MonoBehaviour
     public List<GameObject> cursorList = new List<GameObject>();
     public List<ClientData> currentPlayingPlayers = new List<ClientData>();
 
-    private float lerpTime = 1.0f;
+    private float lerpTime = 1.0f; // How long from A to B
 
     private float lerpTimePassedRed = 0.0f;
     private float lerpTimePassedGreen = 0.0f;
     private float lerpTimePassedBlue = 0.0f;
     private float lerpTimePassedYellow = 0.0f;
 
+    // Init pos to perform lerp
     private Vector2 lerpInitPosRed;
     private Vector2 lerpInitPosGreen;
     private Vector2 lerpInitPosBlue;
     private Vector2 lerpInitPosYellow;
 
+    // Destination pos to perform lerp
     private Vector2 lerpDestinationPosRed;
     private Vector2 lerpDestinationPosGreen;
     private Vector2 lerpDestinationPosBlue;
@@ -29,6 +31,7 @@ public class CursorManager : MonoBehaviour
 
     private void Update()
     {
+        // Applies lerp to specific cursor
         foreach (var player in currentPlayingPlayers)
         {
             switch (player.colorPlayer)
@@ -36,11 +39,9 @@ public class CursorManager : MonoBehaviour
                 case ColorPlayer.NONE:
                     break;
                 case ColorPlayer.RED:
-
                     if (lerpTimePassedRed < lerpTime)
                     {
                         lerpTimePassedRed += Time.deltaTime / lerpTime;
-
                         cursorList[0].transform.position = Vector2.Lerp(lerpInitPosRed, lerpDestinationPosRed, EaseOut(lerpTimePassedRed));
                     }
                     break;
@@ -74,26 +75,11 @@ public class CursorManager : MonoBehaviour
             }
         }
     }
-
-    public static float EaseIn(float t)
-    {
-        return t * t;
-    }
-
-    static float Flip(float x)
-    {
-        return 1 - x;
-    }
-
-    public static float EaseOut(float t)
-    {
-        return Flip(Flip(t) * Flip(t) * Flip(t));
-    }
-
     public void UpdateCursor(MouseData mouseData)
     {
         Vector2 destinationPos = new Vector2(mouseData.x, mouseData.y);
 
+        // Redirect specific lerp and restart it if destination is different
         switch (mouseData.clientData.colorPlayer)
         {
             case ColorPlayer.NONE:
@@ -134,5 +120,22 @@ public class CursorManager : MonoBehaviour
                 break;
         }
     }
+
+    #region HELPERS
+    public static float EaseIn(float t)
+    {
+        return t * t;
+    }
+
+    static float Flip(float x)
+    {
+        return 1 - x;
+    }
+
+    public static float EaseOut(float t)
+    {
+        return Flip(Flip(t) * Flip(t) * Flip(t));
+    }
+    #endregion
 
 }

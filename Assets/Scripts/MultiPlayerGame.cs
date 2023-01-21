@@ -16,9 +16,8 @@ public class MultiPlayerGame : MonoBehaviour
 
     private int emptyCellScore = 1;
 
-    private float mousePositionTime = 0.5f;
+    private float mousePositionTime = 0.5f; // Time between mouse lerps
     private float mousePositionTimer = 0.5f;
-
 
     private bool letIngameInput = true; // This boolean locks the input of the player. If false player can not play
     private bool isGodMode = false; // Debug key boolean to reveal all tiles
@@ -29,9 +28,9 @@ public class MultiPlayerGame : MonoBehaviour
     private bool once = true;
     private StartingCountdown countdown;
 
-    private MultiplayerBoard board; // Board object
-    private Highlight highlight; //Highlights on top of board
-    private TileClear tileClear;
+    private MultiplayerBoard board;
+    private Highlight highlight; // Highlights on top of board
+    private TileClear tileClear; // Tiles in background script
 
     private Cell[,] cells; // 2D array of current cells
     private SinglePlayerGameUI buttonMainMenuUI; // SinglePlayerGameUI object
@@ -121,7 +120,7 @@ public class MultiPlayerGame : MonoBehaviour
             if (x >= 0 && x < width && y >= 0 && y < height)
             {
                 Cell cell = cells[x, y];
-                if (cell.isFlagged || (cell.isRevealed /*&& cell.cellType != Cell.CellType.Number*/)) return;
+                if (cell.isFlagged || (cell.isRevealed)) return;
 
                 eventHandler.SendRevealCell(x, y);
             }
@@ -138,6 +137,7 @@ public class MultiPlayerGame : MonoBehaviour
 
     public void StartGame(Cell[,] cells)
     {
+        // Set difficulty, map size and generate board
         difficulty = DifficultyNew.Extreme;
         width = cells.GetLength(0);
         height = cells.GetLength(1);
@@ -222,54 +222,6 @@ public class MultiPlayerGame : MonoBehaviour
     {
         Cell cell = cells[x, y];
         if (cell.isFlagged || cell.isRevealed) return;
-
-        // Reveal adjacent cells if the cell is a number and all flags are placed correctly
-        /*
-        if (cell.isRevealed)
-        {
-            if (cell.cellType == Cell.CellType.Number)
-            {
-                int flagsNearby = 0;
-                for (int i = -1; i <= 1; i++)
-                {
-                    for (int j = -1; j <= 1; j++)
-                    {
-                        if (x + i >= 0 && x + i < width && y + j >= 0 && y + j < height)
-                        {
-                            Cell cellNearby = cells[x + i, y + j];
-                            if (cellNearby.isFlagged)
-                            {
-                                flagsNearby++;
-                            }
-                        }
-                    }
-                }
-                if (flagsNearby == cell.number)
-                {
-                    for (int i = -1; i <= 1; i++)
-                    {
-                        for (int j = -1; j <= 1; j++)
-                        {
-                            if (x + i >= 0 && x + i < width && y + j >= 0 && y + j < height)
-                            {
-                                Cell cellNearby = cells[x + i, y + j];
-                                if (!cellNearby.isFlagged && !cellNearby.isRevealed)
-                                {
-                                    eventHandler.SendRevealCell(x + i, y + j);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                return;
-            }
-            else
-            {
-                return;
-            }
-        }
-        */
 
         // If cell is an empty cell, reveal numbers and empty cells
         if (cell.cellType == Cell.CellType.Empty)
@@ -410,7 +362,6 @@ public class MultiPlayerGame : MonoBehaviour
                 // Update the board
                 ReloadBoard();
 
-                // Future: Event has flagged cell X
             }
         }
     }
@@ -436,12 +387,7 @@ public class MultiPlayerGame : MonoBehaviour
     // Some debug keys
     private void DebugKeys()
     {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            //isGodMode = false;
-            //isRevealedExceptMines = false;
-            //StartGame(difficulty);
-        }
+  
         if (Input.GetKeyDown(KeyCode.F1))
         {
             isGodMode = !isGodMode;
@@ -453,10 +399,6 @@ public class MultiPlayerGame : MonoBehaviour
             //isRevealedExceptMines = !isRevealedExceptMines;
             //isGodMode = false;
             //ReloadBoard();
-        }
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            //QuitGame();
         }
 
         if (Input.GetKeyDown(KeyCode.F3))
@@ -479,6 +421,7 @@ public class MultiPlayerGame : MonoBehaviour
         return flagsUsedWell == mines ? true : false;
     }
 
+    // Ends game and shows final score
     private void Win()
     {
         Debug.Log("Win");
@@ -502,10 +445,14 @@ public class MultiPlayerGame : MonoBehaviour
 
         win = true;
     }
+
+    // Sorts the score list from highest to lowest
     private int SortByScore(ClientData c1, ClientData c2)
     {
         return c2.score.CompareTo(c1.score);
     }
+
+    // Reveals all bomb tiles and displays menu button
     private void GameOver()
     {
         Debug.Log("GameOver");
@@ -546,9 +493,6 @@ public class MultiPlayerGame : MonoBehaviour
         buttonMainMenuUI.mainMenuGo.SetActive(true);
         foreach (Transform child in buttonMainMenuUI.mainMenuGo.transform)
             child.gameObject.SetActive(true);
-
-
-        // Future: Event has Lost
     }
     #endregion Win&Lose
 
