@@ -19,10 +19,9 @@ public enum ColorPlayer
 
 public class MouseData
 {
-    public int x;
-    public int y;
-    public ColorPlayer color;
-    public int playerNumber;
+    public float x;
+    public float y;
+    public ClientData clientData;
 }
 
 public class ClientData
@@ -163,9 +162,11 @@ public class Client : MonoBehaviour
         }
         else
         {
+            cursorManager.currentPlayingPlayers = lobbyPlayers;
+
             if (pendingMousePositions.Count > 0)
             {
-                cursorManager.UpdateCursor(pendingMousePositions[0].x, pendingMousePositions[0].y, pendingMousePositions[0].color, pendingMousePositions[0].playerNumber);
+                cursorManager.UpdateCursor(pendingMousePositions[0]);
                 pendingMousePositions.RemoveAt(0);
             }
         }
@@ -345,7 +346,7 @@ public class Client : MonoBehaviour
         }
     }
 
-    public void SendMousePosition(ClientData _clientData, int _mousePosX, int _mousePosY)
+    public void SendMousePosition(ClientData _clientData, float _mousePosX, float _mousePosY)
     {
         Sender sender = new Sender(SenderType.MOUSE) { mousePosX = _mousePosX, mousePosY = _mousePosY, clientData = _clientData };
 
@@ -411,7 +412,7 @@ public class Client : MonoBehaviour
                 break;
             case SenderType.MOUSE:
                 Debug.Log("[CLIENT] Received MOUSE sender type from server: " + sender.clientData.userName + " | " + sender.clientData.userID + " || " + sender.mousePosX + " | " + sender.mousePosY);
-                pendingMousePositions.Add(new MouseData { playerNumber = sender.clientData.playerNumber, x = sender.mousePosX, y = sender.mousePosY, color = sender.clientData.colorPlayer });
+                pendingMousePositions.Add(new MouseData { clientData = sender.clientData, x = sender.mousePosX, y = sender.mousePosY });
                 break;
             default:
                 Debug.Log("[CLIENT] Trying to decode UNKNOWN sender type...");

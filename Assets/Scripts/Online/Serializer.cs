@@ -29,8 +29,8 @@ public class Sender
     public int cellPosY;
     public Cell[,] cells;
     public ClientData[] clientList;
-    public int mousePosX;
-    public int mousePosY;
+    public float mousePosX;
+    public float mousePosY;
 
     public Sender(SenderType senderType)
     {
@@ -135,8 +135,8 @@ public static class Serialize
                 writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
                 writer.Write(sender.clientData.score); // 5 --> int
 
-                writer.Write(sender.mousePosX); // 6 -> int
-                writer.Write(sender.mousePosY); // 7 -> int
+                writer.Write(sender.mousePosX); // 6 -> float
+                writer.Write(sender.mousePosY); // 7 -> float
                 writer.Write(sender.clientData.playerNumber); // 8 -> int
                 break;
             default:
@@ -254,8 +254,8 @@ public static class Serialize
                 userName = reader.ReadString(); // 3 -> string
                 colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
                 score = reader.ReadInt32(); // 5 --> int
-                int mousePosX = reader.ReadInt32(); // 6 -> int
-                int mousePosY = reader.ReadInt32(); // 7 -> int
+                float mousePosX = reader.ReadSingle(); // 6 -> float
+                float mousePosY = reader.ReadSingle(); // 7 -> float
                 playerNumber = reader.ReadInt32(); // 8 -> int
 
                 sender.clientData = new ClientData(userID, userName, colorPlayer) { playerNumber = playerNumber, score = score };

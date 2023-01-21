@@ -30,7 +30,7 @@ public class EventHandler : MonoBehaviour
         client.SendClientCell(client.clientData, x, y);
     }
 
-    public void SendMousePosition(int mouseX, int mouseY)
+    public void SendMousePosition(float mouseX, float mouseY)
     {
         Debug.Log("[EVENT] SendCursorPosition event received, SendCursorPosition: " + mouseX + ", " + mouseY + ". From " + client.clientData.userName);
         client.SendMousePosition(client.clientData, mouseX, mouseY);
