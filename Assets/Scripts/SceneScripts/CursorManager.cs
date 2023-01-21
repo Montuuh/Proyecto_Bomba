@@ -27,19 +27,6 @@ public class CursorManager : MonoBehaviour
     private Vector2 lerpDestinationPosBlue;
     private Vector2 lerpDestinationPosYellow;
 
-    //private void Start()
-    //{
-    //    for (int i = 0; i < cursorList.Count; i++)
-    //    {
-    //        cursorList[i] = GameObject.Instantiate(cursorList[i]);
-    //        cursorList[i].transform.SetParent(GameObject.Find("CursorManager").transform, false);
-
-    //        Vector2 spawnPos = Camera.main.ViewportToWorldPoint(new Vector2(0.5f, 0.5f));
-
-    //        cursorList[i].transform.position = spawnPos;
-    //    }
-    //}
-
     private void Update()
     {
         foreach (var player in currentPlayingPlayers)
@@ -50,36 +37,57 @@ public class CursorManager : MonoBehaviour
                     break;
                 case ColorPlayer.RED:
 
-                    lerpTimePassedRed += Time.deltaTime;
-                    cursorList[0].transform.position = Vector2.Lerp(lerpInitPosRed, lerpDestinationPosRed, lerpTimePassedRed);
+                    if (lerpTimePassedRed < lerpTime)
+                    {
+                        lerpTimePassedRed += Time.deltaTime / lerpTime;
 
+                        cursorList[0].transform.position = Vector2.Lerp(lerpInitPosRed, lerpDestinationPosRed, EaseOut(lerpTimePassedRed));
+                    }
                     break;
 
                 case ColorPlayer.GREEN:
-
-                    lerpTimePassedGreen += Time.deltaTime;
-                    cursorList[1].transform.position = Vector2.Lerp(lerpInitPosGreen, lerpDestinationPosGreen, lerpTimePassedGreen);
-
+                    if (lerpTimePassedGreen < lerpTime)
+                    {
+                        lerpTimePassedGreen += Time.deltaTime / lerpTime;
+                        cursorList[1].transform.position = Vector2.Lerp(lerpInitPosGreen, lerpDestinationPosGreen, EaseOut(lerpTimePassedGreen));
+                    }
                     break;
 
                 case ColorPlayer.BLUE:
-
-                    lerpTimePassedBlue += Time.deltaTime;
-                    cursorList[2].transform.position = Vector2.Lerp(lerpInitPosBlue, lerpDestinationPosBlue, lerpTimePassedBlue);
-
+                    if (lerpTimePassedBlue < lerpTime)
+                    {
+                        lerpTimePassedBlue += Time.deltaTime  / lerpTime;
+                        cursorList[2].transform.position = Vector2.Lerp(lerpInitPosBlue, lerpDestinationPosBlue, EaseOut(lerpTimePassedBlue));
+                    }
                     break;
 
                 case ColorPlayer.YELLOW:
-
-                    lerpTimePassedYellow += Time.deltaTime;
-                    cursorList[3].transform.position = Vector2.Lerp(lerpInitPosYellow, lerpDestinationPosYellow, lerpTimePassedYellow);
-
+                    if (lerpTimePassedYellow < lerpTime)
+                    {
+                        lerpTimePassedYellow += Time.deltaTime  / lerpTime;
+                        cursorList[3].transform.position = Vector2.Lerp(lerpInitPosYellow, lerpDestinationPosYellow, EaseOut(lerpTimePassedYellow));
+                    }
                     break;
 
                 default:
                     break;
             }
         }
+    }
+
+    public static float EaseIn(float t)
+    {
+        return t * t;
+    }
+
+    static float Flip(float x)
+    {
+        return 1 - x;
+    }
+
+    public static float EaseOut(float t)
+    {
+        return Flip(Flip(t) * Flip(t) * Flip(t));
     }
 
     public void UpdateCursor(MouseData mouseData)
@@ -91,7 +99,7 @@ public class CursorManager : MonoBehaviour
             case ColorPlayer.NONE:
                 break;
             case ColorPlayer.RED:
-                if (destinationPos.x != lerpDestinationPosRed.x || destinationPos.y != lerpDestinationPosRed.y)
+                if (Mathf.FloorToInt(destinationPos.x) != Mathf.FloorToInt(lerpDestinationPosRed.x) || Mathf.FloorToInt(destinationPos.y) != Mathf.FloorToInt(lerpDestinationPosRed.y))
                 {
                     lerpInitPosRed = cursorList[0].transform.position;
                     lerpDestinationPosRed = destinationPos;
@@ -99,7 +107,7 @@ public class CursorManager : MonoBehaviour
                 }
                 break;
             case ColorPlayer.GREEN:
-                if (destinationPos.x != lerpDestinationPosGreen.x || destinationPos.y != lerpDestinationPosGreen.y)
+                if (Mathf.FloorToInt(destinationPos.x) != Mathf.FloorToInt(lerpDestinationPosGreen.x) || Mathf.FloorToInt(destinationPos.y) != Mathf.FloorToInt(lerpDestinationPosGreen.y))
                 {
                     lerpInitPosGreen = cursorList[1].transform.position;
                     lerpDestinationPosGreen = destinationPos;
@@ -107,7 +115,7 @@ public class CursorManager : MonoBehaviour
                 }
                 break;
             case ColorPlayer.BLUE:
-                if (destinationPos.x != lerpDestinationPosBlue.x || destinationPos.y != lerpDestinationPosBlue.y)
+                if (Mathf.FloorToInt(destinationPos.x) != Mathf.FloorToInt(lerpDestinationPosBlue.x) || Mathf.FloorToInt(destinationPos.y) != Mathf.FloorToInt(lerpDestinationPosBlue.y))
                 {
                     lerpInitPosBlue = cursorList[2].transform.position;
                     lerpDestinationPosBlue = destinationPos;
@@ -115,7 +123,7 @@ public class CursorManager : MonoBehaviour
                 }
                 break;
             case ColorPlayer.YELLOW:
-                if (destinationPos.x != lerpDestinationPosYellow.x || destinationPos.y != lerpDestinationPosYellow.y)
+                if (Mathf.FloorToInt(destinationPos.x) != Mathf.FloorToInt(lerpDestinationPosYellow.x) || Mathf.FloorToInt(destinationPos.y) != Mathf.FloorToInt(lerpDestinationPosYellow.y))
                 {
                     lerpInitPosYellow = cursorList[3].transform.position;
                     lerpDestinationPosYellow = destinationPos;
