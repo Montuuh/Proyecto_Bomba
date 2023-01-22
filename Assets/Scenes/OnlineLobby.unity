@@ -172,8 +172,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45e7295745b4d7748bf4dd226d4e6fd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnTime: 1
   isHorizontalPositive: 0
+  spawnTime: 1
   objectToSpawn: {fileID: 6437446648531124351, guid: b03acd1dfaea50d4db570666b47feace, type: 3}
 --- !u!1 &52712481
 GameObject:
@@ -5088,8 +5088,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45e7295745b4d7748bf4dd226d4e6fd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnTime: 1
   isHorizontalPositive: 1
+  spawnTime: 1
   objectToSpawn: {fileID: 6437446648531124351, guid: b03acd1dfaea50d4db570666b47feace, type: 3}
 --- !u!1 &1929803365
 GameObject:

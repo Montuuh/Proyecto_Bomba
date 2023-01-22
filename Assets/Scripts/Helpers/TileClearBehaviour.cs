@@ -39,7 +39,6 @@ public class TileClearBehaviour : MonoBehaviour
     {
         if(makeItRainInBackground)
         {
-            if (GameObject.Find("Grid").GetComponent<MultiPlayerGame>().win) Destroy(gameObject); // Win checker
 
             spriteRenderer.sortingOrder = 0;
 
@@ -81,6 +80,8 @@ public class TileClearBehaviour : MonoBehaviour
                 default:
                     break;
             }
+
+            if (GameObject.Find("Grid").GetComponent<MultiPlayerGame>().win) Destroy(gameObject); // Win checker
         } else
         {
             Destroy(gameObject);
