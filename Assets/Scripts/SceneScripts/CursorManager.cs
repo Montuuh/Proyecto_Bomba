@@ -29,11 +29,22 @@ public class CursorManager : MonoBehaviour
     private Vector2 lerpDestinationPosBlue;
     private Vector2 lerpDestinationPosYellow;
 
+    private MultiPlayerGame game;
+
     private void Update()
     {
+        game = GameObject.Find("Grid").GetComponent<MultiPlayerGame>();
+
+        foreach (var cursor in cursorList)
+        {
+            cursor.SetActive(false);
+        }
+
         // Applies lerp to specific cursor
         foreach (var player in currentPlayingPlayers)
         {
+            if (player.userID == game.localPlayer.clientData.userID) return;
+
             switch (player.colorPlayer)
             {
                 case ColorPlayer.NONE:
@@ -42,6 +53,7 @@ public class CursorManager : MonoBehaviour
                     if (lerpTimePassedRed < lerpTime)
                     {
                         lerpTimePassedRed += Time.deltaTime / lerpTime;
+                        cursorList[0].SetActive(true);
                         cursorList[0].transform.position = Vector2.LerpUnclamped(lerpInitPosRed, lerpDestinationPosRed, EaseOut(lerpTimePassedRed));
                     }
                     break;
@@ -50,6 +62,7 @@ public class CursorManager : MonoBehaviour
                     if (lerpTimePassedGreen < lerpTime)
                     {
                         lerpTimePassedGreen += Time.deltaTime / lerpTime;
+                        cursorList[1].SetActive(true);
                         cursorList[1].transform.position = Vector2.LerpUnclamped(lerpInitPosGreen, lerpDestinationPosGreen, EaseOut(lerpTimePassedGreen));
                     }
                     break;
@@ -58,6 +71,7 @@ public class CursorManager : MonoBehaviour
                     if (lerpTimePassedBlue < lerpTime)
                     {
                         lerpTimePassedBlue += Time.deltaTime  / lerpTime;
+                        cursorList[2].SetActive(true);
                         cursorList[2].transform.position = Vector2.LerpUnclamped(lerpInitPosBlue, lerpDestinationPosBlue, EaseOut(lerpTimePassedBlue));
                     }
                     break;
@@ -66,6 +80,7 @@ public class CursorManager : MonoBehaviour
                     if (lerpTimePassedYellow < lerpTime)
                     {
                         lerpTimePassedYellow += Time.deltaTime  / lerpTime;
+                        cursorList[3].SetActive(true);
                         cursorList[3].transform.position = Vector2.LerpUnclamped(lerpInitPosYellow, lerpDestinationPosYellow, EaseOut(lerpTimePassedYellow));
                     }
                     break;
@@ -77,6 +92,7 @@ public class CursorManager : MonoBehaviour
     }
     public void UpdateCursor(MouseData mouseData)
     {
+
         Vector2 destinationPos = new Vector2(mouseData.x, mouseData.y);
 
         // Redirect specific lerp and restart it if destination is different
