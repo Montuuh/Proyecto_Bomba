@@ -248,10 +248,14 @@ public class MultiPlayerGame : MonoBehaviour
                 cameraShaker.TriggerShake(bombShakerDuration, bombShakerIntensity);
             }
 
-            health--;
+            if(localPlayer.clientData.userID == clientData.userID)
+            {
+                health--;
 
-            if(health == 0)
-                GameOver();
+                if(health == 0)
+                    GameOver();
+            }
+
         }
         // Number cell, reveal it
         else
