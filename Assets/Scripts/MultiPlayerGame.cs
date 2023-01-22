@@ -9,8 +9,6 @@ public class MultiPlayerGame : MonoBehaviour
 {
     #region Variables
 
-    public int health = 3;
-
     public DifficultyNew difficulty = DifficultyNew.Beginner;
     private int width;
     private int height;
@@ -250,9 +248,9 @@ public class MultiPlayerGame : MonoBehaviour
 
             if(localPlayer.clientData.userID == clientData.userID)
             {
-                health--;
+                localPlayer.clientData.health--;
 
-                if(health == 0)
+                if(localPlayer.clientData.health == 0)
                     GameOver();
             }
 

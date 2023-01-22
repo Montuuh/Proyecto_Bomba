@@ -32,7 +32,7 @@ public class ClientData
     public bool isHost = false;
     public int playerNumber = 0;
     public int score = 0;
-
+    public int health = 3;
     public ClientData()
     {
         SetRandomGuest();

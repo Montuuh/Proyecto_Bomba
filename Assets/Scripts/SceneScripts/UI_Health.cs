@@ -18,7 +18,7 @@ public class UI_Health : MonoBehaviour
             hearts[i].SetActive(false);
         }
 
-        for (int i = 0; i < game.health; i++)
+        for (int i = 0; i < game.localPlayer.clientData.health; i++)
         {
             hearts[i].SetActive(true);
         }

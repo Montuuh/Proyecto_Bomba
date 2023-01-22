@@ -57,6 +57,7 @@ public static class Serialize
                 writer.Write(sender.clientData.userName); // 3 -> string
                 writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
                 writer.Write(sender.clientData.score); // 5 --> int
+                writer.Write(sender.clientData.health); // 6 --> int
                 break;
             case SenderType.CLIENTCHAT:
                 writer.Write((int)sender.senderType); // 1 -> int
@@ -65,6 +66,7 @@ public static class Serialize
                 writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
                 writer.Write(sender.clientData.score); // 5 --> int
                 writer.Write(sender.clientChat); // 6 -> string
+                writer.Write(sender.clientData.health); // 7 --> int
                 break;
             case SenderType.CLIENTCELL:
                 writer.Write((int)sender.senderType); // 1 -> int
@@ -74,6 +76,7 @@ public static class Serialize
                 writer.Write(sender.clientData.score); // 5 --> int
                 writer.Write(sender.cellPosX); // 6 -> int
                 writer.Write(sender.cellPosY); // 7 -> int
+                writer.Write(sender.clientData.health); // 8 --> int
                 break;
             case SenderType.STARTGAME:
                 writer.Write((int)sender.senderType); // 1 -> int
@@ -84,6 +87,7 @@ public static class Serialize
                 writer.Write(sender.clientData.userName); // 3 -> string
                 writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
                 writer.Write(sender.clientData.score); // 5 --> int
+                writer.Write(sender.clientData.health); // 6 --> int
                 break;
             case SenderType.CLIENTCONNECT:
                 writer.Write((int)sender.senderType); // 1 -> int
@@ -92,7 +96,7 @@ public static class Serialize
                 writer.Write((int)sender.clientData.colorPlayer); // 4 -> int
                 writer.Write(sender.clientData.score); // 5 --> int
                 writer.Write(sender.clientData.playerNumber); // 6 -> int
-
+                writer.Write(sender.clientData.health); // 7 --> int
                 break;
             case SenderType.SENDBOARD:
                 writer.Write((int)sender.senderType); // 1 -> int
@@ -118,6 +122,7 @@ public static class Serialize
                         writer.Write(sender.clientList[i].userName); // 4 -> string
                         writer.Write((int)sender.clientList[i].colorPlayer); // 5 -> int
                         writer.Write(sender.clientList[i].score); // 6 --> int
+                        writer.Write(sender.clientList[i].health); // 7 --> int
                     }
                 }
                 else
@@ -138,6 +143,7 @@ public static class Serialize
                 writer.Write(sender.mousePosX); // 6 -> float
                 writer.Write(sender.mousePosY); // 7 -> float
                 writer.Write(sender.clientData.playerNumber); // 8 -> int
+                writer.Write(sender.clientData.health); // 9 --> int
                 break;
             default:
                 Debug.Log("[SERIALIZER] Trying to serialize NONE type...");
@@ -159,7 +165,7 @@ public static class Serialize
 
         Sender sender = new Sender(senderType);
         uint userID = 0;
-        int cellPosX, cellPosY, playerNumber, score = 0;
+        int cellPosX, cellPosY, playerNumber, score, health = 0;
         string userName, clientChat, message = "";
         ColorPlayer colorPlayer = ColorPlayer.NONE;
         switch (sender.senderType)
@@ -173,7 +179,8 @@ public static class Serialize
                 userName = reader.ReadString(); // 3 -> string
                 colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
                 score = reader.ReadInt32(); // 5 --> int
-                sender.clientData = new ClientData(userID, userName, colorPlayer) { score = score };
+                health = reader.ReadInt32(); // 6 -> int
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { score = score, health = health };
                 break;
             case SenderType.CLIENTCHAT:
                 userID = reader.ReadUInt32(); // 2 -> uint
@@ -181,8 +188,9 @@ public static class Serialize
                 colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
                 score = reader.ReadInt32(); // 5 --> int
                 clientChat = reader.ReadString(); // 6 -> string
-                sender.clientChat = clientChat; // 7 -> string
-                sender.clientData = new ClientData(userID, userName, colorPlayer) { score = score };
+                sender.clientChat = clientChat; 
+                health = reader.ReadInt32(); // 7 -> int
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { score = score, health = health };
                 break;
             case SenderType.CLIENTCELL:
                 userID = reader.ReadUInt32(); // 2 -> uint
@@ -191,7 +199,8 @@ public static class Serialize
                 score = reader.ReadInt32(); // 5 --> int
                 cellPosX = reader.ReadInt32(); // 6 -> int
                 cellPosY = reader.ReadInt32(); // 7 -> int
-                sender.clientData = new ClientData(userID, userName, colorPlayer) { score = score };
+                health = reader.ReadInt32(); // 8 -> int
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { score = score, health = health };
                 sender.cellPosX = cellPosX;
                 sender.cellPosY = cellPosY;
                 break;
@@ -203,7 +212,8 @@ public static class Serialize
                 userName = reader.ReadString(); // 3 -> string
                 colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
                 score = reader.ReadInt32(); // 5 --> int
-                sender.clientData = new ClientData(userID, userName, colorPlayer) { score = score };
+                health = reader.ReadInt32(); // 6 -> int
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { score = score, health = health };
                 break;
             case SenderType.CLIENTCONNECT:
                 userID = reader.ReadUInt32(); // 2 -> uint
@@ -211,8 +221,8 @@ public static class Serialize
                 colorPlayer = (ColorPlayer)reader.ReadInt32(); // 4 -> int
                 playerNumber = reader.ReadInt32(); // 5 -> int
                 score = reader.ReadInt32(); // 6 --> int
-
-                sender.clientData = new ClientData(userID, userName, colorPlayer) { playerNumber = playerNumber, score = score };
+                health = reader.ReadInt32(); // 7 -> int
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { playerNumber = playerNumber, score = score, health = health };
                 break;
             case SenderType.SENDBOARD:
                 int width = reader.ReadInt32(); // 2 -> int
@@ -240,8 +250,9 @@ public static class Serialize
                         userName = reader.ReadString(); // 4 -> string
                         colorPlayer = (ColorPlayer)reader.ReadInt32(); // 5 -> int
                         score = reader.ReadInt32(); // 6 --> int
+                        health = reader.ReadInt32(); // 7 -> int
 
-                        clientList[i] = new ClientData(userID, userName, colorPlayer) { score = score };
+                        clientList[i] = new ClientData(userID, userName, colorPlayer) { score = score, health = health };
                     }
                     sender.clientList = clientList;
                 }
@@ -257,8 +268,9 @@ public static class Serialize
                 float mousePosX = reader.ReadSingle(); // 6 -> float
                 float mousePosY = reader.ReadSingle(); // 7 -> float
                 playerNumber = reader.ReadInt32(); // 8 -> int
+                health = reader.ReadInt32(); // 9 -> int
 
-                sender.clientData = new ClientData(userID, userName, colorPlayer) { playerNumber = playerNumber, score = score };
+                sender.clientData = new ClientData(userID, userName, colorPlayer) { playerNumber = playerNumber, score = score, health = health };
                 sender.mousePosX = mousePosX;
                 sender.mousePosY = mousePosY;
                 break;
