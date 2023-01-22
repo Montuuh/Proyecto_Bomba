@@ -42,7 +42,7 @@ public class CursorManager : MonoBehaviour
                     if (lerpTimePassedRed < lerpTime)
                     {
                         lerpTimePassedRed += Time.deltaTime / lerpTime;
-                        cursorList[0].transform.position = Vector2.Lerp(lerpInitPosRed, lerpDestinationPosRed, EaseOut(lerpTimePassedRed));
+                        cursorList[0].transform.position = Vector2.LerpUnclamped(lerpInitPosRed, lerpDestinationPosRed, EaseOut(lerpTimePassedRed));
                     }
                     break;
 
@@ -50,7 +50,7 @@ public class CursorManager : MonoBehaviour
                     if (lerpTimePassedGreen < lerpTime)
                     {
                         lerpTimePassedGreen += Time.deltaTime / lerpTime;
-                        cursorList[1].transform.position = Vector2.Lerp(lerpInitPosGreen, lerpDestinationPosGreen, EaseOut(lerpTimePassedGreen));
+                        cursorList[1].transform.position = Vector2.LerpUnclamped(lerpInitPosGreen, lerpDestinationPosGreen, EaseOut(lerpTimePassedGreen));
                     }
                     break;
 
@@ -58,7 +58,7 @@ public class CursorManager : MonoBehaviour
                     if (lerpTimePassedBlue < lerpTime)
                     {
                         lerpTimePassedBlue += Time.deltaTime  / lerpTime;
-                        cursorList[2].transform.position = Vector2.Lerp(lerpInitPosBlue, lerpDestinationPosBlue, EaseOut(lerpTimePassedBlue));
+                        cursorList[2].transform.position = Vector2.LerpUnclamped(lerpInitPosBlue, lerpDestinationPosBlue, EaseOut(lerpTimePassedBlue));
                     }
                     break;
 
@@ -66,7 +66,7 @@ public class CursorManager : MonoBehaviour
                     if (lerpTimePassedYellow < lerpTime)
                     {
                         lerpTimePassedYellow += Time.deltaTime  / lerpTime;
-                        cursorList[3].transform.position = Vector2.Lerp(lerpInitPosYellow, lerpDestinationPosYellow, EaseOut(lerpTimePassedYellow));
+                        cursorList[3].transform.position = Vector2.LerpUnclamped(lerpInitPosYellow, lerpDestinationPosYellow, EaseOut(lerpTimePassedYellow));
                     }
                     break;
 

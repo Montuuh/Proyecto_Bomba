@@ -130,7 +130,6 @@ public class Server : MonoBehaviour
             clientThread.Abort();
     }
 
-    // ToDo: Not yet adapted to serialization
     private void ServerAcceptThread()
     {
         while (true)
@@ -146,7 +145,6 @@ public class Server : MonoBehaviour
         }
     }
 
-    // ToDo: Not yet adapted to serialization
     private void ClientThread(object clientSocket)
     {
         Socket client = (Socket)clientSocket;
