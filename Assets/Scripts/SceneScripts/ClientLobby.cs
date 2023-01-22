@@ -75,11 +75,11 @@ public class ClientLobby : MonoBehaviour
     // Not used for now, we are using join by server code
     public void OnInputJoinIP()
     {
-        _inputJoinIP = inputJoinIP.text;
+        _inputJoinIP = inputJoinIP.text.ToUpper();
     }
     public void OnInputJoinServerCode()
     {
-        _inputJoinCode = inputJoinIP.text;
+        _inputJoinCode = inputJoinIP.text.ToUpper();
     }
 
     // Joins server
