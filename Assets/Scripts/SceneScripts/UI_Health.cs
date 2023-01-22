@@ -22,5 +22,7 @@ public class UI_Health : MonoBehaviour
         {
             hearts[i].SetActive(true);
         }
+
+        if (game.win) Destroy(gameObject);
     }
 }
