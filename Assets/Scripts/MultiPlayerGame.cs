@@ -245,14 +245,11 @@ public class MultiPlayerGame : MonoBehaviour
             cell.isExploded = true;
             cells[x, y] = cell;
 
-            if (localPlayer.clientData.userID == clientData.userID)
-            {
-                cameraShaker.TriggerShake(bombShakerDuration, bombShakerIntensity);
-            }
+            SubstractHealth(clientData);
 
             if(localPlayer.clientData.userID == clientData.userID)
             {
-                SubstractHealth(localPlayer.clientData);
+                cameraShaker.TriggerShake(bombShakerDuration, bombShakerIntensity);
 
                 if(localPlayer.clientData.health == 0)
                     GameOver();

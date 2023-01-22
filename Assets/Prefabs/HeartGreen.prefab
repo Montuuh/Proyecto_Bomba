@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 493603809050074846}
   - component: {fileID: 493603809050074913}
   m_Layer: 0
-  m_Name: Heart
+  m_Name: HeartGreen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -66,7 +66,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: fb95b0da8af1f4d43bdc30b933b49c09, type: 3}
+  m_Sprite: {fileID: 21300000, guid: b4e911a79500367468820cc23f42335e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

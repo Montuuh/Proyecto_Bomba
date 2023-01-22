@@ -959,9 +959,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   heartsList:
   - {fileID: 493603809050074915, guid: f99cde61fed81af47816eba7ba23708d, type: 3}
-  - {fileID: 493603809050074915, guid: f99cde61fed81af47816eba7ba23708d, type: 3}
-  - {fileID: 493603809050074915, guid: f99cde61fed81af47816eba7ba23708d, type: 3}
-  - {fileID: 493603809050074915, guid: f99cde61fed81af47816eba7ba23708d, type: 3}
+  - {fileID: 493603809050074915, guid: dbd0651a433f5984db1383bec84e4ec7, type: 3}
+  - {fileID: 493603809050074915, guid: 1305cb0003faf3c42bda001309a37536, type: 3}
+  - {fileID: 493603809050074915, guid: 4f45b313e2cdeb84bbe2a9d78cf1011d, type: 3}
 --- !u!4 &704408649 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8773135058598696983, guid: 423ec2e7ead365d41b692100af507f5d, type: 3}

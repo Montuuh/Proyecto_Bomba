@@ -35,30 +35,26 @@ public class UI_Health : MonoBehaviour
                         break;
                     case ColorPlayer.RED:
                         go = GameObject.Instantiate(heartsList[0]);
-                        //go.transform.parent = gameObject.transform;
                         go.transform.SetParent(this.gameObject.transform, false);
                         rTransform = go.GetComponent<RectTransform>();
                         rTransform.localPosition = new Vector3(840 - 125 * j, 400 - 125 * i, 0);
 
-                        break;
-                    case ColorPlayer.BLUE:
-                        go = GameObject.Instantiate(heartsList[1]);
-                        //go.transform.parent = gameObject.transform;
-                        go.transform.SetParent(this.gameObject.transform, false);
-
-                        rTransform = go.GetComponent<RectTransform>();
-                        rTransform.localPosition = new Vector3(840 - 125 * j, 400 - 125 * i, 0);
                         break;
                     case ColorPlayer.GREEN:
-                        go = GameObject.Instantiate(heartsList[2]);
-                        //go.transform.parent = gameObject.transform;
+                        go = GameObject.Instantiate(heartsList[1]);
                         go.transform.SetParent(this.gameObject.transform, false);
+                        rTransform = go.GetComponent<RectTransform>();
+                        rTransform.localPosition = new Vector3(840 - 125 * j, 400 - 125 * i, 0);
+                        break;
+                    case ColorPlayer.BLUE:
+                        go = GameObject.Instantiate(heartsList[2]);
+                        go.transform.SetParent(this.gameObject.transform, false);
+
                         rTransform = go.GetComponent<RectTransform>();
                         rTransform.localPosition = new Vector3(840 - 125 * j, 400 - 125 * i, 0);
                         break;
                     case ColorPlayer.YELLOW:
                         go = GameObject.Instantiate(heartsList[3]);
-                        //go.transform.parent = gameObject.transform;
                         go.transform.SetParent(this.gameObject.transform, false);
                         rTransform = go.GetComponent<RectTransform>();
                         rTransform.localPosition = new Vector3(840 - 125 * j, 400 - 125 * i, 0);
