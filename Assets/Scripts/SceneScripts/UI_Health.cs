@@ -5,24 +5,75 @@ using UnityEngine;
 public class UI_Health : MonoBehaviour
 {
 
-    public List<GameObject> hearts;
+    private HealthManager healthManager;
+    public List<GameObject> heartsList;
 
-    private MultiPlayerGame game;
+    private GameObject go;
+    private RectTransform rTransform;
+    void Start()
+    {
+    }
 
+    // Displays current scores of players
     void Update()
     {
-        game = GameObject.Find("Grid").GetComponent<MultiPlayerGame>();
+        healthManager = GameObject.Find("ClientManager").GetComponent<HealthManager>();
 
-        for (int i = 0; i < hearts.Count; i++)
-        {
-            hearts[i].SetActive(false);
+        List<ClientData> healthUI = healthManager.currentPlayingPlayers;
+
+        foreach (Transform child in gameObject.transform) {
+            GameObject.Destroy(child.gameObject);
         }
 
-        for (int i = 0; i < game.localPlayer.clientData.health; i++)
+        for (int i = 0; i < healthUI.Count; i++)
         {
-            hearts[i].SetActive(true);
-        }
+            for (int j = 0; j < healthUI[i].health; j++)
+            {
+                switch (healthUI[i].colorPlayer)
+                {
+                    case ColorPlayer.NONE:
+                        break;
+                    case ColorPlayer.RED:
+                        go = GameObject.Instantiate(heartsList[0]);
+                        //go.transform.parent = gameObject.transform;
+                        go.transform.SetParent(this.gameObject.transform, false);
+                        rTransform = go.GetComponent<RectTransform>();
+                        rTransform.localPosition = new Vector3(840 - 125 * j, 400 - 125 * i, 0);
 
-        if (game.win) Destroy(gameObject);
+                        break;
+                    case ColorPlayer.BLUE:
+                        go = GameObject.Instantiate(heartsList[1]);
+                        //go.transform.parent = gameObject.transform;
+                        go.transform.SetParent(this.gameObject.transform, false);
+
+                        rTransform = go.GetComponent<RectTransform>();
+                        rTransform.localPosition = new Vector3(840 - 125 * j, 400 - 125 * i, 0);
+                        break;
+                    case ColorPlayer.GREEN:
+                        go = GameObject.Instantiate(heartsList[2]);
+                        //go.transform.parent = gameObject.transform;
+                        go.transform.SetParent(this.gameObject.transform, false);
+                        rTransform = go.GetComponent<RectTransform>();
+                        rTransform.localPosition = new Vector3(840 - 125 * j, 400 - 125 * i, 0);
+                        break;
+                    case ColorPlayer.YELLOW:
+                        go = GameObject.Instantiate(heartsList[3]);
+                        //go.transform.parent = gameObject.transform;
+                        go.transform.SetParent(this.gameObject.transform, false);
+                        rTransform = go.GetComponent<RectTransform>();
+                        rTransform.localPosition = new Vector3(840 - 125 * j, 400 - 125 * i, 0);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        
+
+    }
+
+    private int SortByScore(ClientData c1, ClientData c2)
+    {
+        return c2.score.CompareTo(c1.score);
     }
 }

@@ -87,6 +87,7 @@ public class Client : MonoBehaviour
     public int a = 12;
 
     public ScoreManager scoreManager;
+    public HealthManager healthManager;
 
     void Start()
     {
@@ -150,7 +151,6 @@ public class Client : MonoBehaviour
                 if (!existing)
                 {
                     lobbyPlayers.Add(pendingPlayers[0]);
-                    scoreManager.currentPlayingPlayers = lobbyPlayers;
                 }
 
                 existing = false;
@@ -160,6 +160,10 @@ public class Client : MonoBehaviour
             }
         }
 
+        // Update Lists (UI)
+        scoreManager.currentPlayingPlayers = lobbyPlayers;
+        healthManager.currentPlayingPlayers = lobbyPlayers;
+
         // Updates cursor positions
         if (cursorManager == null)
         {
@@ -168,7 +172,6 @@ public class Client : MonoBehaviour
         else
         {
             cursorManager.currentPlayingPlayers = lobbyPlayers;
-
             if (pendingMousePositions.Count > 0)
             {
                 cursorManager.UpdateCursor(pendingMousePositions[0]);

@@ -36,6 +36,7 @@ public class MultiPlayerGame : MonoBehaviour
     private SinglePlayerGameUI buttonMainMenuUI; // SinglePlayerGameUI object
 
     private ScoreManager scoreManager;
+    private HealthManager healthManager;
 
     public Client localPlayer;
 
@@ -77,6 +78,9 @@ public class MultiPlayerGame : MonoBehaviour
 
         scoreManager = localPlayer.scoreManager;
         scoreManager.localPlayer = localPlayer.clientData;
+
+        healthManager = localPlayer.healthManager;
+        healthManager.localPlayer = localPlayer.clientData;
 
         TMP_Text scoreText = GameObject.Find("Score").GetComponent<TMP_Text>();
         scoreText.alignment = TextAlignmentOptions.Left;
@@ -248,7 +252,7 @@ public class MultiPlayerGame : MonoBehaviour
 
             if(localPlayer.clientData.userID == clientData.userID)
             {
-                localPlayer.clientData.health--;
+                SubstractHealth(localPlayer.clientData);
 
                 if(localPlayer.clientData.health == 0)
                     GameOver();
@@ -315,7 +319,7 @@ public class MultiPlayerGame : MonoBehaviour
         }
     }
 
-    //Paneo
+    
     private void AddScore(ClientData clientData, int ammount)
     {
         if (clientData.colorPlayer == ColorPlayer.NONE) return;
@@ -329,6 +333,23 @@ public class MultiPlayerGame : MonoBehaviour
         {
             clientData.score += ammount;
             scoreManager.UpdateScores(clientData);
+        }
+    }
+
+    
+    private void SubstractHealth(ClientData clientData)
+    {
+        if (clientData.colorPlayer == ColorPlayer.NONE) return;
+
+        if (localPlayer.clientData.userID == clientData.userID)
+        {
+            localPlayer.clientData.health--;
+            healthManager.UpdateLifes(localPlayer.clientData);
+        }
+        else
+        {
+            clientData.health--;
+            healthManager.UpdateLifes(clientData);
         }
     }
 

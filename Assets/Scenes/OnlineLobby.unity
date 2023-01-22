@@ -2955,6 +2955,7 @@ GameObject:
   - component: {fileID: 956514975}
   - component: {fileID: 956514976}
   - component: {fileID: 956514977}
+  - component: {fileID: 956514978}
   m_Layer: 0
   m_Name: ClientManager
   m_TagString: Untagged
@@ -2995,6 +2996,7 @@ MonoBehaviour:
   cursorManager: {fileID: 0}
   a: 12
   scoreManager: {fileID: 956514977}
+  healthManager: {fileID: 956514978}
 --- !u!114 &956514975
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3032,6 +3034,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4291196ccf125d4e9eeff8cbf67fda3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &956514978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 956514972}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3a3d7b2b67ce944e92132c182be5c2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hearts: []
 --- !u!1 &1029711310
 GameObject:
   m_ObjectHideFlags: 0
