@@ -5,7 +5,8 @@ using UnityEngine;
 public class SinglePlayerGameUI : MonoBehaviour
 {
     public GameObject mainMenuGo;
-    
+    public GameObject YouLost;
+
     void Awake()
     {
         if (mainMenuGo == null)

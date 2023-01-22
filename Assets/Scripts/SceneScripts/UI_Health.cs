@@ -38,7 +38,6 @@ public class UI_Health : MonoBehaviour
                         go.transform.SetParent(this.gameObject.transform, false);
                         rTransform = go.GetComponent<RectTransform>();
                         rTransform.localPosition = new Vector3(840 - 125 * j, 400 - 125 * i, 0);
-
                         break;
                     case ColorPlayer.GREEN:
                         go = GameObject.Instantiate(heartsList[1]);
@@ -49,7 +48,6 @@ public class UI_Health : MonoBehaviour
                     case ColorPlayer.BLUE:
                         go = GameObject.Instantiate(heartsList[2]);
                         go.transform.SetParent(this.gameObject.transform, false);
-
                         rTransform = go.GetComponent<RectTransform>();
                         rTransform.localPosition = new Vector3(840 - 125 * j, 400 - 125 * i, 0);
                         break;

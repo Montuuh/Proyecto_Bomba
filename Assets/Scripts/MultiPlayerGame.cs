@@ -48,9 +48,11 @@ public class MultiPlayerGame : MonoBehaviour
     public float bombShakerIntensity;
 
     public GameObject winnerText;
+    public GameObject youLostText;
 
     [HideInInspector]
     public bool win = false;
+    public bool lost = false;
 
     private EventHandler eventHandler;
     #endregion Variables
@@ -108,6 +110,7 @@ public class MultiPlayerGame : MonoBehaviour
 
         // Starting Countdown before game starts
         if (StartingCountdown()) return;
+
 
         // Besides this line, if the flag is false, won't run the code, so in game input is not allowed
         if (!letIngameInput) return;
@@ -225,7 +228,7 @@ public class MultiPlayerGame : MonoBehaviour
     public void Reveal(int x, int y, ClientData clientData)
     {
         Cell cell = cells[x, y];
-        if (cell.isFlagged || cell.isRevealed) return;
+        if (cell.isFlagged || (cell.isRevealed && !lost)) return;
 
         // If cell is an empty cell, reveal numbers and empty cells
         if (cell.cellType == Cell.CellType.Empty)
@@ -251,10 +254,19 @@ public class MultiPlayerGame : MonoBehaviour
             {
                 cameraShaker.TriggerShake(bombShakerDuration, bombShakerIntensity);
 
-                if(localPlayer.clientData.health == 0)
+                if (localPlayer.clientData.health == 0)
                     GameOver();
             }
 
+            bool allDead = true;
+
+            foreach (var player in healthManager.currentPlayingPlayers)
+            {
+                if(player.health > 0) allDead = false;
+            }
+
+            if (allDead)
+                Win();
         }
         // Number cell, reveal it
         else
@@ -469,6 +481,8 @@ public class MultiPlayerGame : MonoBehaviour
 
         buttonMainMenuUI.mainMenuGo.SetActive(true);
 
+        youLostText.SetActive(false);
+
         win = true;
     }
 
@@ -512,13 +526,12 @@ public class MultiPlayerGame : MonoBehaviour
                 }
             }
         }
+
         highlight.Clear();
         ReloadBoard();
 
-        // Make the main menu button appear
-        buttonMainMenuUI.mainMenuGo.SetActive(true);
-        foreach (Transform child in buttonMainMenuUI.mainMenuGo.transform)
-            child.gameObject.SetActive(true);
+        lost = true;
+        youLostText.SetActive(true);
     }
     #endregion Win&Lose
 
