@@ -10,6 +10,8 @@ public class CursorManager : MonoBehaviour
     public List<GameObject> cursorList = new List<GameObject>();
     public List<ClientData> currentPlayingPlayers = new List<ClientData>();
 
+    public List<Texture2D> cursorTextureList;
+
     private float lerpTime = 1.0f; // How long from A to B
 
     private float lerpTimePassedRed = 0.0f;
@@ -31,6 +33,10 @@ public class CursorManager : MonoBehaviour
 
     private MultiPlayerGame game;
 
+    private Vector2 hotSpot = Vector2.zero;
+    private CursorMode cursorMode = CursorMode.Auto;
+
+
     private void Update()
     {
         game = GameObject.Find("Grid").GetComponent<MultiPlayerGame>();
@@ -40,48 +46,83 @@ public class CursorManager : MonoBehaviour
             cursor.SetActive(false);
         }
 
+
         // Applies lerp to specific cursor
         foreach (var player in currentPlayingPlayers)
         {
-            if (player.userID == game.localPlayer.clientData.userID) return;
+            int index = 0;
 
             switch (player.colorPlayer)
             {
                 case ColorPlayer.NONE:
                     break;
                 case ColorPlayer.RED:
+                    index = 0;
+
+                    // If Local set new cursor and continue
+                    if (player.userID == game.localPlayer.clientData.userID)
+                    {
+                        Cursor.SetCursor(cursorTextureList[index], hotSpot, cursorMode);
+                        continue;
+                    }
+
+                    // Else perform lerp
+                    cursorList[index].SetActive(true);
                     if (lerpTimePassedRed < lerpTime)
                     {
                         lerpTimePassedRed += Time.deltaTime / lerpTime;
-                        cursorList[0].SetActive(true);
-                        cursorList[0].transform.position = Vector2.LerpUnclamped(lerpInitPosRed, lerpDestinationPosRed, EaseOut(lerpTimePassedRed));
+                        cursorList[index].transform.position = Vector2.LerpUnclamped(lerpInitPosRed, lerpDestinationPosRed, EaseOut(lerpTimePassedRed));
                     }
                     break;
 
                 case ColorPlayer.GREEN:
+                    index = 1;
+
+                    if (player.userID == game.localPlayer.clientData.userID)
+                    {
+                        Cursor.SetCursor(cursorTextureList[index], hotSpot, cursorMode);
+                        continue;
+                    }
+
+                    cursorList[index].SetActive(true);
                     if (lerpTimePassedGreen < lerpTime)
                     {
                         lerpTimePassedGreen += Time.deltaTime / lerpTime;
-                        cursorList[1].SetActive(true);
-                        cursorList[1].transform.position = Vector2.LerpUnclamped(lerpInitPosGreen, lerpDestinationPosGreen, EaseOut(lerpTimePassedGreen));
+                        cursorList[index].transform.position = Vector2.LerpUnclamped(lerpInitPosGreen, lerpDestinationPosGreen, EaseOut(lerpTimePassedGreen));
                     }
                     break;
 
                 case ColorPlayer.BLUE:
+                    index = 2;
+
+                    if (player.userID == game.localPlayer.clientData.userID)
+                    {
+                        Cursor.SetCursor(cursorTextureList[index], hotSpot, cursorMode);
+                        continue;
+                    }
+
+                    cursorList[index].SetActive(true);
                     if (lerpTimePassedBlue < lerpTime)
                     {
                         lerpTimePassedBlue += Time.deltaTime  / lerpTime;
-                        cursorList[2].SetActive(true);
-                        cursorList[2].transform.position = Vector2.LerpUnclamped(lerpInitPosBlue, lerpDestinationPosBlue, EaseOut(lerpTimePassedBlue));
+                        cursorList[index].transform.position = Vector2.LerpUnclamped(lerpInitPosBlue, lerpDestinationPosBlue, EaseOut(lerpTimePassedBlue));
                     }
                     break;
 
                 case ColorPlayer.YELLOW:
+                    index = 3;
+
+                    if (player.userID == game.localPlayer.clientData.userID)
+                    {
+                        Cursor.SetCursor(cursorTextureList[index], hotSpot, cursorMode);
+                        continue;
+                    }
+
+                    cursorList[index].SetActive(true);
                     if (lerpTimePassedYellow < lerpTime)
                     {
                         lerpTimePassedYellow += Time.deltaTime  / lerpTime;
-                        cursorList[3].SetActive(true);
-                        cursorList[3].transform.position = Vector2.LerpUnclamped(lerpInitPosYellow, lerpDestinationPosYellow, EaseOut(lerpTimePassedYellow));
+                        cursorList[index].transform.position = Vector2.LerpUnclamped(lerpInitPosYellow, lerpDestinationPosYellow, EaseOut(lerpTimePassedYellow));
                     }
                     break;
 
