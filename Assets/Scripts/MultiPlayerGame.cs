@@ -450,13 +450,24 @@ public class MultiPlayerGame : MonoBehaviour
     // Check if all mines are flagged or all cells are revealed except mines
     private bool CheckWin()
     {
+        bool ret = false;
+
         int flagsUsedWell = 0;
+        int revealedCells = 0;
+
         foreach (Cell cell in cells)
         {
-            if (cell.isFlagged && cell.cellType == Cell.CellType.Mine)
+            if ((cell.isFlagged || cell.isRevealed) && cell.cellType == Cell.CellType.Mine)
                 flagsUsedWell++;
+
+            if (cell.isRevealed && cell.cellType != Cell.CellType.Mine)
+                revealedCells++;
         }
-        return flagsUsedWell == mines ? true : false;
+
+        if (flagsUsedWell == mines || revealedCells == (width * height) - mines)
+            ret = true;
+
+        return ret;
     }
 
     // Ends game and shows final score
